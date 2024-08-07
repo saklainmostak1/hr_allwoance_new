@@ -980,8 +980,8 @@ const AdminTemplateEdit = ({ id }) => {
 
 		console.log(adminPageListSettings)
 		// ${process.env.NEXT_PUBLIC_API_URL}:5002/admin/create_side_menu
-		// http://192.168.0.106:5002/submit-form
-		// http://192.168.0.106:5002/admin/create_side_menu
+		// http://192.168.0.185:5002/submit-form
+		// http://192.168.0.185:5002/admin/create_side_menu
 		// ${process.env.NEXT_PUBLIC_API_URL}:5002/admin/update_side_menu/${id}
 		fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/admin/update_side_menu/${id}`, {
 			method: 'PUT',

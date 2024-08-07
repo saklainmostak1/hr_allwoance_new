@@ -282,6 +282,7 @@ app.post('/Admin/expence_category/expence_category_delete/:id', expenceCategoryM
 
 const expenceModel = require(`../app/model/Admin/expense_model/expense_model`)
 app.post('/Admin/expense/expense_create', expenceModel.expence_create)
+app.post('/Admin/expense/expense_single_pdf', expenceModel.expense_single_pdf)
 app.post('/Admin/expense/expense_search', expenceModel.expense_search)
 app.get('/Admin/expense/expense_list/:pageNo/:perPage', expenceModel.expense_list_paigination)
 app.get('/Admin/expense/expense_list', expenceModel.expence_category_list)
@@ -360,6 +361,23 @@ app.post('/Admin/salary/salary_delete/:id', SalaryModel.salary_delete)
 app.get('/Admin/salary/salary_list/:id', SalaryModel.employe_list_salary_single)
 app.get('/Admin/salary/salary_details/:id', SalaryModel.employe_list_salary_single_search)
 app.post('/Admin/salary/salary_edit/:id', SalaryModel.employee_salary_update)
+
+
+const AccountHeadTypeModel = require(`../app/model/Admin/account_head_type_model/account_head_type_model`)
+app.post('/Admin/account_head_type/account_head_type_create', AccountHeadTypeModel.account_head_type_create)
+app.get('/Admin/account_head_type/account_head_type_all', AccountHeadTypeModel.account_head_type_list)
+app.get('/Admin/account_head_type/account_head_type_all/:id', AccountHeadTypeModel.account_head_type_single)
+app.post('/Admin/account_head_type/account_head_type_delete/:id', AccountHeadTypeModel.account_head_type_delete)
+app.post('/Admin/account_head_type/account_head_type_edit/:id', AccountHeadTypeModel.account_head_type_update)
+
+
+const AccountHeadModel = require(`../app/model/Admin/account_head/account_head_model`)
+app.post('/Admin/account_head/account_head_create', AccountHeadModel.account_head_create)
+app.get('/Admin/account_head/account_head_all', AccountHeadModel.account_head_list)
+app.post('/Admin/account_head/account_head_delete/:id', AccountHeadModel.account_head_delete)
+app.get('/Admin/account_head/account_head_all/:id', AccountHeadModel.account_head_single)
+app.post('/Admin/account_head/account_head_edit/:id', AccountHeadModel.account_head_update)
+app.get('/Admin/account_head/account_head_list', AccountHeadModel.account_head_list_show)
 
 
 

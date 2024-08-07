@@ -24,7 +24,7 @@
 
 //     const [userRole, setUserRole] = useState([])
 //     useEffect(() => {
-//         fetch(`http://192.168.0.106:5002/user/user-role-single/${id}`)
+//         fetch(`http://192.168.0.185:5002/user/user-role-single/${id}`)
 //             .then(Response => Response.json())
 //             .then(data => setUserRole(data))
 //     }, [id])
@@ -330,7 +330,7 @@
 
 //     const [userRole, setUserRole] = useState([])
 //     useEffect(() => {
-//         fetch(`http://192.168.0.106:5002/user/user-role-single/${id}`)
+//         fetch(`http://192.168.0.185:5002/user/user-role-single/${id}`)
 //             .then(Response => Response.json())
 //             .then(data => setUserRole(data))
 //     }, [id])
@@ -948,7 +948,7 @@
 //         console.log(formData)
 
 //         // Make a PUT request to update the user role
-//         fetch(`http://192.168.0.106:5002/user/user-role/edit/${userRoleId}`, {
+//         fetch(`http://192.168.0.185:5002/user/user-role/edit/${userRoleId}`, {
 //             method: 'PUT',
 //             headers: {
 //                 'Content-Type': 'application/json',
@@ -1424,7 +1424,7 @@
 //     }, [])
 //     const [btnIconUsers, setBtnIconUsers] = useState([])
 //     useEffect(() => {
-//         fetch('http://192.168.0.106:5002/user-role/btn')
+//         fetch('http://192.168.0.185:5002/user-role/btn')
 //             .then(Response => Response.json())
 //             .then(data => setBtnIconUsers(data))
 

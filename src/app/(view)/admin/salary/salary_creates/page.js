@@ -572,7 +572,7 @@
 
 //     console.log(matchLength)
 
-    
+
 //     // Function to handle form submission
 //     const handleSubmit = (event) => {
 //         // Collect the form data
@@ -688,7 +688,7 @@
 //                                     </div>
 //                                 </div>
 //                                 <div className="card-body">
-                                   
+
 
 //                                     <div className='table-responsive'>
 //                                         {
@@ -830,7 +830,7 @@
 //                                             </table>
 //                                         }
 //                                     </div>
-                              
+
 //                                 </div>
 //                             </div>
 //                         </div>
@@ -854,6 +854,18 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
 const SalaryCreate = () => {
+
+
+    const { data: account_head = []
+    } = useQuery({
+        queryKey: ['account_head'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`)
+
+            const data = await res.json()
+            return data
+        }
+    })
 
 
     const [created, setCreated] = useState(() => {
@@ -1149,166 +1161,174 @@ const SalaryCreate = () => {
                     </div>
 
                     <div className='card'>
-                    <form action="" onSubmit={handleSubmit}>
-                        <div className="body-content bg-light">
-                            <div className="border-primary shadow-sm border-0">
-                                <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Employee Salary Generate</h5>
-                                    <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                        <div className="offset-md-3 col-sm-6">
-                                            <input type="submit" name="create" className="btn btn-sm btn-success" value="Submit" />
+                        <form action="" onSubmit={handleSubmit}>
+                            <div className="body-content bg-light">
+                                <div className="border-primary shadow-sm border-0">
+                                    <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
+                                        <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Employee Salary Generate</h5>
+                                        <div className="card-title font-weight-bold mb-0 card-header-color float-right">
+                                            <div className="offset-md-3 col-sm-6">
+                                                <input type="submit" name="create" className="btn btn-sm btn-success" value="Submit" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="card-body">
-                                   
+                                    <div className="card-body">
 
-                                    <div className='table-responsive'>
-                                        {
-                                            searchResults.length > 0 &&
-                                            <table className="table table-bordered table-hover table-striped table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        
-                                                        <th>
-                                                            {/* <input type="checkbox" name="" id="" /> */}
-                                                        </th>
-                                                        <th>Serial</th>
-                                                        <th>Name</th>
-                                                        <th>Designation</th>
-                                                        <th>Payroll</th>
-                                                        <th>Previous Due</th>
-                                                        <th>Present Salary</th>
-                                                        <th>Total Payable Amount</th>
-                                                        <th>Bonus</th>
-                                                        <th>Paid Amount</th>
-                                                        <th>Due Amount</th>
-                                                        <th>Total Day</th>
-                                                        <th>Working Day</th>
-                                                        <th>Absent & Present</th>
-                                                        <th>Holiday & Leave</th>
-                                                        <th>Paid By:</th>
-                                                        <th>Salary Date</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {loading ?
+
+                                        <div className='table-responsive'>
+                                            {
+                                                searchResults.length > 0 &&
+                                                <table className="table table-bordered table-hover table-striped table-sm">
+                                                    <thead>
                                                         <tr>
-                                                            <td colSpan="16" className="text-center">
-                                                                <FontAwesomeIcon style={{ height: '33px', width: '33px' }} icon={faSpinner} spin />
-                                                            </td>
+
+                                                            <th>
+                                                                {/* <input type="checkbox" name="" id="" /> */}
+                                                            </th>
+                                                            <th>Serial</th>
+                                                            <th>Name</th>
+                                                            <th>Designation</th>
+                                                            <th>Payroll</th>
+                                                            <th>Previous Due</th>
+                                                            <th>Present Salary</th>
+                                                            <th>Total Payable Amount</th>
+                                                            <th>Bonus</th>
+                                                            <th>Paid Amount</th>
+                                                            <th>Due Amount</th>
+                                                            <th>Total Day</th>
+                                                            <th>Working Day</th>
+                                                            <th>Absent & Present</th>
+                                                            <th>Holiday & Leave</th>
+                                                            <th>Paid By:</th>
+                                                            <th>Salary Date</th>
                                                         </tr>
-                                                        :
-                                                        searchResults.map((salary, i) => (
-                                                            <tr key={salary.id}>
-                                                                <th>
-                                                                    <input type="checkbox"  name="salaryCheckbox" id="" />
-                                                                </th>
-                                                                <td>{i + 1}</td>
-                                                                <td>{salary.employee_name}
+                                                    </thead>
+                                                    <tbody>
+                                                        {loading ?
+                                                            <tr>
+                                                                <td colSpan="16" className="text-center">
+                                                                    <FontAwesomeIcon style={{ height: '33px', width: '33px' }} icon={faSpinner} spin />
+                                                                </td>
+                                                            </tr>
+                                                            :
+                                                            searchResults.map((salary, i) => (
+                                                                <tr key={salary.id}>
+                                                                    <th>
+                                                                        <input type="checkbox" name="salaryCheckbox" id="" />
+                                                                    </th>
+                                                                    <td>{i + 1}</td>
+                                                                    <td>{salary.employee_name}
 
-                                                                    <input type="text" className='d-none' name='user_id' 
-                                                                    value={salary.user_id}
-                                                                    />
-                                                                </td>
-                                                                <td>{salary.designation_name_promotion}</td>
-                                                                <td>{`${salary.Payroll} (${salary.salary})`}</td>
-                                                                <td>0</td>
-                                                                <td>{salary.salary}
+                                                                        <input type="text" className='d-none' name='user_id'
+                                                                            value={salary.user_id}
+                                                                        />
+                                                                    </td>
+                                                                    <td>{salary.designation_name_promotion}</td>
+                                                                    <td>{`${salary.Payroll} (${salary.salary})`}</td>
+                                                                    <td>0</td>
+                                                                    <td>{salary.salary}
 
-                                                                    
-                                                                </td>
-                                                                <td>
-                                                                    {
-                                                                        ((salary.salary / salary.totalDays) * ((filteredAttendances.length) + (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) + (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0))).toFixed(2)
-                                                                    }
-                                                                </td>
-                                                                <td>
-                                                                    <input
-                                                                        value={bonus} onChange={(e) => setBonus(e.target.value)}
-                                                                        type="number" name="bonus" class="form-control form-control-sm text-right bonus" id="bonus" />
-                                                                </td>
-                                                                <td>
-                                                                    <input type="number"
-                                                                        name="paid_amount" class="form-control form-control-sm text-right paid_amount" id="paid_amount"
-                                                                        value={salary.salary + parseFloat(bonus)}
 
-                                                                    />
-                                                                </td>
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            ((salary.salary / salary.totalDays) * ((filteredAttendances.length) + (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) + (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0))).toFixed(2)
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        <input
+                                                                            value={bonus} onChange={(e) => setBonus(e.target.value)}
+                                                                            type="number" name="bonus" class="form-control form-control-sm text-right bonus" id="bonus" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            name="paid_amount" class="form-control form-control-sm text-right paid_amount" id="paid_amount"
+                                                                            value={salary.salary + parseFloat(bonus)}
 
-                                                                <td>
-                                                                    {(salary.salary + parseFloat(bonus))-(salary.salary)}
-                                                                <input type="number"
-                                                                    name="due" class="form-control form-control-sm text-right due d-none" id="due"
-                                                                    value={(salary.salary + parseFloat(bonus))-(salary.salary)}
-                                                                />
-                                                                </td>
-                                                                <td>{salary.totalDays}</td>
-                                                                <td>
+                                                                        />
+                                                                    </td>
 
-                                                                    {
-                                                                        Math.abs(
+                                                                    <td>
+                                                                        {(salary.salary + parseFloat(bonus)) - (salary.salary)}
+                                                                        <input type="number"
+                                                                            name="due" class="form-control form-control-sm text-right due d-none" id="due"
+                                                                            value={(salary.salary + parseFloat(bonus)) - (salary.salary)}
+                                                                        />
+                                                                    </td>
+                                                                    <td>{salary.totalDays}</td>
+                                                                    <td>
+
+                                                                        {
+                                                                            Math.abs(
+                                                                                (filteredAttendances.length +
+                                                                                    (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) -
+                                                                                    salary.totalDays)
+                                                                            )
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        Absent: {(Math.abs(
                                                                             (filteredAttendances.length +
                                                                                 (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) -
                                                                                 salary.totalDays)
-                                                                        )
-                                                                    }
-                                                                </td>
-                                                                <td>
-                                                                    Absent: {(Math.abs(
-                                                                        (filteredAttendances.length +
-                                                                            (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) -
-                                                                            salary.totalDays)
-                                                                    ))
+                                                                        ))
 
 
 
-                                                                        - (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0)
-                                                                    }
+                                                                            - (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0)
+                                                                        }
 
-                                                                    <br />
-                                                                    Present:                                {matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0}
-                                                                </td>
-                                                                <td>
-                                                                    Holiday: {filteredAttendances.length}
-                                                                    <br />
-                                                                    Leave: {matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0}
-                                                                </td>
-                                                                <td>
-                                                                    <select name="paid_by" id="" class="form-control form-control-sm" required="">
-                                                                        <option value="2">Cash</option>
+                                                                        <br />
+                                                                        Present:                                {matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0}
+                                                                    </td>
+                                                                    <td>
+                                                                        Holiday: {filteredAttendances.length}
+                                                                        <br />
+                                                                        Leave: {matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0}
+                                                                    </td>
+                                                                    <td>
+                                                                        <select name="paid_by" id="" class="form-control form-control-sm" required="">
+                                                                            {
+                                                                                account_head.map(account =>
+
+                                                                                    <>
+                                                                                        <option value={account.id}>{account.account_head_name}</option>
+                                                                                    </>
+                                                                                )
+                                                                            }
+                                                                            {/* <option value="2">Cash</option>
                                                                         <option value="5">Bank (Primary)</option>
-                                                                        <option value="6">Bank (High School)</option>
-                                                                    </select>
-                                                                </td>
-                                                                <td>
-                                                                    <input
-                                                                        className="form-control"
-                                                                        type="text"
-                                                                        id="fromDate"
-                                                                        value={fromDate ? formatDate(fromDate) : ''}
-                                                                        onClick={handleTextInputClick}
-                                                                        readOnly
-                                                                    />
-                                                                    <input
-                                                                        name='salary_date'
-                                                                        type="date"
-                                                                        id="dateInputFrom"
-                                                                        value={fromDate ? fromDate.toString().split('T')[0] : ''}
-                                                                        onChange={handleDateChangeFrom}
-                                                                        style={{ position: 'absolute', bottom: '20px', right: '0', visibility: 'hidden' }}
-                                                                    />
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                </tbody>
-                                            </table>
-                                        }
+                                                                        <option value="6">Bank (High School)</option> */}
+                                                                        </select>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input
+                                                                            className="form-control"
+                                                                            type="text"
+                                                                            id="fromDate"
+                                                                            value={fromDate ? formatDate(fromDate) : ''}
+                                                                            onClick={handleTextInputClick}
+                                                                            readOnly
+                                                                        />
+                                                                        <input
+                                                                            name='salary_date'
+                                                                            type="date"
+                                                                            id="dateInputFrom"
+                                                                            value={fromDate ? fromDate.toString().split('T')[0] : ''}
+                                                                            onChange={handleDateChangeFrom}
+                                                                            style={{ position: 'absolute', bottom: '20px', right: '0', visibility: 'hidden' }}
+                                                                        />
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        </div>
+
                                     </div>
-                              
                                 </div>
                             </div>
-                        </div>
                         </form>
                     </div>
                 </div>

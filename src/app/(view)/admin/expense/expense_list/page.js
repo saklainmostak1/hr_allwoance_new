@@ -1231,86 +1231,7 @@ const ExpenseList = ({ searchParams }) => {
         }
     };
 
-    // const expense_PDF_download = async () => {
-    //     try {
-    //         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expense/expense_search`, {
-    //             selectedColumns,
-    //             searchQuery,
-    //             fromDate,
-    //             toDate
-    //         });
-    //         const searchResults = response.data.results;
-
-    //         // Create a new window for printing
-    //         const editWindow = window.open('', '_blank');
-    //         editWindow.document.write('<html><head><title>Employee Salary Summary</title><style> table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: left; } thead { background-color: #f2f2f2; } body { text-align: center; } </style></head><body>');
-    //         editWindow.document.write(`
-    //           <h2 style="margin: 0; padding: 0;">Pathshala School & College Salary Summary</h2>
-    //           <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
-    //           <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
-    //           <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
-    //           <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">Salary Summary</h3>
-    //       `);
-
-    //         // Render the filtered data in a table for editing
-    //         editWindow.document.write('<table>');
-
-    //         // Table header
-    //         editWindow.document.write('<thead>');
-    //         editWindow.document.write('<tr>');
-    //         editWindow.document.write('<th>Employee Name</th>');
-    //         editWindow.document.write('<th>Employee ID</th>');
-    //         editWindow.document.write('<th>Degisnation</th>');
-    //         editWindow.document.write('<th>Paid Amount</th>');
-    //         editWindow.document.write('<th>Dues</th>');
-    //         editWindow.document.write('<th>Salary Month	</th>');
-    //         editWindow.document.write('<th>Salary Date</th>');
-
-    //         editWindow.document.write('</tr>');
-    //         editWindow.document.write('</thead>');
-
-    //         // Table body
-    //         editWindow.document.write('<tbody>');
-    //         // Render rows of data
-    //         searchResults.forEach((item, i) => {
-    //             editWindow.document.write('<tr>');
-
-    //             editWindow.document.write(`<td>${item.employee_name}</td>`);
-    //             editWindow.document.write(`<td>${item.user_id}</td>`);
-    //             editWindow.document.write(`<td>${item.designation_name}</td>`);
-    //             editWindow.document.write(`<td>${item.paid_amount}</td>`);
-    //             editWindow.document.write(`<td>${item.due}</td>`);
-    //             editWindow.document.write(`<td>${item.salary_month}</td>`);
-    //             editWindow.document.write(`<td>${item.salary_date}</td>`);
-
-    //             editWindow.document.write('</tr>');
-    //         });
-    //         editWindow.document.write('</tbody>');
-
-    //         editWindow.document.write('</table>');
-    //         editWindow.document.write('</body></html>');
-    //         editWindow.document.close();
-
-    //         // Print function for the new window
-    //         const printWindow = () => {
-    //             editWindow.focus();
-    //             editWindow.print();
-    //             editWindow.close();
-    //         };
-
-    //         // Automatically trigger print after a short delay to ensure content is fully loaded
-    //         setTimeout(() => {
-    //             printWindow();
-    //         }, 1000); // Adjust delay if necessary
-
-    //     } catch (error) {
-    //         console.error('Error:', error);
-    //         // Handle error appropriately
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
-
+ 
 
 
     const printSingleData = (id) => {
@@ -1364,7 +1285,7 @@ const ExpenseList = ({ searchParams }) => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Iten</th>
+                                        <th>Item</th>
                                         <th>Qty</th>
                                         <th>Price</th>
                                         <th>Total</th>
@@ -1406,33 +1327,54 @@ const ExpenseList = ({ searchParams }) => {
 
     console.log(searchResults)
 
-    const pdfSingleData = (id) => {
-        // Fetch data for the specific ID
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expense/expense_all/${id}`)
-            .then(response => {
-                const expenseData = response.data;
-                console.log(expenseData);
+   
 
-                const doc = new jsPDF();
 
-                // Define table columns
-                const columns = [[expenseData.id, expenseData.item_name, expenseData.quantity, expenseData.amount, expenseData.sub_total]];
+    const pdfSingleData = async (id) => {
 
-                // Create the table
-                doc.autoTable({
-                    head: [['Expense Details for ID', 'Name', 'Quantity', 'Price', 'Amount']],
-                    body: columns,
-                    startY: 10 // Start Y position of the table
-                });
-
-                doc.save(`pdf${id}`);
-            })
-            .catch(error => {
-                console.error('Error fetching expense data:', error);
-                // Handle error if needed
+        console.log(id)
+        try {
+            // setLoading(true);
+    
+            // First request to get the expense data
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expense/expense_all/${id}`);
+            // console.log(response)
+            console.log(response.data);
+            const searchResults = response.data;
+    
+    
+            // Second request to generate the PDF
+            const pdfResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expense/expense_single_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    searchResults,
+                    // Other parameters if needed
+                }),
             });
+    
+            if (!pdfResponse.ok) {
+                throw new Error('Error generating PDF In Period');
+            }
+    
+            // Automatically download the PDF
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'expense.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            setErrorr(error.message);
+        } finally {
+            // setLoading(false);
+        }
     };
-
+    
 
 
     // Function to handle date change
@@ -1833,79 +1775,79 @@ const ExpenseList = ({ searchParams }) => {
                                                         {selectedColumns.map((column, j) => (
                                                             <td key={j}>
                                                                 {
-                                                                column === 'serial' ? (
-                                                                    // Rendering serial number if the column is 'serial'
-                                                                    i + 1
-                                                                )
-                                                                :
-                                                                column === 'expense_date' ? (
-                                                                    // Rendering serial number if the column is 'serial'
-                                                                    expense.expense_date.slice(0,10)
-                                                                )
+                                                                    column === 'serial' ? (
+                                                                        // Rendering serial number if the column is 'serial'
+                                                                        i + 1
+                                                                    )
+                                                                        :
+                                                                        column === 'expense_date' ? (
+                                                                            // Rendering serial number if the column is 'serial'
+                                                                            expense.expense_date.slice(0, 10)
+                                                                        )
 
-                                                                    : column === 'action' ? (
-                                                                        // Special handling for the 'status' column
-                                                                        <div className="flex items-center ">
-                                                                            <Link href={`/Admin/expense/expense_edit/${expense.id}?page_group=${page_group}`}>
-                                                                                {filteredBtnIconEdit?.map((filteredBtnIconEdit => (
-                                                                                    <button
-                                                                                        key={filteredBtnIconEdit.id}
-                                                                                        title='Edit'
-                                                                                        style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
-                                                                                        className={filteredBtnIconEdit?.btn}
-                                                                                    >
-                                                                                        <a
-                                                                                            dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
-                                                                                        ></a>
-                                                                                    </button>
-                                                                                )))}
-                                                                            </Link>
+                                                                            : column === 'action' ? (
+                                                                                // Special handling for the 'status' column
+                                                                                <div className="flex items-center ">
+                                                                                    <Link href={`/Admin/expense/expense_edit/${expense.id}?page_group=${page_group}`}>
+                                                                                        {filteredBtnIconEdit?.map((filteredBtnIconEdit => (
+                                                                                            <button
+                                                                                                key={filteredBtnIconEdit.id}
+                                                                                                title='Edit'
+                                                                                                style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                                className={filteredBtnIconEdit?.btn}
+                                                                                            >
+                                                                                                <a
+                                                                                                    dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
+                                                                                                ></a>
+                                                                                            </button>
+                                                                                        )))}
+                                                                                    </Link>
 
-                                                                            {filteredBtnIconPrint.map((filteredBtnIconEdit => (
-                                                                                <button
-                                                                                    onClick={() => printSingleData(expense.id)}
-                                                                                    key={filteredBtnIconEdit.id}
-                                                                                    title='Copy'
-                                                                                    style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
-                                                                                    className={filteredBtnIconEdit?.btn}
-                                                                                >
-                                                                                    <a
-                                                                                        dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
-                                                                                    ></a>
-                                                                                </button>
-                                                                            )))}
-                                                                            {filteredBtnIconPdf.map((filteredBtnIconEdit => (
-                                                                                <button
-                                                                                    onClick={() => pdfSingleData(expense.id)}
-                                                                                    key={filteredBtnIconEdit.id}
-                                                                                    title='Copy'
-                                                                                    style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
-                                                                                    className={filteredBtnIconEdit?.btn}
-                                                                                >
-                                                                                    <a
-                                                                                        dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
-                                                                                    ></a>
-                                                                                </button>
-                                                                            )))}
+                                                                                    {filteredBtnIconPrint.map((filteredBtnIconEdit => (
+                                                                                        <button
+                                                                                            onClick={() => printSingleData(expense.id)}
+                                                                                            key={filteredBtnIconEdit.id}
+                                                                                            title='Copy'
+                                                                                            style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                            className={filteredBtnIconEdit?.btn}
+                                                                                        >
+                                                                                            <a
+                                                                                                dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
+                                                                                            ></a>
+                                                                                        </button>
+                                                                                    )))}
+                                                                                    {filteredBtnIconPdf.map((filteredBtnIconEdit => (
+                                                                                        <button
+                                                                                            onClick={() => pdfSingleData(expense.id)}
+                                                                                            key={filteredBtnIconEdit.id}
+                                                                                            title='Copy'
+                                                                                            style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                            className={filteredBtnIconEdit?.btn}
+                                                                                        >
+                                                                                            <a
+                                                                                                dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
+                                                                                            ></a>
+                                                                                        </button>
+                                                                                    )))}
 
-                                                                            {filteredBtnIconDelete.map((filteredBtnIconDelete => (
-                                                                                <button
-                                                                                    key={filteredBtnIconDelete.id}
-                                                                                    title='Delete'
-                                                                                    onClick={() => expense_delete(expense.id)}
-                                                                                    style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
-                                                                                    className={filteredBtnIconDelete?.btn}
-                                                                                >
-                                                                                    <a
-                                                                                        dangerouslySetInnerHTML={{ __html: filteredBtnIconDelete?.icon }}
-                                                                                    ></a>
-                                                                                </button>
-                                                                            )))}
-                                                                        </div>
-                                                                    ) : (
-                                                                        // Default rendering for other columns
-                                                                        expense[column]
-                                                                    )}
+                                                                                    {filteredBtnIconDelete.map((filteredBtnIconDelete => (
+                                                                                        <button
+                                                                                            key={filteredBtnIconDelete.id}
+                                                                                            title='Delete'
+                                                                                            onClick={() => expense_delete(expense.id)}
+                                                                                            style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                            className={filteredBtnIconDelete?.btn}
+                                                                                        >
+                                                                                            <a
+                                                                                                dangerouslySetInnerHTML={{ __html: filteredBtnIconDelete?.icon }}
+                                                                                            ></a>
+                                                                                        </button>
+                                                                                    )))}
+                                                                                </div>
+                                                                            ) : (
+                                                                                // Default rendering for other columns
+                                                                                expense[column]
+                                                                            )}
                                                             </td>
                                                         ))}
 
@@ -2012,7 +1954,7 @@ const ExpenseList = ({ searchParams }) => {
                                                                 {expense.short_note}
                                                             </td>
 
-                                                            <td>{expense.expense_date.slice(0,10)}</td>
+                                                            <td>{expense.expense_date.slice(0, 10)}</td>
                                                             <td>{expense.created_by}</td>
                                                             <td>  <div className="flex items-center ">
                                                                 <Link href={`/Admin/expense/expense_edit/${expense.id}?page_group=${page_group}`}>

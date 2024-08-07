@@ -2474,7 +2474,7 @@ const EmployeeModel = {
             const isoToDate = parsedToDate.toISOString();
 
             // Make API request to fetch data based on selectedEmployeeId, fromDate, toDate
-            const response = await axios.get(`http://192.168.0.106:5002/Admin/location/geo_location_all/${selectedEmployeeId}`, {
+            const response = await axios.get(`http://192.168.0.185:5002/Admin/location/geo_location_all/${selectedEmployeeId}`, {
                 params: {
                     fromDate: isoFromDate,
                     toDate: isoToDate

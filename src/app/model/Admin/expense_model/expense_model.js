@@ -6,14 +6,14 @@ wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
 
 // wkhtmltopdf.command = "C:\\Users\\user\\Desktop\\Ecommerce\\node_modules\\wkhtmltopdf\\index.js";
 const formatString = (str) => {
-  const words = str?.split('_');
+    const words = str?.split('_');
 
-  const formattedWords = words?.map((word) => {
-    const capitalizedWord = word?.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    return capitalizedWord;
-  });
+    const formattedWords = words?.map((word) => {
+        const capitalizedWord = word?.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        return capitalizedWord;
+    });
 
-  return formattedWords?.join(' ');
+    return formattedWords?.join(' ');
 };
 
 const expenceModel = {
@@ -201,7 +201,7 @@ const expenceModel = {
                 expense_date,
                 discount,
                 short_note,
-                
+
                 bank_check_no,
                 previous_due,
                 sub_total,
@@ -240,7 +240,7 @@ const expenceModel = {
                 expense_date,
                 discount,
                 short_note,
-                
+
                 previous_due,
                 sub_total,
                 payable_amount,
@@ -469,17 +469,17 @@ const expenceModel = {
             const deleteExpenseQuery = 'DELETE FROM expense WHERE id = ?';
             const deleteExpenseItemQuery = 'DELETE FROM expense_item WHERE expense_id = ?';
             const deleteExpenseCheckQuery = 'DELETE FROM expense_check WHERE expense_id = ?';
-            
+
             const insertExpenseLogQuery = 'INSERT INTO expense_log (id, supplier_id, voucher_id, expense_category, amount, payment_type, expense_date, discount, short_note, created_by, previous_due, sub_total, payable_amount, due_amount, paid_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const insertExpenseItemLogQuery = 'INSERT INTO expense_item_log (id ,expense_id, item_name, amount, discount, due) VALUES (?, ?, ?, ?, ?, ?)';
             const insertExpenseCheckLogQuery = 'INSERT INTO expense_check_log (id, expense_id, bank_check_no) VALUES (?, ?, ?)';
-    
+
             connection.beginTransaction((err) => {
                 if (err) {
                     console.log(err);
                     return res.status(500).json({ message: 'Failed to begin transaction.' });
                 }
-    
+
                 // Select expense data
                 connection.query(selectExpenseQuery, [req.params.id], (error, expenseResult) => {
                     if (error) {
@@ -488,16 +488,16 @@ const expenceModel = {
                             res.status(500).json({ message: 'Failed to retrieve expense data.' });
                         });
                     }
-    
+
                     if (expenseResult.length === 0) {
                         console.log('Expense not found');
                         return connection.rollback(() => {
                             res.status(404).json({ message: 'Expense not found.' });
                         });
                     }
-    
+
                     const expenseData = expenseResult[0];
-    
+
                     // Insert expense data into expense_log
                     connection.query(insertExpenseLogQuery, [expenseData.id, expenseData.supplier_id, expenseData.voucher_id, expenseData.expense_category, expenseData.amount, expenseData.payment_type, expenseData.expense_date, expenseData.discount, expenseData.short_note, expenseData.created_by, expenseData.previous_due, expenseData.sub_total, expenseData.payable_amount, expenseData.due_amount, expenseData.paid_amount], (error) => {
                         if (error) {
@@ -506,7 +506,7 @@ const expenceModel = {
                                 res.status(500).json({ message: 'Failed to insert expense data into log.' });
                             });
                         }
-    
+
                         // Select expense items data
                         connection.query(selectExpenseItemQuery, [req.params.id], (error, expenseItemResult) => {
                             if (error) {
@@ -515,7 +515,7 @@ const expenceModel = {
                                     res.status(500).json({ message: 'Failed to retrieve expense item data.' });
                                 });
                             }
-    
+
                             // Insert expense items data into expense_item_log
                             const promisesItems = expenseItemResult.map(item => {
                                 return new Promise((resolve, reject) => {
@@ -529,7 +529,7 @@ const expenceModel = {
                                     });
                                 });
                             });
-    
+
                             // Execute all insert queries for expense_item_log
                             Promise.all(promisesItems)
                                 .then(() => {
@@ -541,7 +541,7 @@ const expenceModel = {
                                                 res.status(500).json({ message: 'Failed to retrieve expense check data.' });
                                             });
                                         }
-    
+
                                         // Insert expense checks data into expense_check_log
                                         const promisesChecks = expenseCheckResult.map(check => {
                                             return new Promise((resolve, reject) => {
@@ -555,7 +555,7 @@ const expenceModel = {
                                                 });
                                             });
                                         });
-    
+
                                         // Execute all insert queries for expense_check_log
                                         Promise.all(promisesChecks)
                                             .then(() => {
@@ -567,7 +567,7 @@ const expenceModel = {
                                                             res.status(500).json({ message: 'Failed to delete related expense checks.' });
                                                         });
                                                     }
-    
+
                                                     // Delete expense items
                                                     connection.query(deleteExpenseItemQuery, [req.params.id], (error) => {
                                                         if (error) {
@@ -576,7 +576,7 @@ const expenceModel = {
                                                                 res.status(500).json({ message: 'Failed to delete related expense items.' });
                                                             });
                                                         }
-    
+
                                                         // Delete expense
                                                         connection.query(deleteExpenseQuery, [req.params.id], (error) => {
                                                             if (error) {
@@ -585,7 +585,7 @@ const expenceModel = {
                                                                     res.status(500).json({ message: 'Failed to delete expense.' });
                                                                 });
                                                             }
-    
+
                                                             connection.commit((err) => {
                                                                 if (err) {
                                                                     console.log(err);
@@ -593,7 +593,7 @@ const expenceModel = {
                                                                         res.status(500).json({ message: 'Failed to commit transaction.' });
                                                                     });
                                                                 }
-    
+
                                                                 console.log('Expense and related items deleted successfully');
                                                                 res.send({ message: 'Expense and related items deleted successfully' });
                                                             });
@@ -624,7 +624,7 @@ const expenceModel = {
             return res.status(500).json({ message: 'An unexpected error occurred.' });
         }
     },
-    
+
 
     // expense_delete: async (req, res) => {
 
@@ -811,7 +811,7 @@ const expenceModel = {
                 LEFT JOIN expense_category ON expense.expense_category = expense_category.id
                 LEFT JOIN expense_item ON expense.id = expense_item.expense_id
             ORDER BY expense.id DESC  
-            LIMIT ?, ?`; 
+            LIMIT ?, ?`;
 
             connection.query(query, [skipRows, perPage], (error, result) => {
                 console.log(result)
@@ -934,64 +934,64 @@ const expenceModel = {
 
     expense_pdf: async (req, res) => {
         try {
-          const { searchResults, selectedColumns, orientation } = req.body; // Assuming selectedColumns is an array of column names
-    
-          console.log(searchResults, 'here all the searchResults');
-          const statusLabels = {
-            1: 'Active',
-            2: 'Inactive',
-            3: 'Pending'
-          };
-    
-          const longTextColumns = ['period_name', 'description'];
-          let tableRows = '';
-          searchResults?.forEach((result, index) => {
-            let row = '<tr>';
-            selectedColumns.forEach(column => {
-              if (column === 'serial') {
-                row += `<td>${index + 1}</td>`; // Displaying index number starting from 1
-              } else if (column === 'action') {
-                // Skip this column
-              }
-              else if (column === 'status_id') {
-                const statusLabel = statusLabels[result[column]] || '';
-                // Get corresponding label from statusLabels object
-                row += `<td>${statusLabel}</td>`;
-              }
-              // else if (column === 'file_path') {
-              //   // Encode the image URL
-              //   const encodedURL = encodeURIComponent(result[column]);
-              //   console.log(`${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}`, 'encodedURL welcome');
-              //   // const encodedURL = encode(result[column]);
-              //   row += `<td><img src="${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
-              // }
-              else if (column === 'file_path') {
-                if (result[column]) {
-                  // Encode the image URL
-                  const encodedURL = encodeURIComponent(result[column]);
-                  console.log(`http://192.168.0.106:5003/${result[column]}`, 'encodedURL welcome');
-                  // const encodedURL = encode(result[column]);
-                  row += `<td><img src="http://192.168.0.106:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
-                } else {
-                  // No file path provided, show a placeholder message
-                  row += `<td></td>`;
-                }
-              }
-              else {
-                const style = longTextColumns.includes(column) ? 'word-wrap: break-word; word-break: break-all;' : '';
-                row += `<td style="${style}">${result[column]}</td>`;
-                // row += `<td>${result[column]}</td>`; // Displaying regular columns
-              }
+            const { searchResults, selectedColumns, orientation } = req.body; // Assuming selectedColumns is an array of column names
+
+            console.log(searchResults, 'here all the searchResults');
+            const statusLabels = {
+                1: 'Active',
+                2: 'Inactive',
+                3: 'Pending'
+            };
+
+            const longTextColumns = ['period_name', 'description'];
+            let tableRows = '';
+            searchResults?.forEach((result, index) => {
+                let row = '<tr>';
+                selectedColumns.forEach(column => {
+                    if (column === 'serial') {
+                        row += `<td>${index + 1}</td>`; // Displaying index number starting from 1
+                    } else if (column === 'action') {
+                        // Skip this column
+                    }
+                    else if (column === 'status_id') {
+                        const statusLabel = statusLabels[result[column]] || '';
+                        // Get corresponding label from statusLabels object
+                        row += `<td>${statusLabel}</td>`;
+                    }
+                    // else if (column === 'file_path') {
+                    //   // Encode the image URL
+                    //   const encodedURL = encodeURIComponent(result[column]);
+                    //   console.log(`${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}`, 'encodedURL welcome');
+                    //   // const encodedURL = encode(result[column]);
+                    //   row += `<td><img src="${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
+                    // }
+                    else if (column === 'file_path') {
+                        if (result[column]) {
+                            // Encode the image URL
+                            const encodedURL = encodeURIComponent(result[column]);
+                            console.log(`http://192.168.0.185:5003/${result[column]}`, 'encodedURL welcome');
+                            // const encodedURL = encode(result[column]);
+                            row += `<td><img src="http://192.168.0.185:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
+                        } else {
+                            // No file path provided, show a placeholder message
+                            row += `<td></td>`;
+                        }
+                    }
+                    else {
+                        const style = longTextColumns.includes(column) ? 'word-wrap: break-word; word-break: break-all;' : '';
+                        row += `<td style="${style}">${result[column]}</td>`;
+                        // row += `<td>${result[column]}</td>`; // Displaying regular columns
+                    }
+                });
+                row += '</tr>';
+                tableRows += row;
             });
-            row += '</tr>';
-            tableRows += row;
-          });
-          // <link href='http://sonnetdp.github.io/nikosh/css/nikosh.css' rel='stylesheet' type='text/css'>
-          // <link href='./nikosh.css' rel='stylesheet' type='text/css'>
-          //  ${process.env.NEXT_PUBLIC_API_URL}:5002/get-css/nikosh.css
-          // @import url("nikosh.css");
-    
-          const html = `<html lang="en">
+            // <link href='http://sonnetdp.github.io/nikosh/css/nikosh.css' rel='stylesheet' type='text/css'>
+            // <link href='./nikosh.css' rel='stylesheet' type='text/css'>
+            //  ${process.env.NEXT_PUBLIC_API_URL}:5002/get-css/nikosh.css
+            // @import url("nikosh.css");
+
+            const html = `<html lang="en">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1046,16 +1046,16 @@ const expenceModel = {
                   <thead>
                       <tr>
                           ${selectedColumns.filter(column => column !== 'action').map(column => {
-            if (column === 'status_id') {
-              return `<th>Status</th>`;
-            }
-            else if (column === 'file_path') {
-              return `<th>File</th>`;
-            }
-            else {
-              return `<th>${formatString(column)}</th>`;
-            }
-          }).join('')}
+                if (column === 'status_id') {
+                    return `<th>Status</th>`;
+                }
+                else if (column === 'file_path') {
+                    return `<th>File</th>`;
+                }
+                else {
+                    return `<th>${formatString(column)}</th>`;
+                }
+            }).join('')}
                       </tr>
                   </thead>
                   <tbody >
@@ -1065,20 +1065,103 @@ const expenceModel = {
           </body>
           </html>`;
 
-          const pdfOrientation = orientation === '' ? 'landscape' : orientation;
-          wkhtmltopdf(html, { pageSize: 'letter',  orientation: pdfOrientation  }, (err, stream) => {
-            if (err) {
-              console.error('Error generating PDF:', err);
-              res.status(500).send('Error generating PDF');
-              return;
-            }
-            stream.pipe(res);
-          });
+            const pdfOrientation = orientation === '' ? 'landscape' : orientation;
+            wkhtmltopdf(html, { pageSize: 'letter', orientation: pdfOrientation }, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
         } catch (error) {
-          console.error('Error in period_pdf:', error);
-          res.status(500).send('Error generating PDF');
+            console.error('Error in period_pdf:', error);
+            res.status(500).send('Error generating PDF');
         }
-      }
+    },
+
+
+    expense_single_pdf: async (req, res) => {
+        try {
+            const { searchResults } = req.body; // Assuming selectedColumns is an array of column names
+            console.log(searchResults)
+
+
+            let html = `
+                    <html>
+                        <head>
+                            <title>Pathshala School & College Expense Form</title>
+                            <style>
+                                table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                }
+                                th, td {
+                                    border: 1px solid black;
+                                    padding: 8px;
+                                    text-align: left;
+                                }
+                                thead {
+                                    background-color: gray; /* Set background color for table header */
+                                }
+                                body {
+                                    text-align: center; /* Center align text within the body */
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h2 style="margin: 0; padding: 0;">Pathshala School & College Expense Form</h2>
+                            <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+                            <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+                            <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+                
+                            <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">Expense Copy</h3>
+                            <div style="display: flex; justify-content: space-between;">
+                                <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+                                <p style="margin: 0; padding: 0;">Collected By: পাঠশালা স্কুল এন্ড কলেজ</p>
+                                <p style="margin: 0; padding: 0;">Date: </p>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <!-- Add other table headers here if needed -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>${searchResults.item_name}</td>
+                                        <td>${searchResults.quantity}</td>
+                                        <td>${searchResults.amount}</td>
+                                        <td>${searchResults.sub_total}</td>
+                                        <!-- Add other table data here if needed -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <footer>
+                                <p>a</p>
+                            </footer>
+                        </body>
+                    </html>
+                `;
+
+
+            wkhtmltopdf(html, { pageSize: 'letter'}, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
+        } catch (error) {
+            console.error('Error in period_pdf:', error);
+            res.status(500).send('Error generating PDF');
+        }
+    }
 
 
 
