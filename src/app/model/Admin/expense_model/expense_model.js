@@ -47,15 +47,16 @@ const expenceModel = {
                     bank_check_no,
                     previous_due,
                     sub_total,
-
+                    voucher_id,
                     payable_amount,
                     due_amount,
-                    paid_amount
+                    paid_amount,
+                    file_path
                 } = req.body;
 
                 // Insert into expense table
-                const expenseQuery = 'INSERT INTO expense ( supplier_id, voucher_id,  expense_category, amount, payment_type, expense_date, quantity,  discount, short_note, created_by,  previous_due, sub_total,payable_amount, due_amount, paid_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                const expenseValues = [supplier_id, nextVoucherId, expense_category, amount, payment_type, expense_date, quantity, discount, short_note, created_by, previous_due, sub_total, payable_amount, due_amount, paid_amount];
+                const expenseQuery = 'INSERT INTO expense ( supplier_id, voucher_id,  expense_category, amount, payment_type, expense_date, quantity,  discount, short_note, created_by,  previous_due, sub_total,payable_amount, due_amount, paid_amount, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                const expenseValues = [supplier_id, voucher_id, expense_category, amount, payment_type, expense_date, quantity, discount, short_note, created_by, previous_due, sub_total, payable_amount, due_amount, paid_amount, file_path];
 
                 connection.query(expenseQuery, expenseValues, (err, result) => {
                     if (err) {
@@ -201,7 +202,7 @@ const expenceModel = {
                 expense_date,
                 discount,
                 short_note,
-
+                file_path,
                 bank_check_no,
                 previous_due,
                 sub_total,
@@ -222,7 +223,7 @@ const expenceModel = {
                 expense_date = ?,
                 discount = ?,
                 short_note = ?,
-                
+                file_path = ?,
                 previous_due = ?,
                 sub_total = ?,
                 payable_amount = ?,
@@ -240,7 +241,7 @@ const expenceModel = {
                 expense_date,
                 discount,
                 short_note,
-
+                file_path,
                 previous_due,
                 sub_total,
                 payable_amount,
@@ -312,6 +313,7 @@ const expenceModel = {
                 ec.bank_check_no,
                 ei.item_name,
                 ei.amount AS item_amount,
+                ei.expense_id AS expense_id,
                 ei.discount AS item_discount,
                 ei.due AS item_due
             FROM 
@@ -339,6 +341,7 @@ const expenceModel = {
                     acc.id = row.id;
                     acc.supplier_id = row.supplier_id;
                     acc.voucher_id = row.voucher_id;
+                    acc.file_path = row.file_path;
                     acc.expense_category = row.expense_category;
                     acc.amount = row.amount;
                     acc.payment_type = row.payment_type;
@@ -354,6 +357,7 @@ const expenceModel = {
                     acc.quantity = row.quantity;
                     acc.item_name = row.item_name,
                         acc.amount = row.item_amount,
+                        acc.expense_id = row.expense_id,
                         acc.discount = row.item_discount,
                         acc.due = row.item_due
                     // Add check details if they exist
@@ -364,6 +368,7 @@ const expenceModel = {
                     if (row.item_name) {
                         acc.items.push({
                             item_name: row.item_name,
+                            expense_id: row.expense_id,
                             amount: row.item_amount,
                             discount: row.item_discount,
                             due: row.item_due

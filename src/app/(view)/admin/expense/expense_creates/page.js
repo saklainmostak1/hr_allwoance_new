@@ -2,20 +2,31 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Swal from "sweetalert2";
-import { FaTrash } from 'react-icons/fa';
+import { FaTimes, FaTrash, FaUpload } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 
 
 const CreateExpense = () => {
 
+
+    
+
     const [supplierId, setSupplierId] = useState('');
+    const [supplier, setSupplier] = useState('');
 
     const supplier_id = (id) => {
         setSupplierId(id);
+        if(!id){
+            setSupplier('Supplier be filled')
+        }
+        else{
+            setSupplier('')
+        }
         console.log("Selected supplier id:", id);
     };
 
@@ -42,10 +53,85 @@ const CreateExpense = () => {
     const prev_due = supplierLastDue?.payable_amount - supplierLastDue?.paid_amount;
 
     const [numToAdd, setNumToAdd] = useState(1);
-    const [fields, setFields] = useState([{ expense_category: '', item_name: '', amount: '', quantity: '', total_amount: '' }]);
+    const [fields, setFields] = useState([{ expense_category: '', item_name: '', amount: '', quantity: '', total_amount: '', voucher_id: '', file_path: '' }]);
 
 
+    const [selectedFile, setSelectedFile] = useState(Array(fields.length).fill(null));
 
+
+    const [fileNames, setFileNames] = useState([])
+    const [rowError, setRowErrors] = useState([]);
+    const [file_size_error, set_file_size_error] = useState(null);
+    const [filePathError, setFilePathError] = useState([])
+    const [samePeriodName, setSamePeriodName] = useState([])
+
+    const period_file_change = (index, e) => {
+
+        e.preventDefault();
+        let files = e.target.files[0];
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const fileName = files.name.split('.')[0]
+        const extension = files.name.split('.').pop();
+        const newName = `${fileName}(${index}).${extension}`;
+        const time = `${year}/${month}/${day}/${hours}/${minutes}`;
+        const _path = 'period/' + time + '/' + newName;
+        console.log(files.name.split('.')[0])
+        const newSelectedFiles = [...selectedFile];
+        newSelectedFiles[index] = files;
+        newSelectedFiles[index].path = _path;
+        // setFileNames(newName)
+        // setSelectedFile(newSelectedFiles);
+        // upload(files, index);
+
+        if (Number(files.size) <= 2097152) {
+            console.log('checking the file size is okay');
+            set_file_size_error[index] = ("");
+            setError("")
+            setFilePathError("")
+            setFileNames(newName);
+            setSelectedFile(newSelectedFiles);
+            upload(files, index);
+        } else {
+            console.log('checking the file size is High');
+            set_file_size_error[index] = ("Max file size 2 MB");
+            newSelectedFiles[index] = null;
+            setSelectedFile(newSelectedFiles);
+            setFileNames(null);
+        }
+        const newFields = [...fields];
+        newFields[index].file_path = _path;
+        setFields(newFields);
+
+    };
+
+    console.log(fileNames)
+
+    const upload = (file, index) => {
+        const formData = new FormData();
+        // Create a new name for the file
+        const extension = file.name.split('.').pop();
+        console.log(file.name.split('.')[0])
+        const fileName = file.name.split('.')[0]
+
+        // Get file extension
+        const newName = `${fileName}(${index}).${extension}`;
+        // Append the file with the new name
+        formData.append('files', file, newName);
+        console.log(file);
+        setFileNames(newName)
+
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5003/period/period_image`, formData)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(er => console.log(er));
+    };
 
     const handleChange = (index, event) => {
         const newFields = [...fields];
@@ -76,6 +162,26 @@ const CreateExpense = () => {
                 newFields[index].total_amount = (quantity * amount).toFixed(3);
             }
         }
+
+        const expense_category = newFields[index]['expense_category'];
+        if (expense_category) {
+            setExpense_category(""); // Clear the error message
+        }
+        const item_name = newFields[index]['item_name'];
+        if (item_name) {
+            setItem_name(""); // Clear the error message
+        }
+
+        const quantity = newFields[index]['quantity'];
+        if (quantity) {
+            setQuantity(""); // Clear the error message
+        }
+        const amount = newFields[index]['amount'];
+        if (amount) {
+            setAmount(""); // Clear the error message
+        }
+
+
         setFields(newFields);
     };
 
@@ -88,7 +194,8 @@ const CreateExpense = () => {
             const newInputValues = [...fields];
             for (let i = 0; i < numToAddInt; i++) {
                 newInputValues.push({
-                    expense_category: '', item_name: '', amount: '', quantity: '', total_amount: ''
+                    expense_category: '', item_name: '', amount: '', quantity: '', total_amount: '', voucher_id: '',
+                    file_path: ''
                 });
             }
             setFields(newInputValues);
@@ -201,9 +308,24 @@ const handleInputChange = (event) => {
     } else if (name === 'dueAmount') {
         setDueAmount(parsedValue >= 0 ? parsedValue : 0);
     }
+    else if (name === 'paid_amount') {
+        if (value.trim() === '') {
+            setPAid_amount('Paid amount is required.');
+        } else {
+            setPAid_amount('');
+            setPaidAmount(parsedValue >= 0 ? parsedValue : 0);
+        }
+    }
    
     setPaidAmount(value >= 0 ? value : 0); 
 };
+
+const [dateError, setDateError] = useState('');
+const [expense_category, setExpense_category] = useState('');
+const [item_name, setItem_name] = useState('');
+const [quantity, setQuantity] = useState('');
+const [amount, setAmount] = useState('');
+const [paid_amount, setPAid_amount] = useState('');
 
     const router = useRouter()
     const expense_create = (event) => {
@@ -217,8 +339,14 @@ const handleInputChange = (event) => {
 
             const item_name = form.item_name.value || form?.item_name[index]?.value
             const expense_category = form.expense_category.value || form?.expense_category[index]?.value
+            let file_path = '';
+            if(file_path){
+
+                 file_path = form.file_path.value || form?.file_path[index]?.value
+            }
+
             const amount = form.amount.value || form?.amount[index]?.value
-            // const voucher_id = form.voucher_id.value || form?.voucher_id[index]?.value
+            const voucher_id = form.voucher_id.value || form?.voucher_id[index]?.value
             const payment = form.payment.value || form?.payment[index]?.value
             const expense_date = form.expense_date.value || form?.expense_date[index]?.value
             const discount = form.discountAmount.value || form?.discountAmount[index]?.value
@@ -237,6 +365,7 @@ const handleInputChange = (event) => {
             }
 
 
+
             const productData = {
                 expense_category, amount, payment_type: payment, expense_date, discount, short_note,
                 created_by: created, bank_check_no, supplier_id, sub_total, previous_due,
@@ -244,8 +373,85 @@ const handleInputChange = (event) => {
                 due_amount,
                 paid_amount,
                 quantity,
-                item_name
+                item_name,
+                voucher_id,
+                file_path
             }
+
+            if(!productData.supplier_id){
+                setSupplier('Supplier be filled')
+                return
+            }
+            if(!productData.expense_date){
+                setDateError('Must Be filled')
+                return
+            }
+            if(!productData.paid_amount){
+                setPAid_amount('Paid Amount Must Be filled')
+                return
+            }
+           
+        const newErrors = new Array(fields.length).fill('');
+        const isValid = fields.every((inputValue, index) => {
+            if (!inputValue.expense_category.trim()) {
+                newErrors[index] = 'Expense category Name must be filled.';
+                return false;
+            }
+            return true;
+        });
+
+        if (!isValid) {
+            setExpense_category(newErrors);
+            return;
+        }
+        setExpense_category(new Array(fields.length).fill(''));
+
+
+        const newErrorsItemName = new Array(fields.length).fill('');
+        const isValidItemName = fields.every((inputValue, index) => {
+            if (!inputValue.item_name.trim()) {
+                newErrorsItemName[index] = 'Item Name must be filled.';
+                return false;
+            }
+            return true;
+        });
+
+        if (!isValidItemName) {
+            setItem_name(newErrorsItemName);
+            return;
+        }
+        setItem_name(new Array(fields.length).fill(''));
+            
+        const newErrorsQuantity = new Array(fields.length).fill('');
+        const isValidQuantity = fields.every((inputValue, index) => {
+            if (!inputValue.quantity.trim()) {
+                newErrorsQuantity[index] = 'Quantity must be filled.';
+                return false;
+            }
+            return true;
+        });
+
+        if (!isValidQuantity) {
+            setQuantity(newErrorsQuantity);
+            return;
+        }
+        setQuantity(new Array(fields.length).fill(''));
+            
+        const newErrorsAmount = new Array(fields.length).fill('');
+        const isValidAmount = fields.every((inputValue, index) => {
+            if (!inputValue.amount.trim()) {
+                newErrorsAmount[index] = 'Amount must be filled.';
+                return false;
+            }
+            return true;
+        });
+
+        if (!isValidAmount) {
+            setAmount(newErrorsAmount);
+            return;
+        }
+        setAmount(new Array(fields.length).fill(''));
+            
 
 
             console.log(productData, '=====================')
@@ -263,7 +469,7 @@ const handleInputChange = (event) => {
                     console.log(Response)
                     if (Response.ok === true) {
                         sessionStorage.setItem("message", "Data saved successfully!");
-                        router.push('/Admin/expense/expense_all')
+                        // router.push('/Admin/expense/expense_all')
                     }
                 })
                 .then((data) => {
@@ -327,6 +533,7 @@ const handleInputChange = (event) => {
     const [formattedDate, setFormattedDate] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [error, setError] = useState('');
+ 
 
     const handleDateChange = (event) => {
         const selectedDate = event.target.value; // Directly get the value from the input
@@ -337,6 +544,12 @@ const handleInputChange = (event) => {
         const formattedDate = `${day}-${month}-${year}`;
         const formattedDatabaseDate = `${year}-${month}-${day}`;
 
+        if(!formattedDatabaseDate){
+            setDateError('Must Be Filled')
+        }
+        else{
+            setDateError('')
+        }
         // Check if the selected date is in the future
         const today = new Date();
         const selected = new Date(selectedDate);
@@ -557,7 +770,42 @@ const handleInputChange = (event) => {
     };
     console.log(paidAmount)
 
+    const period_image_remove = (index) => {
+        console.log(fields[index]?.file_path);
+        const confirmDelete = window.confirm('Are you sure you want to delete this?');
+        if (confirmDelete) {
+            const newSelectedFiles = [...selectedFile];
+            newSelectedFiles[index] = null;
+            setSelectedFile(newSelectedFiles);
+            const filePathToDelete = fields[index]?.file_path; // Accessing file_path with index
+            if (filePathToDelete) {
+                axios.delete(`${process.env.NEXT_PUBLIC_API_URL}:5003/${filePathToDelete}`)
+                    .then(res => {
+                        console.log(`File ${filePathToDelete} deleted successfully`);
+                        setFields(prevData => {
+                            const updatedFields = [...prevData]; // Copying previous data
+                            updatedFields[index] = { ...updatedFields[index], file_path: '' }; // Updating file_path at index
+                            return updatedFields;
+                        });
+                    })
+                    .catch(err => {
+                        console.error(`Error deleting file ${filePathToDelete}:`, err);
+                    });
+            }
+        }
+    };
 
+    const { data: account_head = []
+    } = useQuery({
+        queryKey: ['account_head'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+console.log(expense_category)
     return (
         <div class="container-fluid">
             <div class=" row ">
@@ -582,9 +830,9 @@ const handleInputChange = (event) => {
                                         <div class=" ">
                                             <div className='col-md-12'>
 
-                                                <h5>From,</h5>
+                                                <h5>From,<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></h5>
                                                 <div>
-                                                    <select required="" onChange={(e) => supplier_id(e.target.value)} name="supplier_id" className="form-control form-control-sm mb-2" id="supplier_id">
+                                                    <select  onChange={(e) => supplier_id(e.target.value)} name="supplier_id" className="form-control form-control-sm mb-2" id="supplier_id">
                                                         <option value=''>Select Supplier</option>
                                                         {
                                                             supplierList.map((supplier) => (
@@ -597,11 +845,14 @@ const handleInputChange = (event) => {
                                                         }
 
                                                     </select>
+                                                    {
+                                                        supplier && <p className='text-danger'>{supplier}</p>
+                                                    }
                                                 </div>
                                             </div>
 
                                             <div className="col-md-12">
-                                                <label className='font-weight-bold'>Expense Purches Date:</label>
+                                                <label className='font-weight-bold'>Expense Purches Date:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                 <input
                                                     type="text"
                                                     readOnly
@@ -612,13 +863,14 @@ const handleInputChange = (event) => {
                                                     style={{ display: 'inline-block' }}
                                                 />
                                                 <input
-                                                    name='dob'
+                                                    name='expense_date'
                                                     type="date"
                                                     id={`dateInput-n`}
                                                     onChange={(e) => handleDateChange(e)}
                                                     style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
                                                 />
                                                 {error && <div className="text-danger">{error}</div>}
+                                                {dateError && <p className="text-danger">{dateError}</p>}
                                             </div>
                                             {/* <div >
                                                 <label className='font-weight-bold'>Expense Purches Date:</label>
@@ -677,19 +929,26 @@ const handleInputChange = (event) => {
                                                         <thead>
                                                             <tr>
                                                                 <th>
-                                                                    Expense Category
+                                                                    Expense Category: <small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>
                                                                 </th>
                                                                 <th>
-                                                                    Item Name
+                                                                    Item Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>
                                                                 </th>
                                                                 <th>
-                                                                    Quantity
+                                                                    Quantity:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>
                                                                 </th>
                                                                 <th>
-                                                                    Amount
+                                                                    Amount:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>
                                                                 </th>
                                                                 <th>
                                                                     Total Amount
+                                                                </th>
+                                                                <th>
+                                                                    Voucher Id
+                                                                </th>
+
+                                                                <th>
+                                                                    File
                                                                 </th>
 
                                                                 <th>
@@ -724,7 +983,7 @@ const handleInputChange = (event) => {
                                                                                 <tr >
                                                                                     <td>
                                                                                         <select
-                                                                                            required=""
+                                                                                            
                                                                                             name="expense_category"
                                                                                             className="form-control form-control-sm mb-2"
                                                                                             value={field.expense_category}
@@ -740,49 +999,63 @@ const handleInputChange = (event) => {
                                                                                             }
 
                                                                                         </select>
+                                                                                        {
+                                                                                        expense_category[index] && <p className='text-danger'>{expense_category}</p>
+                                                                                    }
+
                                                                                     </td>
 
+                       
                                                                                     <td>
                                                                                         <input
                                                                                             type="text"
-                                                                                            required
+                                                                                            
                                                                                             name="item_name"
                                                                                             className="form-control form-control-sm mb-2"
                                                                                             placeholder="Expense Title"
                                                                                             value={field.item_name}
                                                                                             onChange={(e) => handleChange(index, e)}
                                                                                         />
+                                                                                        {
+                                                                                            item_name[index] && <p className='text-danger'>{item_name}</p>
+                                                                                        }
 
                                                                                     </td>
 
                                                                                     <td>
                                                                                         <input
                                                                                             type="number"
-                                                                                            required
+                                                                                            
                                                                                             name="quantity"
                                                                                             className="form-control form-control-sm mb-2"
                                                                                             placeholder="Enter Quantity "
                                                                                             value={field.quantity}
                                                                                             onChange={(e) => handleChange(index, e)}
                                                                                         />
+                                                                                        {
+                                                                                            quantity[index] && <p className='text-danger'>{quantity}</p>
+                                                                                        }
                                                                                     </td>
 
                                                                                     <td>
                                                                                         <input
                                                                                             type="number"
-                                                                                            required
+                                                                                            
                                                                                             name="amount"
                                                                                             className="form-control form-control-sm mb-2"
                                                                                             placeholder="Enter Amount "
                                                                                             value={field.amount}
                                                                                             onChange={(e) => handleChange(index, e)}
                                                                                         />
+                                                                                        {
+                                                                                            amount[index] && <p className='text-danger'>{amount}</p>
+                                                                                        }
                                                                                     </td>
 
                                                                                     <td>
                                                                                         <input
                                                                                             type="text"
-                                                                                            required
+                                                                                            
                                                                                             readOnly
                                                                                             className="form-control form-control-sm mb-2"
                                                                                             placeholder="total amount"
@@ -790,7 +1063,7 @@ const handleInputChange = (event) => {
                                                                                         />
                                                                                         <input
                                                                                             type="text"
-                                                                                            required
+                                                                                            
                                                                                             readOnly
                                                                                             hidden
                                                                                             name="total_amount"
@@ -798,6 +1071,68 @@ const handleInputChange = (event) => {
                                                                                             placeholder="total amount"
                                                                                             value={Number(field.total_amount).toFixed(3)}
                                                                                         />
+                                                                                    </td>
+
+                                                                                    <td>
+                                                                                        <input
+                                                                                            type="text"
+                                                                                              name="voucher_id"
+                                                                                            
+                                                                                            onChange={(e) => handleChange(index, e)}
+                                                                                            className="form-control form-control-sm mb-2"
+                                                                                            placeholder="Voucher Number"
+                                                                                            value={field.voucher_id}
+                                                                                        />
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            
+                                                                                            
+                                                                                            hidden
+                                                                                            name="voucher_id"
+                                                                                            className="form-control form-control-sm mb-2"
+                                                                                            placeholder="total amount"
+                                                                                            value={field.voucher_id}
+                                                                                        />
+                                                                                    </td>
+                                                                                    <td style={{width:'180px'}}>
+                                                                             
+
+                                                        <label className='font-weight-bold'>File</label>
+                                                        <div>
+                                                            <span className="btn btn-success btn-sm mb-2">
+                                                                <label htmlFor={`fileInput${index}`} className='mb-0'><FaUpload></FaUpload> Select Image</label>
+                                                                <input
+
+                                                                    className='mb-0'
+
+                                                                    onChange={(e) => period_file_change(index, e)}
+                                                                    type="file" id={`fileInput${index}`} style={{ display: "none" }}
+                                                                />
+                                                            </span>
+                                                        </div>
+
+                                                        {selectedFile[index] ?
+                                                            <>
+                                                                <img className=" mb-2 img-thumbnail" onChange={(e) => period_file_change(index, e)} src={URL.createObjectURL(selectedFile[index])} alt="Uploaded File" />
+
+                                                                <input type="hidden" name="file_path" value={selectedFile[index].path} />
+                                                                <button onClick={() => period_image_remove(index)} type="button" className="btn btn-danger btn-sm position-absolute float-right ml-n4" ><FaTimes></FaTimes></button>
+                                                            </>
+                                                            :
+                                                            ''
+                                                        }
+                                                        {
+                                                            set_file_size_error[index] && (
+                                                                <p className='text-danger'>{set_file_size_error[index]}</p>
+                                                            )
+                                                        }
+                                                        {
+                                                            filePathError[index] && (
+                                                                <p className='text-danger'>{filePathError}</p>
+                                                            )
+                                                        }
+                                                                                 
+                                                   
                                                                                     </td>
                                                                                     <td> <button type="button" onClick={() => handleRemoveField(index)} className="btn btn-danger btn-sm float-lg-right float-md-right" ><FaTrash></FaTrash></button></td>
 
@@ -837,14 +1172,6 @@ const handleInputChange = (event) => {
 
 
                                     <div className="container mx-auto ">
-
-
-                                      
-
-
-
-
-
 
                                         <div class="form-group row student d-flex justify-content-end m-0">
                                             <label class="col-form-label col-md-2">
@@ -1012,6 +1339,9 @@ const handleInputChange = (event) => {
                                                     placeholder="Enter Paid Amount"
                                                     value={paidAmount}
                                                 />
+                                                {
+                                                    paid_amount && <p className='text-danger'>{paid_amount}</p>
+                                                }
                                             </div>
                                         </div>
 
@@ -1030,10 +1360,18 @@ const handleInputChange = (event) => {
                                                     value={selectedEntryType}
                                                     onChange={handleEntryTypeChange}
                                                 >
-                                                    <option value="">Select Type Of Payment</option>
+                                                    {/* <option value="">Select Type Of Payment</option>
                                                     <option value="1">Cash</option>
 
-                                                    <option value="2">Check</option>
+                                                    <option value="2">Check</option> */}
+                                                     {
+                                                                                account_head.map(account =>
+
+                                                                                    <>
+                                                                                        <option value={account.id}>{account.account_head_name}</option>
+                                                                                    </>
+                                                                                )
+                                                                            }
 
                                                 </select>
                                             </div>
@@ -1042,7 +1380,29 @@ const handleInputChange = (event) => {
 
                                         <div class="">
 
-                                            {selectedEntryType === '2' ?
+                                            {selectedEntryType === '5' ?
+
+                                                <div class="form-group row student d-flex justify-content-end m-0">
+                                                    <label class="col-form-label col-md-2">
+                                                        <strong>Bank Check No:</strong>
+                                                    </label>
+
+                                                    <div class="col-md-3">
+                                                        <input
+                                                            type="text"
+                                                            required
+                                                            name="bank_check_no"
+                                                            className="form-control form-control-sm mb-2"
+                                                            placeholder="Enter Bank Check No"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                :
+
+                                                <div className={`brand-item d-lg-flex d-md-flex col-lg-12  justify-content-between`}></div>
+                                            }
+                                            {selectedEntryType === '6' ?
 
                                                 <div class="form-group row student d-flex justify-content-end m-0">
                                                     <label class="col-form-label col-md-2">
