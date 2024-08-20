@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-const TransportAllowanceList = () => {
+const TransportAllowanceList = ({searchParams}) => {
 
     const { data: transportAllowanceAll = [], isLoading, refetch
     } = useQuery({
@@ -19,42 +19,35 @@ const TransportAllowanceList = () => {
     })
 
 
-
-
-
-
-
-
-
     const [userId, setUserId] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setUserId(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
         }
-      }, []);
+    }, []);
 
 
 
     const [page_group, setPage_group] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('pageGroup') || '';
+            return localStorage.getItem('pageGroup') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('pageGroup');
-          setPage_group(storedUserId);
+            const storedUserId = localStorage.getItem('pageGroup');
+            setPage_group(storedUserId);
         }
-      }, []);
+    }, []);
 
 
 
@@ -91,6 +84,46 @@ const TransportAllowanceList = () => {
         btn.method_sort === 1
     );
 
+
+    // Paigination start
+    const parentUsers = transportAllowanceAll
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
+    }
+
+
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUsers, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/transport_allowance/transport_allowance_list/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
     const transport_allowance_delete = id => {
 
         console.log(id)
@@ -103,6 +136,7 @@ const TransportAllowanceList = () => {
                 .then(Response => Response.json())
                 .then(data => {
                     refetch()
+                    caregory_list()
                     console.log(data)
                 })
         }
@@ -111,10 +145,10 @@ const TransportAllowanceList = () => {
     const [message, setMessage] = useState();
     useEffect(() => {
         if (typeof window !== 'undefined') {
-        if (sessionStorage.getItem("message")) {
-            setMessage(sessionStorage.getItem("message"));
-            sessionStorage.removeItem("message");
-        }
+            if (sessionStorage.getItem("message")) {
+                setMessage(sessionStorage.getItem("message"));
+                sessionStorage.removeItem("message");
+            }
         }
     }, [])
 
@@ -144,6 +178,44 @@ const TransportAllowanceList = () => {
                                 </div>
                                 <div class="card-body">
                                     <div className='table-responsive'>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/transport_allowance/transport_allowance_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
 
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
@@ -160,10 +232,10 @@ const TransportAllowanceList = () => {
                                                         Travel To
                                                     </th>
                                                     <th>
-                                                    Vehicle Name
+                                                        Vehicle Name
                                                     </th>
                                                     <th>
-                                                    Amount
+                                                        Amount
                                                     </th>
                                                     <th>
                                                         Action
@@ -183,7 +255,7 @@ const TransportAllowanceList = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    transportAllowanceAll.map((transport_allowance, i) => (
+                                                    pageUsers.map((transport_allowance, i) => (
                                                         <tr key={transport_allowance.id}>
                                                             <td>    {i + 1}</td>
 
@@ -258,6 +330,44 @@ const TransportAllowanceList = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/transport_allowance/transport_allowance_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/transport_allowance/transport_allowance_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>

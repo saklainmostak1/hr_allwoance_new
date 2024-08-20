@@ -133,36 +133,88 @@ const CreateExpense = () => {
             .catch(er => console.log(er));
     };
 
+    const englishToBengaliNumbers = (value) => {
+        const englishDigits = '0123456789';
+        const bengaliDigits = '০১২৩৪৫৬৭৮৯';
+        let result = '';
+    
+        for (let char of value) {
+            const index = englishDigits.indexOf(char);
+            result += index === -1 ? char : bengaliDigits[index];
+        }
+    
+        return result;
+    };
+    
+    const bengaliToEnglishNumbers = (value) => {
+        const bengaliDigits = '০১২৩৪৫৬৭৮৯';
+        const englishDigits = '0123456789';
+        let result = '';
+    
+        for (let char of value) {
+            const index = bengaliDigits.indexOf(char);
+            result += index === -1 ? char : englishDigits[index];
+        }
+    
+        return result;
+    };
+    
     const handleChange = (index, event) => {
         const newFields = [...fields];
-
-        if (event.target.type === 'file') {
-            newFields[index][event.target.name] = event.target.files[0];
+        const { name, type, value, files } = event.target;
+    
+        if (type === 'file') {
+            newFields[index][name] = files[0];
         } else {
-            newFields[index][event.target.name] = event.target.value;
 
-            if (event.target.name === 'quantity') {
-                if (parseFloat(event.target.value) < 1) {
-                    // ('Error', 'Quantity cannot be less than 1', 'error');
-                    newFields[index][event.target.name] = '1';
+            if (name === 'item_name') {
+                // Handle item_name as varchar, no specific validation needed
+                newFields[index][name] = value;
+            } 
+            // Convert input value to English for validation and calculation
+           else{
+            const englishValue = bengaliToEnglishNumbers(value);
+    
+            // Validate input to ensure only valid digits are allowed
+            const validPattern = /^[0-9০-৯]*$/;
+            if (validPattern.test(value)) {
+                // Store the Bengali representation
+                newFields[index][name] = value;
+    
+                if (name === 'quantity') {
+                    if (parseFloat(englishValue) < 1) {
+                        // ('Error', 'Quantity cannot be less than 1', 'error');
+                        newFields[index][name] = englishToBengaliNumbers('1');
+                    }
+                }
+    
+                if (name === 'amount') {
+                    if (parseFloat(englishValue) < 0) {
+                        // Swal.fire('Error', 'Amount cannot be less than 0', 'error');
+                        newFields[index][name] = englishToBengaliNumbers('0');
+                    }
+                }
+    
+                if (name === 'quantity' || name === 'amount') {
+                    // Convert both quantity and amount to English for calculations
+                    const quantity = parseFloat(bengaliToEnglishNumbers(newFields[index].quantity || '0'));
+                    const amount = parseFloat(bengaliToEnglishNumbers(newFields[index].amount || '0'));
+    
+                    newFields[index].total_amount = (quantity * amount).toFixed(3);
+                }
+            } else {
+                // Clear value if it is invalid
+                newFields[index][name] = '';
+                // Optionally set an error message
+                if (name === 'quantity') {
+                    setQuantity("Invalid input. Only digits are allowed.");
+                } else if (name === 'amount') {
+                    setAmount("Invalid input. Only digits are allowed.");
                 }
             }
-
-            if (event.target.name === 'amount') {
-                if (parseFloat(event.target.value) < 0) {
-                    // Swal.fire('Error', 'Amount cannot be less than 0', 'error');
-                    newFields[index][event.target.name] = '0';
-                }
-            }
-
-            if (event.target.name === 'quantity' || event.target.name === 'amount') {
-                const quantity = parseFloat(newFields[index].quantity || 0);
-                const amount = parseFloat(newFields[index].amount || 0);
-
-                newFields[index].total_amount = (quantity * amount).toFixed(3);
-            }
+           }
         }
-
+    
         const expense_category = newFields[index]['expense_category'];
         if (expense_category) {
             setExpense_category(""); // Clear the error message
@@ -171,7 +223,7 @@ const CreateExpense = () => {
         if (item_name) {
             setItem_name(""); // Clear the error message
         }
-
+    
         const quantity = newFields[index]['quantity'];
         if (quantity) {
             setQuantity(""); // Clear the error message
@@ -181,9 +233,129 @@ const CreateExpense = () => {
             setAmount(""); // Clear the error message
         }
 
-
+    
+    
         setFields(newFields);
     };
+    
+    // const handleChange = (index, event) => {
+    //     const newFields = [...fields];
+    
+    //     if (event.target.type === 'file') {
+    //         newFields[index][event.target.name] = event.target.files[0];
+    //     } else {
+    //         let value = event.target.value;
+    
+    //         // Regex to allow only digits and Bengali numbers
+    //         const validPattern = /^[0-9০-৯]*$/;
+    
+    //         if (validPattern.test(value)) {
+    //             newFields[index][event.target.name] = value;
+    
+    //             if (event.target.name === 'quantity') {
+    //                 if (parseFloat(value) < 1) {
+    //                     // ('Error', 'Quantity cannot be less than 1', 'error');
+    //                     newFields[index][event.target.name] = '1';
+    //                 }
+    //             }
+    
+    //             if (event.target.name === 'amount') {
+    //                 if (parseFloat(value) < 0) {
+    //                     // Swal.fire('Error', 'Amount cannot be less than 0', 'error');
+    //                     newFields[index][event.target.name] = '0';
+    //                 }
+    //             }
+    
+    //             if (event.target.name === 'quantity' || event.target.name === 'amount') {
+    //                 const quantity = parseFloat(newFields[index].quantity || 0);
+    //                 const amount = parseFloat(newFields[index].amount || 0);
+    
+    //                 newFields[index].total_amount = (quantity * amount).toFixed(3);
+    //             }
+    //         } else {
+    //             // Clear value if it is invalid
+    //             newFields[index][event.target.name] = '';
+    //             // Optionally set an error message
+    //             if (event.target.name === 'quantity') {
+    //                 setQuantity("Invalid input. Only digits are allowed.");
+    //             } else if (event.target.name === 'amount') {
+    //                 setAmount("Invalid input. Only digits are allowed.");
+    //             }
+    //         }
+    //     }
+    
+    //     const expense_category = newFields[index]['expense_category'];
+    //     if (expense_category) {
+    //         setExpense_category(""); // Clear the error message
+    //     }
+    //     const item_name = newFields[index]['item_name'];
+    //     if (item_name) {
+    //         setItem_name(""); // Clear the error message
+    //     }
+    
+    //     const quantity = newFields[index]['quantity'];
+    //     if (quantity) {
+    //         setQuantity(""); // Clear the error message
+    //     }
+    //     const amount = newFields[index]['amount'];
+    //     if (amount) {
+    //         setAmount(""); // Clear the error message
+    //     }
+    
+    //     setFields(newFields);
+    // };
+    
+    // const handleChange = (index, event) => {
+    //     const newFields = [...fields];
+
+    //     if (event.target.type === 'file') {
+    //         newFields[index][event.target.name] = event.target.files[0];
+    //     } else {
+    //         newFields[index][event.target.name] = event.target.value;
+
+    //         if (event.target.name === 'quantity') {
+    //             if (parseFloat(event.target.value) < 1) {
+    //                 // ('Error', 'Quantity cannot be less than 1', 'error');
+    //                 newFields[index][event.target.name] = '1';
+    //             }
+    //         }
+
+    //         if (event.target.name === 'amount') {
+    //             if (parseFloat(event.target.value) < 0) {
+    //                 // Swal.fire('Error', 'Amount cannot be less than 0', 'error');
+    //                 newFields[index][event.target.name] = '0';
+    //             }
+    //         }
+
+    //         if (event.target.name === 'quantity' || event.target.name === 'amount') {
+    //             const quantity = parseFloat(newFields[index].quantity || 0);
+    //             const amount = parseFloat(newFields[index].amount || 0);
+
+    //             newFields[index].total_amount = (quantity * amount).toFixed(3);
+    //         }
+    //     }
+
+    //     const expense_category = newFields[index]['expense_category'];
+    //     if (expense_category) {
+    //         setExpense_category(""); // Clear the error message
+    //     }
+    //     const item_name = newFields[index]['item_name'];
+    //     if (item_name) {
+    //         setItem_name(""); // Clear the error message
+    //     }
+
+    //     const quantity = newFields[index]['quantity'];
+    //     if (quantity) {
+    //         setQuantity(""); // Clear the error message
+    //     }
+    //     const amount = newFields[index]['amount'];
+    //     if (amount) {
+    //         setAmount(""); // Clear the error message
+    //     }
+
+
+    //     setFields(newFields);
+    // };
 
 
 
@@ -300,9 +472,18 @@ useEffect(() => {
     setPaidAmount(data)
 }, [data])
 // Other functions remain the same
+
+
+
+
+
+
 const handleInputChange = (event) => {
     const { name, value } = event.target;
     const parsedValue = parseFloat(value);
+    if(name === 'bank_check_no'){
+        setBank('')
+    }
     if (name === 'discountAmount') {
         setDiscountAmount(parsedValue >= 0 ? parsedValue : 0);
     } else if (name === 'dueAmount') {
@@ -320,12 +501,16 @@ const handleInputChange = (event) => {
     setPaidAmount(value >= 0 ? value : 0); 
 };
 
+
+
+
 const [dateError, setDateError] = useState('');
 const [expense_category, setExpense_category] = useState('');
 const [item_name, setItem_name] = useState('');
 const [quantity, setQuantity] = useState('');
 const [amount, setAmount] = useState('');
 const [paid_amount, setPAid_amount] = useState('');
+const [bank, setBank] = useState('');
 
     const router = useRouter()
     const expense_create = (event) => {
@@ -360,7 +545,10 @@ const [paid_amount, setPAid_amount] = useState('');
             const paid_amount = form.paid_amount.value || '';
             const sub_total = form.sub_total.value || '';
             let bank_check_no = '';
-            if (selectedEntryType === '2') {
+            if (selectedEntryType === '5') {
+                bank_check_no = form.bank_check_no.value || '';
+            }
+            else if(selectedEntryType === '6'){
                 bank_check_no = form.bank_check_no.value || '';
             }
 
@@ -381,6 +569,16 @@ const [paid_amount, setPAid_amount] = useState('');
             if(!productData.supplier_id){
                 setSupplier('Supplier be filled')
                 return
+            }
+            // if(!bank_check_no){
+            //     setBank('Bank Check No Must be filled')
+            //     return
+            // }
+            if (selectedEntryType === '5' || selectedEntryType === '6') {
+                if (!productData.bank_check_no) {
+                    setBank('Bank Check No must be filled');
+                    return;
+                }
             }
             if(!productData.expense_date){
                 setDateError('Must Be filled')
@@ -1024,7 +1222,7 @@ console.log(expense_category)
 
                                                                                     <td>
                                                                                         <input
-                                                                                            type="number"
+                                                                                            type="text"
                                                                                             
                                                                                             name="quantity"
                                                                                             className="form-control form-control-sm mb-2"
@@ -1039,7 +1237,7 @@ console.log(expense_category)
 
                                                                                     <td>
                                                                                         <input
-                                                                                            type="number"
+                                                                                            type="text"
                                                                                             
                                                                                             name="amount"
                                                                                             className="form-control form-control-sm mb-2"
@@ -1390,11 +1588,14 @@ console.log(expense_category)
                                                     <div class="col-md-3">
                                                         <input
                                                             type="text"
-                                                            required
+                                                            onChange={handleInputChange}
                                                             name="bank_check_no"
                                                             className="form-control form-control-sm mb-2"
                                                             placeholder="Enter Bank Check No"
                                                         />
+                                                        {
+                                                            bank && <p className='text-danger'>{bank}</p>
+                                                        }
                                                     </div>
                                                 </div>
 
@@ -1412,11 +1613,14 @@ console.log(expense_category)
                                                     <div class="col-md-3">
                                                         <input
                                                             type="text"
-                                                            required
+                                                            onChange={handleInputChange}
                                                             name="bank_check_no"
                                                             className="form-control form-control-sm mb-2"
                                                             placeholder="Enter Bank Check No"
                                                         />
+                                                          {
+                                                            bank && <p className='text-danger'>{bank}</p>
+                                                        }
                                                     </div>
                                                 </div>
 

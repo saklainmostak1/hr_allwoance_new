@@ -1,4 +1,5 @@
 'use client'
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -9,6 +10,17 @@ const CreateHolydayCategory = () => {
 
     const [isSameAsLivingAddress, setIsSameAsLivingAddress] = useState(false);
 
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = []
+    } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/holiday_category/holiday_category_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
 
 
     const [created_by, setCreated_by] = useState(() => {
@@ -47,6 +59,12 @@ const CreateHolydayCategory = () => {
             setCompany('')
         }
 
+        const existingBrand = brands.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
         setFormData(attribute)
 
         // setFormData(prevData => ({
@@ -75,6 +93,20 @@ const CreateHolydayCategory = () => {
             return;
         }
         console.log(schoolShift)
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Holyday Category name already exists. Please choose a different Holyday Category name.");
+            return
+
+        }
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/holiday_category/holiday_category_create`, {
             method: 'POST',
             headers: {
@@ -124,9 +156,12 @@ const CreateHolydayCategory = () => {
                                     <div class="form-group row"><label class="col-form-label font-weight-bold col-md-3"> Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label><div class="col-md-6">
                                         <input
                                             onChange={handleChange}
-                                            class="form-control form-control-sm required" id="title" placeholder="Enter Holiday Category Name Name" type="text" name="name" />
+                                            class="form-control form-control-sm required" id="title" placeholder="Enter Holiday Category Name" type="text" name="name" />
                                         {
                                             company && <p className='text-danger'>{company}</p>
+                                        }
+                                        {
+                                            sameBrandName && <p className='text-danger'>{sameBrandName}</p>
                                         }
                                     </div>
                                     </div>

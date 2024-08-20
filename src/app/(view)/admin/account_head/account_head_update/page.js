@@ -26,6 +26,20 @@ const AccountHeadUpdate = ({ id }) => {
         modified_by: userId
     });
 
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = [],  } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_all`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return filteredBrands;
+        }
+    });
+
+
+
     const { data: accountHeadTypeSingle, isLoading, refetch } = useQuery({
         queryKey: ['accountHeadTypeSingle', id],
         queryFn: async () => {
@@ -74,9 +88,17 @@ const AccountHeadUpdate = ({ id }) => {
         const attribute = { ...formData }
         attribute[name] = value
 
+     
+     
+        
         const account_head_name = attribute['account_head_name'];
         if (account_head_name) {
             setAccount_head_name('')
+        }
+        const existingBrand = brands.find((brand) => brand?.account_head_name?.toLowerCase() === formData?.account_head_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
         }
         const account_type_id = attribute['account_type_id'];
         if (account_type_id) {
@@ -98,20 +120,33 @@ const AccountHeadUpdate = ({ id }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.account_head_name || formData.account_head_name.trim() === '') {
+        if (!formData.account_head_name ) {
             setAccount_head_name('Account Head name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }
-        if (!formData.account_type_id || formData.account_type_id.trim() === '') {
+        if (!formData.account_type_id ) {
             setAccount_type_id('Account Head Type name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }
-        if (!formData.opening_balance || formData.opening_balance.trim() === '') {
+        if (!formData.opening_balance ) {
             setOpening_balance('Opening Balance  is required');
             // You can show this error message to the user in the UI as needed
             return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.account_head_name.toLowerCase()) === normalizebrandName(formData.account_head_name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Account Head name already exists. Please choose a different Account Head name.");
+            return
+
         }
 
         try {
@@ -156,6 +191,9 @@ const AccountHeadUpdate = ({ id }) => {
                                             class="form-control form-control-sm required" id="title" placeholder="Enter Account Head Type Name" type="text" name="account_head_name" />
                                         {
                                             account_head_name && <p className='text-danger'>{account_head_name}</p>
+                                        }
+                                        {
+                                            sameBrandName && <p className='text-danger'>{sameBrandName}</p>
                                         }
                                     </div></div>
                                     <div class="form-group row">

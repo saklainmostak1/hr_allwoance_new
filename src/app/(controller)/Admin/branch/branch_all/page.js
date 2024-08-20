@@ -1,10 +1,12 @@
 import BranchList from '@/app/(view)/admin/brance/branch_all/page';
 import React from 'react';
 
-const BranchAll = () => {
+const BranchAll = ({searchParams}) => {
     return (
         <div>
-            <BranchList></BranchList>
+            <BranchList
+            searchParams={searchParams}
+            ></BranchList>
         </div>
     );
 };

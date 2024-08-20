@@ -465,7 +465,7 @@ const BrandCreate = () => {
                             <div className="card-header custom-card-header py-1 clearfix bg-gradient-primary text-white">
                                 <h5 className="card-title card-header-color font-weight-bold mb-0  float-left mt-1">Create Brance</h5>
                                 <div className="card-title card-header-color font-weight-bold mb-0  float-right ">
-                                    <Link href={`/Admin/brance/brance_all?page_group=${page_group}`} className="btn btn-sm btn-info h-50">Back to Brance List</Link>
+                                    <Link href={`/Admin/branch/branch_all?page_group=${page_group}`} className="btn btn-sm btn-info h-50">Back to Brance List</Link>
                                 </div>
                             </div>
 
@@ -554,7 +554,7 @@ const BrandCreate = () => {
                                                                                         <input
                                                                                             value={field.branch_name}
                                                                                             onChange={(e) => barnd_change(index, e)}
-                                                                                            type="text" name="branch_name" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
+                                                                                            type="text" name="branch_name" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Branch Name" />
                                                                                         {
                                                                                             brance_name[index] && <p>{brance_name[index]}</p>
                                                                                         }
@@ -592,7 +592,7 @@ const BrandCreate = () => {
                                                                                             value={field.company_type_id}
                                                                                             onChange={(e) => barnd_change(index, e)}
                                                                                             name="company_type_id" class="form-control form-control-sm  trim integer_no_zero row_unique_education" id="education" placeholder="Enter Education">
-                                                                                            <option >Select Education</option>
+                                                                                            <option >Select Company Type</option>
                                                                                             {
                                                                                                 companysType.map(company_type =>
                                                                                                     <>
@@ -615,7 +615,7 @@ const BrandCreate = () => {
                                                                                             value={field.status_id}
                                                                                             onChange={(e) => barnd_change(index, e)}
                                                                                             name="status_id" class="form-control form-control-sm  trim integer_no_zero row_unique_education" id="education" placeholder="Enter Education">
-                                                                                            <option >Select Education</option>
+                                                                                            <option >Select Status</option>
                                                                                             {
                                                                                                 status.map(status =>
                                                                                                     <>
@@ -637,7 +637,7 @@ const BrandCreate = () => {
                                                                                         <input
                                                                                             value={field.office_address}
                                                                                             onChange={(e) => barnd_change(index, e)}
-                                                                                            type="text" name="office_address" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
+                                                                                            type="text" name="office_address" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Branch Address" />
                                                                                         {
                                                                                             office_address[index] && <p className='text-danger'>{office_address[index]}</p>
                                                                                         }
@@ -646,7 +646,7 @@ const BrandCreate = () => {
                                                                                         <input
                                                                                             value={field.mobile}
                                                                                             onChange={(e) => barnd_change(index, e)}
-                                                                                            type="text" name="mobile" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
+                                                                                            type="text" name="mobile" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Mobile Number" />
                                                                                         {
                                                                                             mobile[index] && <p className='text-danger'>{mobile[index]}</p>
                                                                                         }
@@ -655,7 +655,7 @@ const BrandCreate = () => {
                                                                                         <input
                                                                                             value={field.email}
                                                                                             onChange={(e) => barnd_change(index, e)}
-                                                                                            type="text" name="email" class="form-control form-control-sm  required row_unique_result" id="result" placeholder="Enter Result" />
+                                                                                            type="text" name="email" class="form-control form-control-sm  required row_unique_result" id="result" placeholder="Enter Email" />
                                                                                         {
                                                                                             email[index] && <p className='text-danger'>{email[index]}</p>
                                                                                         }
@@ -664,7 +664,7 @@ const BrandCreate = () => {
                                                                                         <input
                                                                                             value={field.phone}
                                                                                             onChange={(e) => barnd_change(index, e)}
-                                                                                            type="text" name="phone" class="form-control form-control-sm  required row_unique_passing_year" id="passing_year" placeholder="Enter Passing Year" />
+                                                                                            type="text" name="phone" class="form-control form-control-sm  required row_unique_passing_year" id="passing_year" placeholder="Enter Phone Number" />
                                                                                         {
                                                                                             phone[index] && <p className='text-danger'>{phone[index]}</p>
                                                                                         }

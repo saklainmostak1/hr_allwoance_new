@@ -312,6 +312,7 @@ export default function AdminPageListC() {
                                                                                                 <option defaultValue="student_management">student_management</option>
                                                                                                 <option defaultValue="system_setup">system_setup</option>
                                                                                                 <option defaultValue="inventory">inventory</option>
+                                                                                                <option defaultValue="organisation_setup">organisation_setup</option>
 
                                                                                             </select>
 

@@ -10,6 +10,20 @@ const HolydayCategoryEdit = ({ id }) => {
 
     const [isSameAsLivingAddress, setIsSameAsLivingAddress] = useState(false);
 
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = [],  } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/holiday_category/holiday_category_all`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return filteredBrands;
+        }
+    });
+
+
+
     const { data: holiday_categorys_single = [], isLoading, refetch
     } = useQuery({
         queryKey: ['holiday_category'],
@@ -58,6 +72,13 @@ const HolydayCategoryEdit = ({ id }) => {
         if (company) {
             setCompany('')
         }
+
+        const existingBrand = brands.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
         setFormData(attribute)
     };
 
@@ -67,6 +88,19 @@ const HolydayCategoryEdit = ({ id }) => {
         if (!formData.name) {
             setCompany('Holiday Category name is required');
             return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Holyday Category name already exists. Please choose a different Holyday Category name.");
+            return
+
         }
 
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/holiday_category/holiday_category_edit/${id}`, {
@@ -80,7 +114,7 @@ const HolydayCategoryEdit = ({ id }) => {
                 Response.json();
                 if (Response.ok) {
                     if (typeof window !== 'undefined') {
-                        sessionStorage.setItem("message", "Data saved successfully!");
+                        sessionStorage.setItem("message", "Data Update successfully!");
                     }
                     router.push('/Admin/holiday_category/holiday_category_all');
                 }
@@ -115,6 +149,7 @@ const HolydayCategoryEdit = ({ id }) => {
                                                 onChange={handleChange}
                                                 className="form-control form-control-sm required" id="title" placeholder="Enter Holiday Category Name" type="text" name="name" />
                                             {company && <p className='text-danger'>{company}</p>}
+                                            {sameBrandName && <p className='text-danger'>{sameBrandName}</p>}
                                         </div>
                                     </div>
                                     <div className="form-group row">

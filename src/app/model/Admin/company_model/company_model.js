@@ -8,14 +8,14 @@ const CompanyModel = {
     company_create: async (req, res) => {
         try {
             const { company_name, created_by } = req.body;
-    
+
             // Using parameterized query to prevent SQL injection
             const insertQuery = 'INSERT INTO company (company_name, created_by) VALUES (?, ?)';
             const result = await connection.query(insertQuery, [company_name, created_by]);
-    
+
             // Sending only the necessary data from the result object
             const { insertId, affectedRows } = result;
-    
+
             // Sending response with relevant data
             res.status(200).json({ insertId, affectedRows });
         } catch (error) {
@@ -68,11 +68,11 @@ const CompanyModel = {
     company_update: async (req, res) => {
         try {
 
-            const { company_name , modified_by} = req.body;
+            const { company_name, modified_by } = req.body;
 
 
             const query = `UPDATE company SET   company_name = ?, modified_by = ? WHERE id = ?`;
-            connection.query(query, [company_name , modified_by, req.params.id], (error, result) => {
+            connection.query(query, [company_name, modified_by, req.params.id], (error, result) => {
                 if (!error && result.affectedRows > 0) {
                     console.log(result);
                     return res.send(result);
@@ -140,8 +140,39 @@ const CompanyModel = {
     //         console.log(error)
     //     }
     // },
+    company_list_paigination: async (req, res) => {
+        const pageNo = Number(req.params.pageNo);
+        const perPage = Number(req.params.perPage);
+        try {
+            const skipRows = (pageNo - 1) * perPage;
+            let query = `
+      SELECT company.*, 
+             users_created.full_name AS created_by,
+             users_modified.full_name AS modified_by 
+      FROM company 
+      LEFT JOIN users AS users_created ON company.created_by = users_created.id 
+      LEFT JOIN users AS users_modified ON company.modified_by = users_modified.id 
+      ORDER BY company.id DESC
+      LIMIT ?, ?
+    `;
 
-    
+            connection.query(query, [skipRows, perPage], (error, result) => {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                }
+
+                else {
+                    console.log(error)
+                }
+
+            })
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
+
 
 }
 

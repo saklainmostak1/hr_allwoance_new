@@ -1,6 +1,7 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const EditCompany = ({id}) => {
@@ -71,6 +72,8 @@ const EditCompany = ({id}) => {
         // }));
     };
 
+    const router = useRouter()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -89,7 +92,11 @@ const EditCompany = ({id}) => {
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
-            console.log(data); // Handle response data or success message
+            console.log(data);
+            if (data.affectedRows > 0) {
+                sessionStorage.setItem("message", "Data updated successfully!");
+                router.push('/Admin/company/company_all');
+            } // Handle response data or success message
         } catch (error) {
             console.error('Error updating school shift:', error);
             // Handle error or show an error message to the user

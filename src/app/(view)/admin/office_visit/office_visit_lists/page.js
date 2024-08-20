@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-const OfficeVisitList = () => {
+const OfficeVisitList = ({ searchParams }) => {
 
     const { data: office_visits = [], isLoading, refetch
     } = useQuery({
@@ -18,35 +18,35 @@ const OfficeVisitList = () => {
         }
     })
 
-  console.log(office_visits)
+    console.log(office_visits)
 
-  const [userId, setUserId] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('userId') || '';
-    }
-    return '';
-  });
+    const [userId, setUserId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('userId') || '';
+        }
+        return '';
+    });
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUserId = localStorage.getItem('userId');
-      setUserId(storedUserId);
-    }
-  }, []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
+        }
+    }, []);
 
-  const [page_group, setPage_group] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('pageGroup') || '';
-    }
-    return '';
-  });
+    const [page_group, setPage_group] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('pageGroup') || '';
+        }
+        return '';
+    });
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUserId = localStorage.getItem('pageGroup');
-      setPage_group(storedUserId);
-    }
-  }, []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('pageGroup');
+            setPage_group(storedUserId);
+        }
+    }, []);
 
     const { data: moduleInfo = []
     } = useQuery({
@@ -72,7 +72,9 @@ const OfficeVisitList = () => {
         btn.method_sort === 10
     );
 
-
+    const filteredBtnIconPerson = brandList.filter(btn =>
+        btn.method_sort === 9
+    );
 
     const filteredBtnIconDelete = brandList.filter(btn =>
         btn.method_sort === 5
@@ -80,6 +82,46 @@ const OfficeVisitList = () => {
     const filteredBtnIconCreate = brandList.filter(btn =>
         btn.method_sort === 1
     );
+
+    // Paigination start
+    const parentUsers = office_visits
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
+    }
+
+
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUserss, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_list/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+  
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
 
     const office_visit_delete = id => {
 
@@ -93,6 +135,7 @@ const OfficeVisitList = () => {
                 .then(Response => Response.json())
                 .then(data => {
                     refetch()
+                    caregory_list()
                     console.log(data)
                 })
         }
@@ -100,13 +143,17 @@ const OfficeVisitList = () => {
 
     const [message, setMessage] = useState();
     useEffect(() => {
-        if(typeof window !== 'undefined'){
+        if (typeof window !== 'undefined') {
             if (sessionStorage.getItem("message")) {
                 setMessage(sessionStorage.getItem("message"));
                 sessionStorage.removeItem("message");
             }
         }
     }, [])
+
+    console.log(pageUserss)
+    const pageUsers = pageUserss.sort((a, b) => b.id - a.id);
+
 
     return (
         <div className="container-fluid">
@@ -133,7 +180,44 @@ const OfficeVisitList = () => {
                                 </div>
                                 <div class="card-body">
                                     <div className='table-responsive'>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/office_visit/office_visit_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
 
+                                        </div>
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
 
@@ -142,19 +226,35 @@ const OfficeVisitList = () => {
 
                                                         Serial
                                                     </th>
-                                                    <th>
+                                                    <th style={{
+                                                        wordBreak: 'break-all',
+                                                        wordWrap: 'break-word',
+                                                        whiteSpace: 'normal',
+                                                    }}>
                                                         Name
                                                     </th>
                                                     <th>
                                                         Address
                                                     </th>
-                                                    <th>
+                                                    <th style={{
+                                                        wordBreak: 'break-all',
+                                                        wordWrap: 'break-word',
+                                                        whiteSpace: 'normal',
+                                                    }}>
                                                         Email
                                                     </th>
-                                                    <th>
-                                                    Remarks
+                                                    <th style={{
+                                                        wordBreak: 'break-all',
+                                                        wordWrap: 'break-word',
+                                                        whiteSpace: 'normal',
+                                                    }}>
+                                                        Remarks
                                                     </th>
-                                                    <th>
+                                                    <th style={{
+                                                        wordBreak: 'break-all',
+                                                        wordWrap: 'break-word',
+                                                        whiteSpace: 'normal',
+                                                    }}>
                                                         Person
                                                     </th>
 
@@ -177,37 +277,67 @@ const OfficeVisitList = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    office_visits.map((office_visit, i) => (
+                                                    pageUsers.map((office_visit, i) => (
                                                         <tr key={office_visit.id}>
                                                             <td>    {i + 1}</td>
 
-                                                            <td>
+                                                            <td style={{
+                                                                wordBreak: 'break-all',
+                                                                wordWrap: 'break-word',
+                                                                whiteSpace: 'normal',
+                                                            }}>
                                                                 {office_visit?.office_name}
                                                             </td>
 
                                                             <td>
                                                                 {office_visit.office_address}
                                                             </td>
-                                                            <td>
+                                                            <td style={{
+                                                                wordBreak: 'break-all',
+                                                                wordWrap: 'break-word',
+                                                                whiteSpace: 'normal',
+                                                            }}>
                                                                 {office_visit.office_email}
                                                             </td>
 
-                                                            <td>
+                                                            <td style={{
+                                                                wordBreak: 'break-all',
+                                                                wordWrap: 'break-word',
+                                                                whiteSpace: 'normal',
+                                                            }}>
                                                                 {office_visit?.remarks?.map(remark => remark.remarks)}
                                                             </td>
-                                                            <td>
-                                                            {office_visit?.persons?.map(person => person.person_name)}
+                                                            <td style={{
+                                                                wordBreak: 'break-all',
+                                                                wordWrap: 'break-word',
+                                                                whiteSpace: 'normal',
+                                                            }}>
+                                                                {office_visit?.persons?.map(person => person.person_name)}
                                                             </td>
 
                                                             <td>
 
                                                                 <div className="flex items-center ">
-                                                                   
+
                                                                     <Link href={`/Admin/office_visit/office_visit_remarks/${office_visit.id}?page_group=${page_group}`}>
                                                                         {filteredBtnIconRemarks.map((filteredBtnIconEdit => (
                                                                             <button
                                                                                 key={filteredBtnIconEdit.id}
                                                                                 title='Remarks'
+                                                                                style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                className={filteredBtnIconEdit?.btn}
+                                                                            >
+                                                                                <a
+                                                                                    dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
+                                                                                ></a>
+                                                                            </button>
+                                                                        )))}
+                                                                    </Link>
+                                                                    <Link href={`/Admin/office_visit/office_visit_person/${office_visit.id}?page_group=${page_group}`}>
+                                                                        {filteredBtnIconPerson?.map((filteredBtnIconEdit => (
+                                                                            <button
+                                                                                key={filteredBtnIconEdit.id}
+                                                                                title='Person'
                                                                                 style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
                                                                                 className={filteredBtnIconEdit?.btn}
                                                                             >
@@ -242,6 +372,44 @@ const OfficeVisitList = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/office_visit/office_visit_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/office_visit/office_visit_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>

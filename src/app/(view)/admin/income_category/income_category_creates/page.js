@@ -1,4 +1,5 @@
 'use client'
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -6,8 +7,18 @@ import React, { useEffect, useState } from 'react';
 
 const CreateIncomeCategory = () => {
 
-    const [errorMessage, setErrorMessage] = useState('');
 
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = []
+    } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income_category/income_category_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
     
 
     const [created, setCreated] = useState(() => {
@@ -24,31 +35,47 @@ const CreateIncomeCategory = () => {
         }
       }, []);
 
+      const [formData, setFormData] = useState({
+        income_category_name: '', created_by: created
+
+    });
+
 
     const router = useRouter()
     const income_category_create = (event) => {
 
         event.preventDefault();
 
-        const form = event.target
-        const income_category_name = form.income_category_name.value
-        if (!income_category_name.trim()) {
-            setErrorMessage('Income Category Name is required');
-            return; // stop execution if there's an error
-        }
-        const addValue = {
-            income_category_name,
-            created_by: created
+        if (!formData.income_category_name || formData.income_category_name.trim() === '') {
+            setCompany('Income Category name is required');
+            // You can show this error message to the user in the UI as needed
+            return;
         }
 
-        console.log(addValue);
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.income_category_name.toLowerCase()) === normalizebrandName(formData.income_category_name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Expense Category name already exists. Please choose a different Expense Category  name.");
+            return
+
+        }
+
+        const schoolShift = {
+            ...formData,
+            created
+        };
 
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income_category/income_category_create`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
             },
-            body: JSON.stringify(addValue),
+            body: JSON.stringify(schoolShift),
         })
             .then((Response) => {
                 Response.json()
@@ -71,8 +98,27 @@ const CreateIncomeCategory = () => {
 
     }
 
-    const handleInputChange = () => {
-        setErrorMessage('');
+    const [company, setCompany] = useState([])
+    const handleInputChange = (event) => {
+        const name = event.target.name
+        const value = event.target.value
+        const attribute = { ...formData }
+        attribute[name] = value
+
+        const company = attribute['income_category_name'];
+        if (company) {
+            setCompany('')
+        }
+
+        const existingBrand = brands.find((brand) => brand?.income_category_name?.toLowerCase() === formData?.income_category_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
+        setFormData(attribute)
+
+       
     };
 
 
@@ -98,7 +144,8 @@ const CreateIncomeCategory = () => {
                                         <label class="col-form-label font-weight-bold col-md-3">Income Category Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                         <div class="col-md-6">
                                             <input type="text" required="" name="income_category_name" class="form-control form-control-sm  required  unique_income_category_name" id="income_category_name" placeholder="Enter income category name" onChange={handleInputChange} />
-                                            {errorMessage && <div className="text-danger">{errorMessage}</div>}
+                                            {company && <div className="text-danger">{company}</div>}
+                                            {sameBrandName && <div className="text-danger">{sameBrandName}</div>}
                                         </div>
                                     </div>
 

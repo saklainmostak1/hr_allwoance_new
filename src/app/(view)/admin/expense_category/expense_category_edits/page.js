@@ -20,20 +20,34 @@ const ExpenceCategoryUpdate = ({ id }) => {
         }
     })
 
-  
+
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = [], } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expence_category/expence_category_all`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return filteredBrands;
+        }
+    });
+
+
+
     const [modified, setModified] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setModified(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setModified(storedUserId);
         }
-      }, []);
+    }, []);
     const [expenseCategory, setexpenseCategory] = useState({
         expense_category_name: '',
         modified_by: ''
@@ -50,18 +64,58 @@ const ExpenceCategoryUpdate = ({ id }) => {
         });
     }, [expenseCategorySingle, modified]);
 
+    const [company, setCompany] = useState([])
 
     const material_input_change = (event) => {
+
         const name = event.target.name
         const value = event.target.value
         const attribute = { ...expenseCategory }
         attribute[name] = value
+
+        const company = attribute['expense_category_name'];
+        if (company) {
+            setCompany('')
+        }
+
+        const existingBrand = brands.find((brand) => brand?.expense_category_name?.toLowerCase() === expenseCategory?.expense_category_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
+
+
         setexpenseCategory(attribute)
 
     };
     const router = useRouter()
     const expense_category_update = (e) => {
         e.preventDefault()
+
+
+
+        if (!expenseCategory.expense_category_name || expenseCategory.expense_category_name.trim() === '') {
+            setCompany('Expense Category name is required');
+            // You can show this error message to the user in the UI as needed
+            return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.expense_category_name.toLowerCase()) === normalizebrandName(expenseCategory.expense_category_name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Expense Category name already exists. Please choose a different Expense Category  name.");
+            return
+
+        }
+
+
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expence_category/expence_category_edit/${id}`, {
             method: 'POST',
             headers: {
@@ -107,9 +161,14 @@ const ExpenceCategoryUpdate = ({ id }) => {
                                         <div class="form-group row">
                                             <label class="col-form-label font-weight-bold col-md-3">Expense Category Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div class="col-md-6">
-                                                <input type="text" required onChange={material_input_change} name="expense_category_name" class="form-control form-control-sm  required unique_expense_category_name" id="expense_category_name" placeholder="Enter expense category name" value={expenseCategory.expense_category_name} />
+                                                <input type="text"  onChange={material_input_change} name="expense_category_name" class="form-control form-control-sm  required unique_expense_category_name" id="expense_category_name" placeholder="Enter expense category name" value={expenseCategory.expense_category_name} />
 
-
+                                                {
+                                                    sameBrandName && <p className='text-danger'>{sameBrandName}</p>
+                                                }
+                                                {
+                                                    company && <p className='text-danger'>{company}</p>
+                                                }
                                             </div>
                                         </div>
 

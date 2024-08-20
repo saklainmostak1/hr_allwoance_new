@@ -1,9 +1,25 @@
 'use client'
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const CoountHeadTypeCreate = () => {
+
+
+
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = []
+    } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head_type/account_head_type_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
 
 
 
@@ -31,6 +47,9 @@ const CoountHeadTypeCreate = () => {
    
 
     const [company, setCompany] = useState([])
+
+
+
     const handleChange = (event) => {
         // const { name, value } = event.target;
         const name = event.target.name
@@ -41,6 +60,12 @@ const CoountHeadTypeCreate = () => {
         const company = attribute['account_head_type_name'];
         if (company) {
             setCompany('')
+        }
+
+        const existingBrand = brands.find((brand) => brand?.account_head_type_name?.toLowerCase() === formData?.account_head_type_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
         }
 
         setFormData(attribute)
@@ -57,6 +82,19 @@ const CoountHeadTypeCreate = () => {
             setCompany('Account Type name is required');
             // You can show this error message to the user in the UI as needed
             return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.account_head_type_name.toLowerCase()) === normalizebrandName(formData.account_head_type_name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Account Head Type name already exists. Please choose a different Account Head Type name.");
+            return
+
         }
         const schoolShift = {
             ...formData,
@@ -112,6 +150,9 @@ const CoountHeadTypeCreate = () => {
                                             class="form-control form-control-sm required" id="title" placeholder="Enter Account head type Name" type="text" name="account_head_type_name" />
                                             {
                                                 company && <p className='text-danger'>{company}</p>
+                                            }
+                                            {
+                                                sameBrandName && <p className='text-danger'>{sameBrandName}</p>
                                             }
                                     </div></div>
 

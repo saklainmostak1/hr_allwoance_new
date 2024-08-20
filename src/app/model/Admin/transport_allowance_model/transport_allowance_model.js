@@ -111,38 +111,38 @@ const TransportAllowanceModel = {
     },
 
 
-    // sub_category_list_paigination: async (req, res) => {
-    //     const pageNo = Number(req.params.pageNo);
-    //     const perPage = Number(req.params.perPage);
-    //     try {
-    //         const skipRows = (pageNo - 1) * perPage;
-    //         let query = `
-    //   SELECT sub_category.*, 
-    //          users_created.full_name AS created_by,
-    //          users_modified.full_name AS modified_by 
-    //   FROM sub_category 
-    //   LEFT JOIN users AS users_created ON sub_category.created_by = users_created.id 
-    //   LEFT JOIN users AS users_modified ON sub_category.modified_by = users_modified.id 
-    //   ORDER BY sub_category.id DESC
-    //   LIMIT ?, ?
-    // `;
+    transport_allowance_list_paigination: async (req, res) => {
+        const pageNo = Number(req.params.pageNo);
+        const perPage = Number(req.params.perPage);
+        try {
+            const skipRows = (pageNo - 1) * perPage;
+            let query = `
+      SELECT transport_allowance.*, 
+             users_created.full_name AS created_by,
+             users_modified.full_name AS modified_by 
+      FROM transport_allowance 
+      LEFT JOIN users AS users_created ON transport_allowance.created_by = users_created.id 
+      LEFT JOIN users AS users_modified ON transport_allowance.modified_by = users_modified.id 
+      ORDER BY transport_allowance.id DESC
+      LIMIT ?, ?
+    `;
 
-    //         connection.query(query, [skipRows, perPage], (error, result) => {
-    //             console.log(result)
-    //             if (!error) {
-    //                 res.send(result)
-    //             }
+            connection.query(query, [skipRows, perPage], (error, result) => {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                }
 
-    //             else {
-    //                 console.log(error)
-    //             }
+                else {
+                    console.log(error)
+                }
 
-    //         })
-    //     }
-    //     catch (error) {
-    //         console.log(error)
-    //     }
-    // },
+            })
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
 
     
 

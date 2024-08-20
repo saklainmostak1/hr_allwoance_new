@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-const MobileAllowanceList = () => {
+const MobileAllowanceList = ({searchParams}) => {
 
     const { data: mobileAllowanceAll = [], isLoading, refetch
     } = useQuery({
@@ -84,6 +84,45 @@ const MobileAllowanceList = () => {
         btn.method_sort === 1
     );
 
+    // Paigination start
+    const parentUsers = mobileAllowanceAll
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
+    }
+
+
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUsers, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/mobile_allowance/mobile_allowance_list/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
     const mobile_allowance_delete = id => {
 
         console.log(id)
@@ -96,6 +135,7 @@ const MobileAllowanceList = () => {
                 .then(Response => Response.json())
                 .then(data => {
                     refetch()
+                    caregory_list()
                     console.log(data)
                 })
         }
@@ -112,7 +152,46 @@ const MobileAllowanceList = () => {
         }
     }, [])
 
-
+    // const formatDate = (dateString) => {
+    //     const date = new Date(dateString);
+        
+    //     const options = {
+    //       weekday: 'long',
+    //       year: 'numeric',
+    //       month: 'long',
+    //       day: 'numeric',
+    //       hour: 'numeric',
+    //       minute: 'numeric',
+    //       second: 'numeric',
+    //       hour12: true,
+    //     };
+      
+    //     const formatter = new Intl.DateTimeFormat('en-US', options);
+    //     return formatter.format(date);
+    //   };
+     
+      const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+      
+        // Extract day, month, year
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const year = date.getFullYear();
+      
+        // Extract hours and minutes
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+        // Determine AM/PM
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12; // Convert hours to 12-hour format
+        const formattedTime = `${formattedHours}:${minutes} ${ampm}`;
+      
+        // Format as day-month-year hours:minutes AM/PM
+        return `${day}-${month}-${year} ${formattedTime}`;
+      };
+      
+    
     return (
         <div className="container-fluid">
             <div className="row">
@@ -138,7 +217,44 @@ const MobileAllowanceList = () => {
                                 </div>
                                 <div class="card-body">
                                     <div className='table-responsive'>
+                                    <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allawonce/mobile_allawonce_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allawonce/mobile_allawonce_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/mobile_allawonce/mobile_allawonce_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allawonce/mobile_allawonce_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allawonce/mobile_allawonce_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
 
+                                        </div>
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
 
@@ -174,7 +290,7 @@ const MobileAllowanceList = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    mobileAllowanceAll.map((mobile_allowance, i) => (
+                                                    pageUsers.map((mobile_allowance, i) => (
                                                         <tr key={mobile_allowance.id}>
                                                             <td>    {i + 1}</td>
 
@@ -185,7 +301,7 @@ const MobileAllowanceList = () => {
                                                                 {mobile_allowance?.amount}
                                                             </td>
                                                             <td>
-                                                                {mobile_allowance?.recharge_time}
+                                                                {formatDateTime(mobile_allowance?.recharge_time)}
                                                             </td>
 
                                                           
@@ -246,6 +362,44 @@ const MobileAllowanceList = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allowance/mobile_allowance_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allowance/mobile_allowance_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/mobile_allowance/mobile_allowance_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allowance/mobile_allowance_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/mobile_allowance/mobile_allowance_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>

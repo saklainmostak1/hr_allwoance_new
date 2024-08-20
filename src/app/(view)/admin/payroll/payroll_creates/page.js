@@ -17,7 +17,7 @@
 // 		const convince = form.convince_val.value;
 // 		const tax = form.tax_val.value;
 // 		const total = form.total.value;
-	
+
 
 
 // 		const schoolShift = {
@@ -181,21 +181,21 @@ const PayRollCreate = () => {
         notes: ''
     });
 
- 
-    
+
+
     const [created_by, setCreated_by] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setCreated_by(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setCreated_by(storedUserId);
         }
-      }, []);
+    }, []);
 
 
     useEffect(() => {
@@ -222,16 +222,16 @@ const PayRollCreate = () => {
         setFormData(attribute)
 
 
-         const basic = attribute['basic'];
+        const basic = attribute['basic'];
         if (basic) {
             setBasic(""); // Clear the error message
         }
-       
+
         const title = attribute['title'];
         if (title) {
             setTitle(""); // Clear the error message
         }
-       
+
 
 
     };
@@ -244,11 +244,11 @@ const PayRollCreate = () => {
             created_by
         };
 
-        if(!formData.title){
+        if (!formData.title) {
             setTitle('Tital Name Must Be filled')
             return
         }
-        if(!formData.basic){
+        if (!formData.basic) {
             setBasic('Basic Must Be filled')
             return
         }
@@ -260,21 +260,21 @@ const PayRollCreate = () => {
             },
             body: JSON.stringify(schoolShift),
         })
-        .then((Response) => {
-            Response.json();
-            console.log(Response);
-            if (Response.ok === true) {
-                if(typeof window !== 'undefined'){
+            .then((Response) => {
+                Response.json();
+                console.log(Response);
+                if (Response.ok === true) {
+                    if (typeof window !== 'undefined') {
 
-                    sessionStorage.setItem("message", "Data saved successfully!");
+                        sessionStorage.setItem("message", "Data saved successfully!");
+                    }
+                    router.push('/Admin/payroll/payroll_all');
                 }
-                router.push('/Admin/payroll/payroll_all');
-            }
-        })
-        .then((data) => {
-            console.log(data);
-        })
-        .catch((error) => console.error(error));
+            })
+            .then((data) => {
+                console.log(data);
+            })
+            .catch((error) => console.error(error));
     };
 
     return (
@@ -298,7 +298,7 @@ const PayRollCreate = () => {
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Title:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
-                                                <input type="text"  name="title" className="form-control form-control-sm required" id="title" placeholder="Enter Title" value={formData.title} onChange={handleChange} />
+                                                <input type="text" name="title" className="form-control form-control-sm required" id="title" placeholder="Enter Title" value={formData.title} onChange={handleChange} />
                                                 {
                                                     title && <p className='text-danger'>{title}</p>
                                                 }
@@ -307,19 +307,30 @@ const PayRollCreate = () => {
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Basic:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
-                                                <input type="number"  step="1" name="basic" className="form-control form-control-sm required integer basic" id="basic" placeholder="Enter Basic" value={formData.basic} onChange={handleChange} />
-                                               {
-                                                basic && <p className='text-danger'>{basic}</p>
-                                               }
+                                                <input type="number" step="1" name="basic" className="form-control form-control-sm required integer basic" id="basic" placeholder="Enter Basic" value={formData.basic} onChange={handleChange} />
+                                                {
+                                                    basic && <p className='text-danger'>{basic}</p>
+                                                }
                                             </div>
                                         </div>
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Medical(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="medical_val" className="medical_val" value="0" />
-                                                    <input type="number"  step="1" name="medical" className="form-control form-control-sm required integer" id="medical" placeholder="Enter Medical" value={formData.medical} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                    <select
+                                                        name="medical"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.medical}
+                                                        onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -327,9 +338,22 @@ const PayRollCreate = () => {
                                             <label className="col-form-label font-weight-bold col-md-3">House(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="house_val" className="house_val" value="0" />
-                                                    <input type="number"  step="1" name="house" className="form-control form-control-sm required integer" id="house" placeholder="Enter House" value={formData.house} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                <select
+                                                        name="house"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.house} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
+                                                    {/* <input type="hidden" name="house_val" className="house_val" value="0" />
+                                                    <input type="number" step="1" name="house" className="form-control form-control-sm required integer" id="house" placeholder="Enter House" value={formData.house} onChange={handleChange} />
+                                                    <span className="input-group-addon cal" id="basic-addon1"></span> */}
                                                 </div>
                                             </div>
                                         </div>
@@ -337,9 +361,22 @@ const PayRollCreate = () => {
                                             <label className="col-form-label font-weight-bold col-md-3">Convince(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="convince_val" className="convince_val" value="0" />
-                                                    <input type="number"  step="1" name="convince" className="form-control form-control-sm required integer" id="convince" placeholder="Enter Convince" value={formData.convince} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                <select
+                                                        name="convince"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.convince} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
+                                                    {/* <input type="hidden" name="convince_val" className="convince_val" value="0" />
+                                                    <input type="number" step="1" name="convince" className="form-control form-control-sm required integer" id="convince" placeholder="Enter Convince" value={formData.convince} onChange={handleChange} />
+                                                    <span className="input-group-addon cal" id="basic-addon1"></span> */}
                                                 </div>
                                             </div>
                                         </div>
@@ -347,9 +384,22 @@ const PayRollCreate = () => {
                                             <label className="col-form-label font-weight-bold col-md-3">Tax(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="tax_val" className="tax_val" value="0" />
-                                                    <input type="number"  step="1" name="tax" className="form-control form-control-sm required integer" id="tax" placeholder="Enter Tax" value={formData.tax} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                <select
+                                                        name="tax"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                      value={formData.tax} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
+                                                    {/* <input type="hidden" name="tax_val" className="tax_val" value="0" />
+                                                    <input type="number" step="1" name="tax" className="form-control form-control-sm required integer" id="tax" placeholder="Enter Tax" value={formData.tax} onChange={handleChange} />
+                                                    <span className="input-group-addon cal" id="basic-addon1"></span> */}
                                                 </div>
                                             </div>
                                         </div>
@@ -357,7 +407,7 @@ const PayRollCreate = () => {
                                             <label className="col-form-label font-weight-bold col-md-3">Total:</label>
                                             <div className="col-md-6">
                                                 <input type="hidden" name="total_val" className="total_amount" />
-                                                <p className="total_val">{formData.total}</p>
+                                                <p className="total_val">{formData.total ? formData.total : 0}</p>
                                             </div>
                                         </div>
                                         <div className="form-group row">

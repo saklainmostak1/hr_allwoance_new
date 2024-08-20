@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-const BranchList = () => {
+const BranchList = ({searchParams}) => {
 
     const { data: branchAll = [], isLoading, refetch
     } = useQuery({
@@ -83,21 +83,81 @@ const BranchList = () => {
         btn.method_sort === 1
     );
 
+    // Paigination start
+    const parentUsers = branchAll
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
+    }
+
+
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUsers, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/branch/branch_list/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
+
     const branch_delete = id => {
 
-        console.log(id)
-        const proceed = window.confirm(`Are You Sure delete${id}`)
-        if (proceed) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/branch/branch_delete/${id}`, {
-                method: "POST",
+    
+        console.log(id);
 
+
+        // const proceed = window.confirm(`Are You Sure delete${id}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/branch/branch_delete/${id}`, {
+            method: "POST",
+        })
+            .then(response => {
+                console.log(response)
+                response.json()
+                if (response.ok === true) {
+                    const procced = window.confirm(`Are You Sure delete`)
+                    if (procced)
+                        refetch();
+                    caregory_list()
+
+
+                }
+                else {
+                    alert('Data already running. You cant Delete this item.');
+                }
             })
-                .then(Response => Response.json())
-                .then(data => {
-                    refetch()
-                    console.log(data)
-                })
-        }
+            .then(data => {
+                if (data) {
+
+                    console.log(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the data. Please try again.');
+            });
     }
 
     const [message, setMessage] = useState();
@@ -131,12 +191,47 @@ const BranchList = () => {
                                         <Link href={`/Admin/branch/branch_create?page_group`} className="btn btn-sm btn-info">Back Branch Create</Link>
                                     </div>
                                 </div>
-                                <div className="alert alert-warning mb-0 mx-4 mt-4 text-danger font-weight-bold" role="alert">
-                                    (<small><sup><i className="text-danger fas fa-star"></i></sup></small>) field required
-                                </div>
+                              
                                 <div class="card-body">
                                     <div className='table-responsive'>
+                                    <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/branch/branch_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
 
+                                        </div>
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
 
@@ -180,7 +275,7 @@ const BranchList = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    branchAll.map((branch, i) => (
+                                                    pageUsers.map((branch, i) => (
                                                         <tr key={branch.id}>
                                                             <td>    {i + 1}</td>
 
@@ -258,6 +353,44 @@ const BranchList = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/branch/branch_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/branch/branch_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>

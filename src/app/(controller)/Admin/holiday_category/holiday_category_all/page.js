@@ -1,10 +1,12 @@
 import HolidayCategoryList from '@/app/(view)/admin/holiday_category/holiday_category_list/page';
 import React from 'react';
 
-const ListHolidayCategory = () => {
+const ListHolidayCategory = ({searchParams}) => {
     return (
         <div>
-            <HolidayCategoryList></HolidayCategoryList>
+            <HolidayCategoryList
+            searchParams={searchParams}
+            ></HolidayCategoryList>
         </div>
     );
 };

@@ -8,14 +8,14 @@ const HolidayCategoryModel = {
     holiday_category_create: async (req, res) => {
         try {
             const { name, created_by, is_weekly_holiday } = req.body;
-    
+
             // Using parameterized query to prevent SQL injection
             const insertQuery = 'INSERT INTO holiday_category (name, created_by, is_weekly_holiday) VALUES (?, ?, ?)';
             const result = await connection.query(insertQuery, [name, created_by, is_weekly_holiday]);
-    
+
             // Sending only the necessary data from the result object
             const { insertId, affectedRows } = result;
-    
+
             // Sending response with relevant data
             res.status(200).json({ insertId, affectedRows });
         } catch (error) {
@@ -82,7 +82,7 @@ const HolidayCategoryModel = {
     holiday_category_update: async (req, res) => {
         try {
 
-            const { name, is_weekly_holiday, modified_by} = req.body;
+            const { name, is_weekly_holiday, modified_by } = req.body;
 
 
             const query = `UPDATE holiday_category SET   name = ?, is_weekly_holiday = ?, modified_by = ? WHERE id = ?`;
@@ -120,6 +120,41 @@ const HolidayCategoryModel = {
             console.log(error)
         }
     },
+
+    holiday_category_list_paigination: async (req, res) => {
+        const pageNo = Number(req.params.pageNo);
+        const perPage = Number(req.params.perPage);
+        try {
+            const skipRows = (pageNo - 1) * perPage;
+            let query = `
+      SELECT holiday_category.*, 
+             users_created.full_name AS created_by,
+             users_modified.full_name AS modified_by 
+      FROM holiday_category 
+      LEFT JOIN users AS users_created ON holiday_category.created_by = users_created.id 
+      LEFT JOIN users AS users_modified ON holiday_category.modified_by = users_modified.id 
+      ORDER BY holiday_category.id DESC
+      LIMIT ?, ?
+    `;
+
+            connection.query(query, [skipRows, perPage], (error, result) => {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                }
+
+                else {
+                    console.log(error)
+                }
+
+            })
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
+
+
 
 
 }

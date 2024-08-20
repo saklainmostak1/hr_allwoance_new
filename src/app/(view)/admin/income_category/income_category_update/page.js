@@ -6,6 +6,21 @@ import React, { useEffect, useState } from 'react';
 
 const IncomeCategoryUpdate = ({ id }) => {
 
+
+
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = [],  } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income_category/income_category_all`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return filteredBrands;
+        }
+    });
+
+
     const router = useRouter()
     // /Admin/income_category/income_category_all/:id
 
@@ -52,18 +67,54 @@ const IncomeCategoryUpdate = ({ id }) => {
         });
     }, [incomeCategorySingle, modified]);
 
-
+    const [company, setCompany] = useState([])
     const material_input_change = (event) => {
         const name = event.target.name
         const value = event.target.value
         const attribute = { ...incomeCategory }
         attribute[name] = value
+
+        const company = attribute['income_category_name'];
+        if (company) {
+            setCompany('')
+        }
+
+        const existingBrand = brands.find((brand) => brand?.income_category_name?.toLowerCase() === incomeCategory?.income_category_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
+
         setincomeCategory(attribute)
 
     };
 
     const income_category_update = (e) => {
         e.preventDefault()
+
+
+
+        if (!incomeCategory?.income_category_name || incomeCategory?.income_category_name?.trim() === '') {
+            setCompany('Income Category name is required');
+            // You can show this error message to the user in the UI as needed
+            return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand?.income_category_name?.toLowerCase()) === normalizebrandName(incomeCategory?.income_category_name?.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Expense Category name already exists. Please choose a different Expense Category  name.");
+            return
+
+        }
+
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income_category/income_category_edit/${id}`, {
             method: 'POST',
             headers: {
@@ -112,7 +163,9 @@ const IncomeCategoryUpdate = ({ id }) => {
                                         <div class="form-group row">
                                             <label class="col-form-label font-weight-bold col-md-3">Income Category Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div class="col-md-6">
-                                                <input type="text" required onChange={material_input_change} name="income_category_name" class="form-control form-control-sm  required unique_income_category_name" id="income_category_name" placeholder="Enter income category name" value={incomeCategory.income_category_name} />
+                                                <input type="text"  onChange={material_input_change} name="income_category_name" class="form-control form-control-sm  required unique_income_category_name" id="income_category_name" placeholder="Enter income category name" value={incomeCategory.income_category_name} />
+                                                {company && <div className="text-danger">{company}</div>}
+                                                {sameBrandName && <div className="text-danger">{sameBrandName}</div>}
                                             </div>
                                         </div>
 

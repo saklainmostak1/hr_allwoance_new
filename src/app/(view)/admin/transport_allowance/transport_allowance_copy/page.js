@@ -267,9 +267,9 @@ const CopyTransportAllowance = ({id}) => {
                 console.log(Response);
                 if (Response.ok === true) {
                     if (typeof window !== 'undefined') {
-                    sessionStorage.setItem("message", "Data saved successfully!");
+                    sessionStorage.setItem("message", "Data Copy successfully!");
                     }
-                    // router.push('/Admin/transport_allowance/transport_allowance_all');
+                    router.push('/Admin/transport_allowance/transport_allowance_all');
                 }
             })
             .then((data) => {
@@ -303,7 +303,7 @@ const CopyTransportAllowance = ({id}) => {
                                     <input required=""
                                     value={formData.travel_from}
                                         onChange={handleChange}
-                                        class="form-control form-control-sm required mb-2" id="title" placeholder="Enter Company Name" type="text" name="travel_from" />
+                                        class="form-control form-control-sm required mb-2" id="title" placeholder="Enter Travel From Name" type="text" name="travel_from" />
                                     {
                                         travel_from && <p className='text-danger'>{travel_from}</p>
                                     }
@@ -340,7 +340,7 @@ const CopyTransportAllowance = ({id}) => {
                                     <input required=""
                                      value={formData.travel_to}
                                         onChange={handleChange}
-                                        class="form-control form-control-sm required mb-2" id="title" placeholder="Enter Company Name" type="text" name="travel_to" />
+                                        class="form-control form-control-sm required mb-2" id="title" placeholder="Enter Travel To Name" type="text" name="travel_to" />
                                      {
                                         travel_to && <p className='text-danger'>{travel_to}</p>
                                     }
@@ -376,7 +376,7 @@ const CopyTransportAllowance = ({id}) => {
                                     <input required=""
                                      value={formData.vehicle_name}
                                         onChange={handleChange}
-                                        class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="vehicle_name" />
+                                        class="form-control form-control-sm required" id="title" placeholder="Enter Vehicle Name" type="text" name="vehicle_name" />
                                          {
                                         vehicle_name && <p className='text-danger'>{vehicle_name}</p>
                                     }
@@ -387,18 +387,18 @@ const CopyTransportAllowance = ({id}) => {
                                     <input required=""
                                      value={formData.amount}
                                         onChange={handleChange}
-                                        class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="amount" />
+                                        class="form-control form-control-sm required" id="title" placeholder="Enter Amount" type="text" name="amount" />
                                          {
                                         amount && <p className='text-danger'>{amount}</p>
                                     }
                                 </div>
                                 </div>
                            
-                                <div class="form-group row"><label class="col-form-label font-weight-bold col-md-3">Travel(KM)<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label><div class="col-md-6">
+                                <div class="form-group row"><label class="col-form-label font-weight-bold col-md-3">Travel (KM)<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label><div class="col-md-6">
                                     <input required=""
                                      value={formData.km_travel}
                                         onChange={handleChange}
-                                        class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="km_travel" />
+                                        class="form-control form-control-sm required" id="title" placeholder="Enter Travel (KM)" type="text" name="km_travel" />
                                          {
                                         km_travel && <p className='text-danger'>{km_travel}</p>
                                     }

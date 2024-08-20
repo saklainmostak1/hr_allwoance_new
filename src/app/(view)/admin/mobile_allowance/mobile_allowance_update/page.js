@@ -1,27 +1,33 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const MobileAllowanceEdit = ({ id }) => {
 
 
+
+    const [employeeName, setEmployeeName] = useState('')
+    console.log(employeeName)
+
+
     const [userId, setUserId] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setUserId(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
         }
-      }, []);
+    }, []);
 
     const [formData, setFormData] = useState({
-        mobile: '', amount: '', recharge_user: userId, recharge_time: '',
+        mobile: '', amount: '', recharge_user: employeeName || userId, recharge_time: '',
         modified_by: userId
     });
 
@@ -36,64 +42,126 @@ const MobileAllowanceEdit = ({ id }) => {
 
     useEffect(() => {
         if (mobileAllowanceSingle && mobileAllowanceSingle[0]) {
-            const { mobile, amount , recharge_time} = mobileAllowanceSingle[0];
+            const { mobile, amount, recharge_time, recharge_user } = mobileAllowanceSingle[0];
             setFormData({
 
-                mobile, amount , recharge_time, modified_by: userId
+                mobile, amount, recharge_time, recharge_user, modified_by: userId
             });
         }
     }, [mobileAllowanceSingle, userId]);
 
 
-    const [selectedDate, setSelectedDate] = useState([]);
-    const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
+    const [mobile, setMobile] = useState([])
+    const [amount, setAmount] = useState([])
+    const [recharge_time, setRecharge_time] = useState([])
 
-    const handleDateSelection = (event) => {
-        const inputDate = event.target.value; // Directly get the value from the input
 
-        const day = String(inputDate.split('-')[2]).padStart(2, '0'); // Extract day, month, and year from the date string
-        const month = String(inputDate.split('-')[1]).padStart(2, '0');
-        const year = String(inputDate.split('-')[0]);
-        const formattedDate = `${day}-${month}-${year}`;
-        const formattedDatabaseDate = `${year}-${month}-${day}`;
-        setSelectedDate(formattedDate);
-        setFormData(prevData => ({
+
+    const [displayDatess, setDisplayDatess] = useState(''); // Stores the formatted date as "11-08-2024"
+    const [displayTimess, setDisplayTimess] = useState(''); // Stores the formatted time as "11:20 AM/PM"
+    const [errorss, setErrorss] = useState(''); // State to manage error messages
+
+
+    const handleDateSelections = (event) => {
+        const inputDate = event.target.value; // Get the date-time input in yyyy-mm-ddTHH:MM format
+        const [datePart, timePart] = inputDate.split('T'); // Separate the date and time parts
+
+        const [year, month, day] = datePart.split('-');
+        const formattedDisplayDate = `${day}-${month}-${year}`; // Format: 11-08-2024
+
+        const selectedDate = new Date(datePart); // Create a new Date object
+        // const selectedDate = new Date(datePart + ' ' + timePart); // Create a new Date object
+        const currentDate = new Date();
+
+        if (selectedDate > currentDate) {
+            setErrorss('Date cannot be in the future.');
+            return; // Exit the function without updating the state
+        } else {
+            setErrorss(''); // Clear any previous error
+        }
+
+        // Convert time to 12-hour format with AM/PM
+        let hours = parseInt(timePart?.split(':')[0], 10);
+        const minutes = timePart.split(':')[1];
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12; // Convert to 12-hour format
+        const formattedDisplayTime = `${hours}:${minutes} ${ampm}`; // Format: 11:20 AM/PM
+
+        setDisplayDatess(formattedDisplayDate); // Display format: 11-08-2024
+        setDisplayTimess(formattedDisplayTime); // Display format: 11:20 AM/PM
+
+        setFormData((prevData) => ({
             ...prevData,
-            recharge_time: formattedDatabaseDate // Update the dob field in the state
+            recharge_time: `${datePart} ${timePart}`, // Store in MySQL format: "2024-08-11 11:20"
         }));
-        // if(!formattedDatabaseDate){
-        //     setJoinDate('Join Date must be filled nayan')
-        // }
-        // else{
-        //     setJoinDate('')
-        // }
     };
 
-    console.log(selectedDate);
-
     useEffect(() => {
-        const dob = formData.recharge_time;
-        const formattedDate = dob?.split('T')[0];
+        let dob = formData.recharge_time;
 
-        if (formattedDate?.includes('-')) {
-            const [year, month, day] = formattedDate.split('-');
-            setFormattedDisplayDate(`${day}-${month}-${year}`);
-        } else {
-            console.log("Date format is incorrect:", formattedDate);
+        // Auto-select current date and time if dob is empty
+        if (!dob) {
+            const currentDate = new Date();
+            const datePart = currentDate.toISOString().split('T')[0]; // Format: 2024-08-11
+            const timePart = currentDate.toTimeString().slice(0, 5); // Format: 11:20
+
+            dob = `${datePart} ${timePart}`;
+            setFormData((prevData) => ({
+                ...prevData,
+                recharge_time: dob,
+            }));
+
+            const [year, month, day] = datePart.split('-');
+            setDisplayDatess(`${day}-${month}-${year}`);
+
+            // Convert time to 12-hour format with AM/PM
+            let hours = parseInt(timePart.split(':')[0], 10);
+            const minutes = timePart.split(':')[1];
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            setDisplayTimess(`${hours}:${minutes} ${ampm}`);
         }
     }, [formData]);
 
 
     const handleChange = (event) => {
         const { name, value } = event.target;
+
+
+        if (name === 'mobile') {
+            setMobile('')
+        }
+        if (name === 'amount') {
+            setAmount('')
+        }
+        if (name === 'recharge_time') {
+            setRecharge_time('')
+        }
+
         setFormData(prevData => ({
             ...prevData,
             [name]: value
         }));
     };
 
+    const router = useRouter()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!formData.mobile) {
+            setMobile('Mobile number is Required')
+            return
+        }
+        if (!formData.amount) {
+            setAmount('Amount is Required')
+            return
+        }
+        if (!formData.recharge_time) {
+            setRecharge_time('Recharge time is Required')
+            return
+        }
+
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/mobile_allowance/mobile_allowance_edit/${id}`, {
                 method: 'POST',
@@ -103,6 +171,14 @@ const MobileAllowanceEdit = ({ id }) => {
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
+            if (data.affectedRows > 0) {
+
+                if (typeof window !== 'undefined') {
+
+                    sessionStorage.setItem("message", "Data Updated successfully!");
+                }
+                router.push('/Admin/mobile_allowance/mobile_allowance_all');
+            }
             console.log(data); // Handle response data or success message
         } catch (error) {
             console.error('Error updating school shift:', error);
@@ -111,7 +187,74 @@ const MobileAllowanceEdit = ({ id }) => {
     };
     console.log(mobileAllowanceSingle)
 
-    
+    const { data: employeeList = [] } = useQuery({
+        queryKey: ['employeeList'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_all_list`);
+            const data = await res.json();
+            return data;
+        }
+    });
+
+    // Fetch the list of branches
+    const { data: branches = [] } = useQuery({
+        queryKey: ['branches'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/branch/branch_all`);
+            const data = await res.json();
+            return data;
+        }
+    });
+
+
+    const [selectedBranch, setSelectedBranch] = useState('');
+    const [filteredEmployees, setFilteredEmployees] = useState([]);
+
+    // Filter employees based on selected branch
+    useEffect(() => {
+        if (selectedBranch) {
+            const employeesInBranch = employeeList.filter(employee => employee.branch_id === parseFloat(selectedBranch));
+            setFilteredEmployees(employeesInBranch);
+        } else {
+            setFilteredEmployees(employeeList);
+        }
+    }, [selectedBranch, employeeList]);
+
+    // Group employees by their designation
+    const groupedEmployees = filteredEmployees.reduce((groups, employee) => {
+        const designation = employee.designation_name;
+        if (!groups[designation]) {
+            groups[designation] = [];
+        }
+        groups[designation].push(employee);
+        return groups;
+    }, {});
+
+    const employee14012 = filteredEmployees.find(employee => employee.user_id === parseFloat(formData.recharge_user));
+
+    console.log(employee14012);
+
+    console.log(formData.recharge_time)
+
+    const date = new Date(formData.recharge_time);
+
+    // Formatting the date part as DD-MM-YYYY
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getUTCFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+
+    // Formatting the time part as hh:mm AM/PM
+    const options = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    const formattedTime = date.toLocaleTimeString('en-US', options);
+
+    console.log(`${formattedDate} ${formattedTime}`); // Outputs: "18-08-2024 11:42 AM"
+
+
     return (
         <div class="container-fluid">
             <div class=" row ">
@@ -130,13 +273,66 @@ const MobileAllowanceEdit = ({ id }) => {
                             </div>
                             <div className="card-body">
                                 <form className="form-horizontal" method="post" autoComplete="off" onSubmit={handleSubmit}>
+                                    <div className="form-group row">
+                                        <label className="col-form-label font-weight-bold col-md-3">Branch Name:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                        <div className="col-md-6">
+                                            <select
+                                                onChange={(e) => {
+                                                    const branchId = e.target.value;
+                                                    setSelectedBranch(branchId);
+                                                    handleChange(e);
+                                                }}
+                                                value={employee14012?.branch_id}
+
+                                                name="whose_leave"
+                                                className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                id="whose_leave"
+                                            >
+                                                <option value="">Select Branch</option>
+                                                {branches.map(branch => (
+                                                    <option key={branch.id} value={branch.id}>{branch.branch_name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="form-group row">
+                                        <label className="col-form-label font-weight-bold col-md-3">Mobile Allowance For:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                        <div className="col-md-6">
+                                            <select
+                                                onChange={
+                                                    (e) => {
+                                                        setEmployeeName(e.target.value);
+                                                        handleChange(e)
+                                                    }}
+                                                value={formData.recharge_user}
+
+                                                name="recharge_user"
+                                                className="form-control form-control-sm trim integer_no_zero recharge_user"
+                                                id="recharge_user"
+                                            >
+                                                <option value="">Select Mobile Allownace Person</option>
+                                                {Object.keys(groupedEmployees).map(designation => (
+                                                    <optgroup key={designation} label={designation}>
+                                                        {groupedEmployees[designation].map(employee => (
+                                                            <option key={employee.user_id} value={employee.user_id}>
+                                                                {employee.full_name}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
 
                                     <div class="form-group row"><label class="col-form-label font-weight-bold col-md-3">Mobile Number:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label><div class="col-md-6">
                                         <input required=""
                                             onChange={handleChange}
-                                   
+
                                             value={formData.mobile}
-                                            class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="mobile" />
+                                            class="form-control form-control-sm required" id="title" placeholder="Enter Mobile Number" type="text" name="mobile" />
+                                        {
+                                            mobile && <p className='text-danger'>{mobile}</p>
+                                        }
                                     </div>
                                     </div>
 
@@ -144,28 +340,42 @@ const MobileAllowanceEdit = ({ id }) => {
                                         <input required=""
                                             onChange={handleChange}
                                             value={formData.amount}
-                                            class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="amount" />
+                                            class="form-control form-control-sm required" id="title" placeholder="Enter Recharge Amount " type="text" name="amount" />
+                                        {
+                                            amount && <p className='text-danger'>{amount}</p>
+                                        }
                                     </div>
                                     </div>
-                                    <div class="form-group row"><label class="col-form-label font-weight-bold col-md-3">Recharge Time<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label><div class="col-md-6">
-                                        <input
-                                            type="text"
-                                            readOnly0
-                                            defaultValue={formattedDisplayDate}
-                                            onClick={() => document.getElementById(`dateInput-nt`).showPicker()}
-                                            placeholder="dd-mm-yyyy"
-                                            className="form-control form-control-sm mb-2"
-                                            style={{ display: 'inline-block', }}
-                                        />
-                                        <input
-                                            name='recharge_time'
-                                            type="datetime-local"
-                                            id={`dateInput-nt`}
-                                            onChange={(e) => handleDateSelection(e)}
-                                            style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
+                                    <div className="form-group row">
+                                        <label className="col-form-label font-weight-bold col-md-3">Recharge Time:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                        <div className="col-md-6">
+                                            <input
+                                                type="text"
+                                                readOnly
+                                                // defaultValue={formattedDisplayDates}
+                                                // value={`${displayDatess} ${displayTimess}`}
+                                                value={`${formattedDate} ${formattedTime}`}
+                                                onClick={() => document.getElementById(`dateInput-ntn`).showPicker()}
+                                                placeholder="dd-mm-YYYY"
+                                                className="form-control form-control-sm"
+                                                style={{ display: 'inline-block', }}
+                                            />
+                                            <input
+                                                name='recharge_time'
+                                                type="datetime-local"
+                                                id={`dateInput-ntn`}
+                                                onChange={(e) => handleDateSelections(e)}
+                                                style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
 
-                                        />
-                                    </div>
+                                            />
+                                            {
+                                                recharge_time && <p className='text-danger mb-0'>{recharge_time}</p>
+                                            }
+                                            {
+                                                errorss && <p className='text-danger mb-0'>{errorss}</p>
+                                            }
+
+                                        </div>
                                     </div>
 
 

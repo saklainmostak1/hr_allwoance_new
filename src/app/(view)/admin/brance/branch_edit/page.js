@@ -458,7 +458,7 @@ const BranchUpdate = ({ id }) => {
                                                 name='status_id'
 
                                                 class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select</option>
+                                                <option value=''>Select Status</option>
                                                 {
                                                     status.map(sta =>
                                                         <>
@@ -482,7 +482,7 @@ const BranchUpdate = ({ id }) => {
                                         <div class="col-md-6">
                                             <input type="text" name="office_address" defaultValue={brandData.office_address} onChange={brand_input_change}
                                                 class="form-control form-control-sm  required "
-                                                placeholder='Branch Name'
+                                                placeholder='Office Address'
                                                 maxLength={256}
                                             />
                                             {
@@ -497,7 +497,7 @@ const BranchUpdate = ({ id }) => {
                                         <div class="col-md-6">
                                             <input type="text" name="mobile" defaultValue={brandData.mobile} onChange={brand_input_change}
                                                 class="form-control form-control-sm  required "
-                                                placeholder='Branch Name'
+                                                placeholder='Enter Mobile Number'
                                                 maxLength={256}
                                             />
                                             {
@@ -512,7 +512,7 @@ const BranchUpdate = ({ id }) => {
                                         <div class="col-md-6">
                                             <input type="text" name="email" defaultValue={brandData.email} onChange={brand_input_change}
                                                 class="form-control form-control-sm  required "
-                                                placeholder='Branch Name'
+                                                placeholder='Enter Email Address'
                                                 maxLength={256}
                                             />
                                              {
@@ -528,7 +528,7 @@ const BranchUpdate = ({ id }) => {
                                         <div class="col-md-6">
                                             <input type="text" name="phone" defaultValue={brandData.phone} onChange={brand_input_change}
                                                 class="form-control form-control-sm  required "
-                                                placeholder='Branch Name'
+                                                placeholder='Enter Phone Number'
                                                 maxLength={256}
                                             />
                                             {

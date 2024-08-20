@@ -185,16 +185,13 @@ app.get('/faIcons', faIcons.getAllIconList)
 
 
 
-
-
-
-
 const schoolShift = require('../app/model/Admin/school_shift/school_shiftt')
 app.post('/Admin/school_shift/school_shift_create', schoolShift.school_shiftt_create)
 app.get('/Admin/school_shift/school_shift_all', schoolShift.school_shift_list)
 app.post('/Admin/school_shift/school_shift_delete/:id', schoolShift.school_shift_delete)
 app.get('/Admin/school_shift/school_shift_all/:id', schoolShift.school_shift_single)
 app.post('/Admin/school_shift/school_shift_edit/:id', schoolShift.school_shift_update)
+app.get('/Admin/school_shift/school_shift_all/:pageNo/:perPage', schoolShift.school_shift_list_paigination)
 
 
 const payRoll = require('../app/model/Admin/pay_roll_model/pay_roll_model')
@@ -203,6 +200,7 @@ app.get('/Admin/pay_roll/pay_roll_all', payRoll.payroll_list)
 app.post('/Admin/pay_roll/pay_roll_delete/:id', payRoll.payroll_delete)
 app.post('/Admin/pay_roll/pay_roll_edit/:id', payRoll.payroll_update)
 app.get('/Admin/pay_roll/pay_roll_all/:id', payRoll.payroll_single)
+app.get('/Admin/pay_roll/pay_roll_list/:pageNo/:perPage', payRoll.payroll_list_paigination)
 
 const EmployeeModel = require('../app/model/Admin/employee_model/employee_model')
 app.get('/Admin/education/education_list', EmployeeModel.education_name_list)
@@ -227,6 +225,8 @@ app.post('/Admin/location/location_search', EmployeeModel.employee_location_sear
 app.post('/Admin/location/location_pdf', EmployeeModel.employee_location_pdf)
 app.get('/Admin/location/geo_location_all/:id', EmployeeModel.employee_geo_location_all)
 app.get('/Admin/location/geo_location_all_live/:id', EmployeeModel.employee_geo_location_all_current_date)
+app.get('/Admin/employee/employee_all_list', EmployeeModel.employee_all_list)
+app.get('/Admin/employee/employee_all_list/:id', EmployeeModel.employee_all_list_single)
 
 
 
@@ -236,6 +236,7 @@ app.get('/Admin/company/company_all', CompanyModel.company_list)
 app.post('/Admin/company/company_edit/:id', CompanyModel.company_update)
 app.get('/Admin/company/company_all/:id', CompanyModel.company_single)
 app.post('/Admin/company/company_delete/:id', CompanyModel.company_delete)
+app.get('/Admin/company/company_list/:pageNo/:perPage', CompanyModel.company_list_paigination)
 
 const BranceModel = require('../app/model/Admin/brance_model/brance_model')
 app.get('/Admin/company_type/company_type_all', BranceModel.company_type_list)
@@ -244,6 +245,7 @@ app.post('/Admin/branch/branch_create', BranceModel.branch_create)
 app.get('/Admin/branch/branch_all/:id', BranceModel.branch_single)
 app.post('/Admin/branch/branch_edit/:id', BranceModel.branch_update)
 app.post('/Admin/branch/branch_delete/:id', BranceModel.branch_delete)
+app.get('/Admin/branch/branch_list/:pageNo/:perPage', BranceModel.branch_list_paigination)
 
 const MobileAllwoanceModel = require('../app/model/Admin/mobile_allowance_model/mobile_allowance_model')
 app.post('/Admin/mobile_allowance/mobile_allowance_create', MobileAllwoanceModel.mobile_allowance_create)
@@ -251,6 +253,7 @@ app.get('/Admin/mobile_allowance/mobile_allowance_all', MobileAllwoanceModel.mob
 app.get('/Admin/mobile_allowance/mobile_allowance_all/:id', MobileAllwoanceModel.mobile_allowance_single)
 app.post('/Admin/mobile_allowance/mobile_allowance_edit/:id', MobileAllwoanceModel.mobile_allowance_update)
 app.post('/Admin/mobile_allowance/mobile_allowance_delete/:id', MobileAllwoanceModel.mobile_allowance_delete)
+app.get('/Admin/mobile_allowance/mobile_allowance_list/:pageNo/:perPage', MobileAllwoanceModel.mobile_allowance_list_paigination)
 
 
 const TransportAllwoanceModel = require('../app/model/Admin/transport_allowance_model/transport_allowance_model')
@@ -260,6 +263,7 @@ app.get('/Admin/transport_allowance/transport_allowance_all', TransportAllwoance
 app.post('/Admin/transport_allowance/transport_allowance_edit/:id', TransportAllwoanceModel.transport_allowance_update)
 app.get('/Admin/transport_allowance/transport_allowance_all/:id', TransportAllwoanceModel.transport_allowance_single)
 app.post('/Admin/transport_allowance/transport_allowance_delete/:id', TransportAllwoanceModel.mobile_allowance_delete)
+app.get('/Admin/transport_allowance/transport_allowance_list/:pageNo/:perPage', TransportAllwoanceModel.transport_allowance_list_paigination)
 
 
 const OfficeVisitModel = require('../app/model/Admin/office_visit_model/office_visit_model')
@@ -270,6 +274,23 @@ app.get('/Admin/office_visit/office_visit_all', OfficeVisitModel.office_visit_li
 app.post('/Admin/office_visit/office_visit_remarks_create', OfficeVisitModel.office_visit_remarks_create)
 app.post('/Admin/office_visit/office_visit_person_create', OfficeVisitModel.office_visit_person_create)
 app.post('/Admin/office_visit/office_visit_delete/:id', OfficeVisitModel.office_visit_delete)
+app.get('/Admin/office_visit/office_visit_list/:pageNo/:perPage', OfficeVisitModel.office_visit_list_paigination)
+app.get('/Admin/office_visit/office_visit_remarks_list/:id', OfficeVisitModel.office_visit_remarks_single)
+app.get('/Admin/office_visit/office_visit_person_list/:id', OfficeVisitModel.office_visit_person_single)
+app.post('/Admin/office_visit/office_visit_remarks_edit/:id', OfficeVisitModel.office_visit_remarks_update)
+app.post('/Admin/office_visit/office_visit_person_edit/:id', OfficeVisitModel.office_visit_person_update)
+app.post('/Admin/office_visit/office_visit_remarks_delete/:id', OfficeVisitModel.office_visit_remarks_delete)
+app.post('/Admin/office_visit/office_visit_person_delete/:id', OfficeVisitModel.office_visit_person_delete)
+app.get('/Admin/office_visit/office_visit_person_list/:pageNo/:perPage/:id', OfficeVisitModel.office_visit_person_list_pagination)
+app.get('/Admin/office_visit/office_visit_remarks_list/:pageNo/:perPage/:id', OfficeVisitModel.office_visit_remarks_list_pagination)
+app.get('/Admin/office_visit/office_visit_person_list_visit/:id', OfficeVisitModel.office_visit_person_single_visit)
+app.get('/Admin/office_visit/office_visit_remarks_list_visit/:id', OfficeVisitModel.office_visit_remarks_single_visit)
+app.post('/Admin/office_visit/office_visit_person_list_pdf', OfficeVisitModel.office_visit_person_pdf)
+app.post('/Admin/office_visit/office_visit_remarks_list_pdf', OfficeVisitModel.office_visit_remarks_pdf)
+app.post('/Admin/office_visit/office_visit_person_list_print', OfficeVisitModel.office_visit_person_print)
+app.post('/Admin/office_visit/office_visit_remarks_list_print', OfficeVisitModel.office_visit_remarks_print)
+app.post('/Admin/office_visit/office_visit_remarks_search/:id', OfficeVisitModel.office_visit_remarks_search)
+app.post('/Admin/office_visit/office_visit_person_search/:id', OfficeVisitModel.office_visit_person_search)
 
 
 const expenceCategoryModel = require(`../app/model/Admin/expense_category_model/expense_category_model`)
@@ -325,6 +346,7 @@ app.get('/Admin/holiday_category/holiday_category_all', holidayCategoryModel.hol
 app.get('/Admin/holiday_category/holiday_category_all/:id', holidayCategoryModel.holiday_category_single)
 app.post('/Admin/holiday_category/holiday_category_edit/:id', holidayCategoryModel.holiday_category_update)
 app.post('/Admin/holiday_category/holiday_category_delete/:id', holidayCategoryModel.holiday_category_delete)
+app.get('/Admin/holiday_category/holiday_category_list/:pageNo/:perPage', holidayCategoryModel.holiday_category_list_paigination)
 
 
 const yearlyHolidayModel = require(`../app/model/Admin/yearly_holiday_modal/yearly_holiday_modal`)
@@ -347,6 +369,7 @@ app.post('/Admin/leave_application/leave_application_approve', leaveApplicationM
 app.post('/Admin/leave_application/leave_application_search', leaveApplicationModel.leave_application_list_search)
 app.get('/Admin/leave_category/leave_category_list', leaveApplicationModel.leave_category_list)
 app.post('/Admin/leave_application/leave_application_edit_status/:id', leaveApplicationModel.leave_application_update_status)
+app.post('/Admin/leave_application/leave_application_pdf', leaveApplicationModel.leave_application_pdf)
 
 const SalaryModel = require(`../app/model/Admin/salary_model/salary_model`)
 
@@ -379,9 +402,307 @@ app.get('/Admin/account_head/account_head_all/:id', AccountHeadModel.account_hea
 app.post('/Admin/account_head/account_head_edit/:id', AccountHeadModel.account_head_update)
 app.get('/Admin/account_head/account_head_list', AccountHeadModel.account_head_list_show)
 
+//  Jewel Vai
+const GenderModel = require("../app/model/Admin/gender_model/gender_model");
+app.post("/Admin/gender/gender_create", GenderModel.gender_create);
+app.get("/Admin/gender/gender_all", GenderModel.gender_list);
+app.get("/Admin/gender/gender_all/:id", GenderModel.gender_single);
+app.post("/Admin/gender/gender_edit/:id", GenderModel.gender_update);
+app.post("/Admin/gender/gender_delete/:id", GenderModel.gender_delete);
+
+// list Pagination
+app.get(
+  "/Admin/gender/gender_list_paigination/:pageNo/:perPage",
+  GenderModel.gender_list_paigination
+);
+
+const LeaveCategoryModel = require("../app/model/Admin/leave_category_model/leave_category_model.js");
+
+app.post(
+  "/Admin/leave_category/leave_category_create",
+  LeaveCategoryModel.leave_category_create
+);
+app.get(
+  "/Admin/leave_category/leave_category_all",
+  LeaveCategoryModel.leave_category_list
+);
+app.post(
+  "/Admin/leave_category/leave_category_edit/:id",
+  LeaveCategoryModel.leave_category_update
+);
+app.get(
+  "/Admin/leave_category/leave_category_all/:id",
+  LeaveCategoryModel.leave_category_single
+);
+app.post(
+  "/Admin/leave_category/leave_category_delete/:id",
+  LeaveCategoryModel.leave_category_delete
+);
+
+const BloodGroupModel = require("../app/model/Admin/blood_group_model/blood_group_model.js");
+
+// app.get(
+//   "/Admin/blood_group/blood_group_all/:pageNo/:perPage",
+//   BloodGroupModel.blood_list_paigination
+// );
+app.post(
+  "/Admin/blood_group/blood_group_create",
+  BloodGroupModel.blood_group_create
+);
+app.get("/Admin/blood_group/blood_group_all", BloodGroupModel.blood_group_list);
+app.post(
+  "/Admin/blood_group/blood_group_edit/:id",
+  BloodGroupModel.blood_group_update
+);
+app.get(
+  "/Admin/blood_group/blood_group_all/:id",
+  BloodGroupModel.blood_group_single
+);
+app.post(
+  "/Admin/blood_group/blood_group_delete/:id",
+  BloodGroupModel.blood_group_delete
+);
+app.get(
+  "/Admin/blood_group/blood_group_list_paigination/:pageNo/:perPage",
+  BloodGroupModel.blood_group_list_paigination
+);
+
+
+const CompanyTypeModel = require("../app/model/Admin/company_type_model/company_type_model.js");
+app.post(
+  "/Admin/company_type/company_type_create",
+  CompanyTypeModel.company_type_create
+);
+app.get(
+  "/Admin/company_type/company_type_all",
+  CompanyTypeModel.company_type_list
+);
+app.get(
+  "/Admin/company_type/company_type_all/:id",
+  CompanyTypeModel.company_type_single
+);
+app.post(
+  "/Admin/company_type/company_type_edit/:id",
+  CompanyTypeModel.company_type_update
+);
+app.post(
+  "/Admin/company_type/company_type_delete/:id",
+  CompanyTypeModel.company_type_delete
+);
+
+// list Pagination
+app.get(
+  "/Admin/company_type/company_type_list_paigination/:pageNo/:perPage",
+  CompanyTypeModel.company_type_list_paigination
+);
+
+
+// Designation
+const DesignationModel = require("../app/model/Admin/designation_model/designation_model.js");
+
+app.post(
+  "/Admin/designation/designation_create",
+  DesignationModel.designation_create
+);
+app.get(
+  "/Admin/designation/designation_all",
+  DesignationModel.designation_list
+);
+app.post(
+  "/Admin/designation/designation_delete/:id",
+  DesignationModel.designation_delete
+);
+app.post(
+  "/Admin/designation/designation_edit/:id",
+  DesignationModel.designation_update
+);
+app.get(
+  "/Admin/designation/designation_all/:id",
+  DesignationModel.designation_single
+);
+
+// list Pagination
+app.get(
+  "/Admin/designation/designation_list_paigination/:pageNo/:perPage",
+  DesignationModel.designation_list_paigination
+);
+
+// Profession
+const ProfessionModel = require("../app/model/Admin/profession_model/profession_model.js");
+
+app.post(
+  "/Admin/profession/profession_create",
+  ProfessionModel.profession_create
+);
+app.get("/Admin/profession/profession_all", ProfessionModel.profession_list);
+app.post(
+  "/Admin/profession/profession_delete/:id",
+  ProfessionModel.profession_delete
+);
+app.post(
+  "/Admin/profession/profession_edit/:id",
+  ProfessionModel.profession_update
+);
+app.get(
+  "/Admin/profession/profession_all/:id",
+  ProfessionModel.profession_single
+);
+
+// list Pagination
+app.get(
+  "/Admin/profession/profession_list_paigination/:pageNo/:perPage",
+  ProfessionModel.profession_list_paigination
+);
+
+
+const EducationModel = require("../app/model/Admin/education_model/education_model.js");
+app.post("/Admin/education/education_create", EducationModel.education_create);
+app.get("/Admin/education/education_all", EducationModel.education_list);
+app.post(
+  "/Admin/education/education_edit/:id",
+  EducationModel.education_update
+);
+app.get("/Admin/education/education_all/:id", EducationModel.education_single);
+app.post(
+  "/Admin/education/education_delete/:id",
+  EducationModel.education_delete
+);
+// list Pagination
+app.get(
+  "/Admin/education/education_list_paigination/:pageNo/:perPage",
+  EducationModel.education_list_paigination
+);
+
+
+const ReligionModel = require("../app/model/Admin/religion_model/religion_model.js");
+app.post("/Admin/religion/religion_create", ReligionModel.religion_create);
+app.get("/Admin/religion/religion_all", ReligionModel.religion_list);
+app.post("/Admin/religion/religion_edit/:id", ReligionModel.religion_update);
+app.get("/Admin/religion/religion_all/:id", ReligionModel.religion_single);
+app.post("/Admin/religion/religion_delete/:id", ReligionModel.religion_delete);
+app.get("/Admin/religion/religion_list_paigination/:pageNo/:perPage", ReligionModel.religion_list_paigination);
 
 
 
+
+// PhotoGalleryCategoryModel
+const PhotoGalleryCategoryModel = require("../app/model/Admin/events_category_model/events_category.js");
+
+app.post(
+  "/Admin/events_category/events_category_create",
+  PhotoGalleryCategoryModel.photo_gallery_category_create
+);
+app.get(
+  "/Admin/events_category/events_category_all",
+  PhotoGalleryCategoryModel.photo_gallery_category_list
+);
+app.post(
+  "/Admin/events_category/events_category_edit/:id",
+  PhotoGalleryCategoryModel.photo_gallery_category_update
+);
+app.get(
+  "/Admin/events_category/events_category_all/:id",
+  PhotoGalleryCategoryModel.photo_gallery_category_single
+);
+app.post(
+  "/Admin/events_category/events_category_delete/:id",
+  PhotoGalleryCategoryModel.photo_gallery_category_delete
+);
+
+// list Pagination
+app.get(
+  "/Admin/events_category/events_category_list_paigination/:pageNo/:perPage",
+  PhotoGalleryCategoryModel.photo_gallery_category_list_paigination
+);
+// NewsCategoryModel
+const NewsCategoryModel = require("../app/model/Admin/news_category_model/news_category.js");
+
+app.post(
+  "/Admin/news_category/news_category_create",
+  NewsCategoryModel.news_category_create
+);
+app.get(
+  "/Admin/news_category/news_category_all",
+  NewsCategoryModel.news_category_list
+);
+app.post(
+  "/Admin/news_category/news_category_edit/:id",
+  NewsCategoryModel.news_category_update
+);
+app.get(
+  "/Admin/news_category/news_category_all/:id",
+  NewsCategoryModel.news_category_single
+);
+app.post(
+  "/Admin/news_category/news_category_delete/:id",
+  NewsCategoryModel.news_category_delete
+);
+
+// list Pagination
+app.get(
+  "/Admin/news_category/news_category_list_paigination/:pageNo/:perPage",
+  NewsCategoryModel.news_category_list_paigination
+);
+// NoticeCategoryModel
+
+const NoticeCategoryModel = require("../app/model/Admin/notice_category_model/notice_category.js");
+
+app.post(
+  "/Admin/notice_category/notice_category_create",
+  NoticeCategoryModel.notice_category_create
+);
+app.get(
+  "/Admin/notice_category/notice_category_all",
+  NoticeCategoryModel.notice_category_list
+);
+app.post(
+  "/Admin/notice_category/notice_category_edit/:id",
+  NoticeCategoryModel.notice_category_update
+);
+app.get(
+  "/Admin/notice_category/notice_category_all/:id",
+  NoticeCategoryModel.notice_category_single
+);
+app.post(
+  "/Admin/notice_category/notice_category_delete/:id",
+  NoticeCategoryModel.notice_category_delete
+);
+
+// list Pagination
+app.get(
+  "/Admin/notice_category/notice_category_list_paigination/:pageNo/:perPage",
+  NoticeCategoryModel.notice_category_list_paigination
+);
+// VideoGalleryCategoryModel
+
+const VideoGalleryCategoryModel = require("../app/model/Admin/video_category_model/video_category.js");
+
+app.post(
+  "/Admin/video_gallery_category/video_gallery_category_create",
+  VideoGalleryCategoryModel.video_gallery_category_create
+);
+app.get(
+  "/Admin/video_gallery_category/video_gallery_category_all",
+  VideoGalleryCategoryModel.video_gallery_category_list
+);
+app.post(
+  "/Admin/video_gallery_category/video_gallery_category_edit/:id",
+  VideoGalleryCategoryModel.video_gallery_category_update
+);
+app.get(
+  "/Admin/video_gallery_category/video_gallery_category_all/:id",
+  VideoGalleryCategoryModel.video_gallery_category_single
+);
+app.post(
+  "/Admin/video_gallery_category/video_gallery_category_delete/:id",
+  VideoGalleryCategoryModel.video_gallery_category_delete
+);
+
+// list Pagination
+app.get(
+  "/Admin/video_gallery_category/video_category_list_paigination/:pageNo/:perPage",
+  VideoGalleryCategoryModel.video_gallery_category_list_paigination
+);
 
 
 const path = require('path');

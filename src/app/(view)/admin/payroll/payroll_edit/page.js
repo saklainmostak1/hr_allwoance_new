@@ -1,28 +1,29 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-const PayRollEdit = ({id}) => {
+const PayRollEdit = ({ id }) => {
 
 
-    
+
     const [userId, setUserId] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setUserId(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
         }
-      }, []);
+    }, []);
 
     const [formData, setFormData] = useState({
-        title: '', basic: '', medical: '', house: '', convince: '', tax: '', notes: '', total: '' ,
+        title: '', basic: '', medical: '', house: '', convince: '', tax: '', notes: '', total: '',
         modified_by: userId
     });
 
@@ -37,9 +38,9 @@ const PayRollEdit = ({id}) => {
 
     useEffect(() => {
         if (payRollSingle && payRollSingle[0]) {
-            const { title, basic, medical, house, convince, tax, notes, total  } = payRollSingle[0];
+            const { title, basic, medical, house, convince, tax, notes, total } = payRollSingle[0];
             setFormData({
-                title, basic, medical, house, convince, tax, notes, total ,  modified_by: userId
+                title, basic, medical, house, convince, tax, notes, total, modified_by: userId
             });
         }
     }, [payRollSingle, userId]);
@@ -69,29 +70,31 @@ const PayRollEdit = ({id}) => {
         setFormData(attribute)
 
 
-         const basic = attribute['basic'];
+        const basic = attribute['basic'];
         if (basic) {
             setBasic(""); // Clear the error message
         }
-       
+
         const title = attribute['title'];
         if (title) {
             setTitle(""); // Clear the error message
         }
-       
+
 
 
     };
+
+    const router = useRouter()
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-        if(!formData.title){
+        if (!formData.title) {
             setTitle('Tital Name Must Be filled')
             return
         }
-        if(!formData.basic){
+        if (!formData.basic) {
             setBasic('Basic Must Be filled')
             return
         }
@@ -105,7 +108,14 @@ const PayRollEdit = ({id}) => {
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
-            console.log(data); // Handle response data or success message
+            console.log(data);
+            if (data.affectedRows > 0) {
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem("message", "Data Update successfully!");
+                }
+                router.push('/Admin/payroll/payroll_all');
+            }
+            // Handle response data or success message
         } catch (error) {
             console.error('Error updating school shift:', error);
             // Handle error or show an error message to the user
@@ -114,29 +124,29 @@ const PayRollEdit = ({id}) => {
 
     return (
         <div className="container-fluid">
-        <div className="row">
-            <div className='col-12 p-4'>
-                <div className='card'>
-                    <div className="body-content bg-light">
-                        <div className="border-primary shadow-sm border-0">
-                            <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Edit PayRoll</h5>
-                                <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                    <Link href={`/Admin/payroll/payroll_all?page_group`} className="btn btn-sm btn-info">Back to PayRoll List</Link>
+            <div className="row">
+                <div className='col-12 p-4'>
+                    <div className='card'>
+                        <div className="body-content bg-light">
+                            <div className="border-primary shadow-sm border-0">
+                                <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
+                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Edit PayRoll</h5>
+                                    <div className="card-title font-weight-bold mb-0 card-header-color float-right">
+                                        <Link href={`/Admin/payroll/payroll_all?page_group`} className="btn btn-sm btn-info">Back to PayRoll List</Link>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="alert alert-warning mb-0 mx-4 mt-4 text-danger font-weight-bold" role="alert">
-                                (<small><sup><i className="text-danger fas fa-star"></i></sup></small>) field required
-                            </div>
-                           
-                                <div className="card-body">
-                                  
+                                <div className="alert alert-warning mb-0 mx-4 mt-4 text-danger font-weight-bold" role="alert">
+                                    (<small><sup><i className="text-danger fas fa-star"></i></sup></small>) field required
+                                </div>
 
-                                <form onSubmit={handleSubmit}>
+                                <div className="card-body">
+
+
+                                    <form onSubmit={handleSubmit}>
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Title:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
-                                                <input type="text"  name="title" className="form-control form-control-sm required" id="title" placeholder="Enter Title" value={formData.title} onChange={handleChange} />
+                                                <input type="text" name="title" className="form-control form-control-sm required" id="title" placeholder="Enter Title" value={formData.title} onChange={handleChange} />
                                                 {
                                                     title && <p className='text-danger'>{title}</p>
                                                 }
@@ -145,7 +155,7 @@ const PayRollEdit = ({id}) => {
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Basic:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
-                                                <input type="number"  step="1" name="basic" className="form-control form-control-sm required integer basic" id="basic" placeholder="Enter Basic" value={formData.basic} onChange={handleChange} />
+                                                <input type="number" step="1" name="basic" className="form-control form-control-sm required integer basic" id="basic" placeholder="Enter Basic" value={formData.basic} onChange={handleChange} />
                                                 {
                                                     basic && <p className='text-danger'>{basic}</p>
                                                 }
@@ -155,9 +165,20 @@ const PayRollEdit = ({id}) => {
                                             <label className="col-form-label font-weight-bold col-md-3">Medical(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="medical_val" className="medical_val" value="0" />
-                                                    <input type="number"  step="1" name="medical" className="form-control form-control-sm required integer" id="medical" placeholder="Enter Medical" value={formData.medical} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                    <select
+                                                        name="medical"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.medical} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -165,9 +186,23 @@ const PayRollEdit = ({id}) => {
                                             <label className="col-form-label font-weight-bold col-md-3">House(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="house_val" className="house_val" value="0" />
-                                                    <input type="number"  step="1" name="house" className="form-control form-control-sm required integer" id="house" placeholder="Enter House" value={formData.house} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+                                                    <select
+                                                        name="house"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.house} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
+
+                                                    {/* <input type="hidden" name="house_val" className="house_val" value="0" />
+                                                    <input type="number" step="1" name="house" className="form-control form-control-sm required integer" id="house" placeholder="Enter House" value={formData.house} onChange={handleChange} />
+                                                    <span className="input-group-addon cal" id="basic-addon1"></span> */}
                                                 </div>
                                             </div>
                                         </div>
@@ -175,9 +210,20 @@ const PayRollEdit = ({id}) => {
                                             <label className="col-form-label font-weight-bold col-md-3">Convince(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="convince_val" className="convince_val" value="0" />
-                                                    <input type="number"  step="1" name="convince" className="form-control form-control-sm required integer" id="convince" placeholder="Enter Convince" value={formData.convince} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+
+                                                    <select
+                                                        name="convince"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.convince} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -185,9 +231,20 @@ const PayRollEdit = ({id}) => {
                                             <label className="col-form-label font-weight-bold col-md-3">Tax(%):<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <div className="input-group">
-                                                    <input type="hidden" name="tax_val" className="tax_val" value="0" />
-                                                    <input type="number"  step="1" name="tax" className="form-control form-control-sm required integer" id="tax" placeholder="Enter Tax" value={formData.tax} onChange={handleChange} />
-                                                    <span className="input-group-addon cal" id="basic-addon1"></span>
+
+                                                    <select
+                                                        name="tax"
+                                                        className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                        id="whose_leave"
+                                                        value={formData.tax} onChange={handleChange}
+                                                    >
+                                                        {Array.from({ length: 101 }, (_, i) => (
+                                                            <option key={i} value={i}>
+                                                                {i}
+                                                            </option>
+                                                        ))}
+
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -213,15 +270,15 @@ const PayRollEdit = ({id}) => {
 
 
 
-                                   
+
                                 </div>
-                            
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     );
 };
 

@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-const HolidayCategoryList = () => {
+const HolidayCategoryList = ({searchParams}) => {
 
     const { data: holiday_categorys = [], isLoading, refetch
     } = useQuery({
@@ -82,6 +82,45 @@ const HolidayCategoryList = () => {
         btn.method_sort === 1
     );
 
+
+    const parentUsers = holiday_categorys
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
+    }
+
+
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUsers, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/holiday_category/holiday_category_list/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
     const holiday_category_delete = id => {
 
         console.log(id)
@@ -94,6 +133,7 @@ const HolidayCategoryList = () => {
                 .then(Response => Response.json())
                 .then(data => {
                     refetch()
+                    caregory_list()
                     console.log(data)
                 })
         }
@@ -134,7 +174,44 @@ const HolidayCategoryList = () => {
                               
                                 <div class="card-body">
                                     <div className='table-responsive'>
+                                    <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/holiday_category/holiday_category_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
 
+                                        </div>
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
 
@@ -173,7 +250,7 @@ const HolidayCategoryList = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    holiday_categorys.map((holiday_category, i) => (
+                                                    pageUsers.map((holiday_category, i) => (
                                                         <tr key={holiday_category.id}>
                                                             <td>    {i + 1}</td>
 
@@ -246,6 +323,44 @@ const HolidayCategoryList = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/holiday_category/holiday_category_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/holiday_category/holiday_category_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>

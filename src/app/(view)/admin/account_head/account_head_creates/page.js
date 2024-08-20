@@ -47,7 +47,7 @@ const AccountHeadCreate = () => {
     } = useQuery({
         queryKey: ['brands'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/branch/branch_all`)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_all`)
 
             const data = await res.json()
             return data
@@ -118,14 +118,14 @@ const AccountHeadCreate = () => {
 
 
 
-        // const matchingBrand = brands.find(item => item?.account_head_name?.toLowerCase() === brandName?.toLowerCase());
-        // if (matchingBrand) {
-        //     setSameBrandName('Branch name already exists!');
-        //     // You can also set an error state to show the message in the UI instead of using alert
-        // }
-        // else {
-        //     setSameBrandName("")
-        // }
+        const matchingBrand = brands.find(item => item?.account_head_name?.toLowerCase() === brance_name?.toLowerCase());
+        if (matchingBrand) {
+            setSameBrandName('Account Head name already exists!');
+            // You can also set an error state to show the message in the UI instead of using alert
+        }
+        else {
+            setSameBrandName("")
+        }
 
 
         setFields(newFields);
@@ -182,7 +182,7 @@ const AccountHeadCreate = () => {
         const newErrors = new Array(fields.length).fill('');
         const isValid = fields.every((inputValue, index) => {
             if (!inputValue.account_head_name.trim()) {
-                newErrors[index] = 'Brance Name must be filled.';
+                newErrors[index] = 'Account Head Name must be filled.';
                 return false;
             }
             return true;
@@ -197,7 +197,7 @@ const AccountHeadCreate = () => {
         const newError = new Array(fields.length).fill('');
         const isValids = fields.every((inputValue, index) => {
             if (!inputValue?.account_type_id?.trim()) {
-                newError[index] = 'Company Name must be filled.';
+                newError[index] = 'Account Type Name must be filled.';
                 return false;
             }
             return true;
@@ -215,7 +215,7 @@ const AccountHeadCreate = () => {
         const newErrorAdress = new Array(fields.length).fill('');
         const isValidsAdress = fields.every((inputValue, index) => {
             if (!inputValue?.opening_balance?.trim()) {
-                newErrorAdress[index] = 'Office Adress  must be filled.';
+                newErrorAdress[index] = 'Opening Balance  must be filled.';
                 return false;
             }
             return true;
@@ -229,18 +229,6 @@ const AccountHeadCreate = () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         const normalizebrandName = (name) => {
             return name?.trim().replace(/\s+/g, '');
         };
@@ -250,7 +238,7 @@ const AccountHeadCreate = () => {
             const isValidsSamebrand = fields.every((inputValue, index) => {
                 const isExistingbrand = brands.find(item => normalizebrandName(item?.account_head_name?.toLowerCase()) === normalizebrandName(inputValue?.account_head_name?.toLowerCase()));
                 if (isExistingbrand) {
-                    newErrorSamebrandName[index] = 'Brance name already exists!';
+                    newErrorSamebrandName[index] = 'Account Head name already exists!';
                     return false;
                 }
                 return true;
@@ -325,7 +313,7 @@ const AccountHeadCreate = () => {
     const router = useRouter();
 
 
- 
+
 
 
 
@@ -424,10 +412,10 @@ const AccountHeadCreate = () => {
                                                                                             onChange={(e) => barnd_change(index, e)}
                                                                                             type="text" name="account_head_name" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter account head name" />
                                                                                         {
-                                                                                            brance_name[index] && <p>{brance_name[index]}</p>
+                                                                                            brance_name[index] && <p className='text-danger'>{brance_name}</p>
                                                                                         }
                                                                                         {
-                                                                                            brandName[index] && <p className='text-danger'>{brandName[index]}</p>
+                                                                                            brandName[index] && <p className='text-danger'>{brandName}</p>
                                                                                         }
 
                                                                                     </td>

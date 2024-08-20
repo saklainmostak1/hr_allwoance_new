@@ -1,10 +1,12 @@
 import OfficeVisitList from '@/app/(view)/admin/office_visit/office_visit_lists/page';
 import React from 'react';
 
-const OfficeVisitAll = () => {
+const OfficeVisitAll = ({searchParams}) => {
     return (
         <div>
-            <OfficeVisitList></OfficeVisitList>
+            <OfficeVisitList
+            searchParams={searchParams}
+            ></OfficeVisitList>
         </div>
     );
 };

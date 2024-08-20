@@ -6,6 +6,17 @@ import React, { useEffect, useState } from 'react';
 const AccountHeadTypeCopy = ({id}) => {
 
    
+    const [sameBrandName, setSameBrandName] = useState([])
+    const { data: brands = [],  } = useQuery({
+        queryKey: ['brands'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_all`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return filteredBrands;
+        }
+    });
 
       const [userId, setUserId] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -67,6 +78,13 @@ const AccountHeadTypeCopy = ({id}) => {
         if (account_head_type) {
             setCompany(""); // Clear the error message
         }
+
+        const existingBrand = brands.find((brand) => brand?.account_head_type_name?.toLowerCase() === formData?.account_head_type_name?.toLowerCase());
+        if (!existingBrand) {
+            // Show error message
+            setSameBrandName("");
+        }
+
         setFormData(attribute)
 
         // setFormData(prevData => ({
@@ -83,6 +101,19 @@ const AccountHeadTypeCopy = ({id}) => {
             setCompany('Company name is required');
             // You can show this error message to the user in the UI as needed
             return;
+        }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, '');
+        };
+
+
+        const existingBrand = brands.find((brand) => normalizebrandName(brand.account_head_type_name.toLowerCase()) === normalizebrandName(formData.account_head_type_name.toLowerCase()));
+        if (existingBrand) {
+            // Show error message
+            setSameBrandName("Account Head type name already exists. Please choose a different Account Head type name.");
+            return
+
         }
     
         try {
@@ -128,6 +159,9 @@ console.log(account_head_typeSingle)
                                     class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text"  name="account_head_type_name" />
                                     {
                                         account_head_type && <p className='text-danger'>{account_head_type}</p>
+                                    }
+                                    {
+                                        sameBrandName && <p className='text-danger'>{sameBrandName}</p>
                                     }
                                     </div></div>
 

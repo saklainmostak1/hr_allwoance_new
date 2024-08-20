@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-const SchoolShiftAll = () => {
+const SchoolShiftAll = ({ searchParams }) => {
 
     const { data: schoolShiftList = [], isLoading, refetch
     } = useQuery({
@@ -84,28 +84,100 @@ const SchoolShiftAll = () => {
         btn.method_sort === 1
     );
 
-    const school_shift_delete = id => {
 
-        console.log(id)
-        const proceed = window.confirm(`Are You Sure delete${id}`)
-        if (proceed) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/school_shift/school_shift_delete/${id}`, {
-                method: "POST",
 
-            })
-                .then(Response => Response.json())
-                .then(data => {
-                    refetch()
-                    console.log(data)
-                })
-        }
+
+
+    // Paigination start
+    const parentUsers = schoolShiftList
+
+    const totalData = parentUsers?.length
+    const dataPerPage = 20
+
+    const totalPages = Math.ceil(totalData / dataPerPage)
+
+    let currentPage = 1
+
+
+    if (Number(searchParams.page) >= 1) {
+        currentPage = Number(searchParams.page)
     }
 
 
+    let pageNumber = []
+    for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+        if (index < 1) {
+            continue
+        }
+        if (index > totalPages) {
+            break
+        }
+        pageNumber.push(index)
+    }
+    const [pageUsers, setPageUsers] = useState([]);
+    const caregory_list = async () => {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/school_shift/school_shift_all/${currentPage}/${dataPerPage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setPageUsers(data);
+    };
+    useEffect(() => {
+        caregory_list();
+    }, [currentPage]);
+
+    const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
+    const school_shift_delete = id => {
+        console.log(id);
+
+
+        // const proceed = window.confirm(`Are You Sure delete${id}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/school_shift/school_shift_delete/${id}`, {
+            method: "POST",
+        })
+            .then(response => {
+                console.log(response)
+                response.json()
+                if (response.ok === true) {
+                    const procced = window.confirm(`Are You Sure delete`)
+                    if (procced)
+                        refetch();
+                    caregory_list()
+
+
+                }
+                else {
+                    alert('Data already running. You cant Delete this item');
+                }
+            })
+            .then(data => {
+                if (data) {
+
+                    console.log(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the data. Please try again.');
+            });
+
+    };
+
+
+    const formatTimeTo12Hour = (timeStr) => {
+        const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours, minutes, seconds);
+      
+        // Options for formatting the time
+        const options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+        return date.toLocaleTimeString([], options);
+      };
+      
 
     const [message, setMessage] = useState();
     useEffect(() => {
-        if(typeof window !== 'undefined'){
+        if (typeof window !== 'undefined') {
 
             if (sessionStorage.getItem("message")) {
                 setMessage(sessionStorage.getItem("message"));
@@ -131,7 +203,7 @@ const SchoolShiftAll = () => {
                                 <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
                                     <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">List School Shift</h5>
                                     <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                        <Link href={`/Admin/school_shift/school_shift_create?page_group`} className="btn btn-sm btn-info">Back School Shift Create</Link>
+                                        <Link href={`/Admin/shift/shift_create?page_group`} className="btn btn-sm btn-info">Back School Shift Create</Link>
                                     </div>
                                 </div>
 
@@ -139,7 +211,44 @@ const SchoolShiftAll = () => {
                                 <div className="card-body">
 
                                     <div className='table-responsive'>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/shift/shift_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
 
+                                        </div>
                                         <table className="table  table-bordered table-hover table-striped table-sm">
                                             <thead>
                                                 <tr>
@@ -154,13 +263,13 @@ const SchoolShiftAll = () => {
                                                         Start Time
                                                     </th>
                                                     <th>
-                                                        End Time
-                                                    </th>
-                                                    <th>
-                                                        Early Time
+                                                        Late Time
                                                     </th>
                                                     <th>
                                                         Early End Time
+                                                    </th>
+                                                    <th>
+                                                        End Time
                                                     </th>
 
 
@@ -182,28 +291,29 @@ const SchoolShiftAll = () => {
                                                     </div>
                                                 </div>
                                                     :
-                                                    schoolShiftList.map((school_shift, i) => (
+                                                    pageUsers.map((school_shift, i) => (
                                                         <tr key={school_shift.id}>
                                                             <td>    {i + 1}</td>
                                                             <td>{school_shift.name}</td>
                                                             <td>
-                                                                {school_shift.start_time}
+                                                                {formatTimeTo12Hour(school_shift.start_time)}
                                                             </td>
 
                                                             <td>
-                                                                {school_shift.end_time}
+                                                                {formatTimeTo12Hour(school_shift.late_time)}
+                                                            </td>
+
+                                                            <td>
+                                                                {formatTimeTo12Hour(school_shift.early_end_time)}
                                                             </td>
                                                             <td>
-                                                                {school_shift.early_time}
-                                                            </td>
-                                                            <td>
-                                                                {school_shift.early_end_time}
+                                                                {formatTimeTo12Hour(school_shift.end_time)}
                                                             </td>
 
                                                             <td>
 
                                                                 <div className="flex items-center ">
-                                                                    <Link href={`/Admin/school_shift/school_shift_edit/${school_shift.id}?page_group=${page_group}`}>
+                                                                    <Link href={`/Admin/shift/shift_edit/${school_shift.id}?page_group=${page_group}`}>
                                                                         {filteredBtnIconEdit?.map((filteredBtnIconEdit => (
                                                                             <button
                                                                                 key={filteredBtnIconEdit.id}
@@ -217,20 +327,7 @@ const SchoolShiftAll = () => {
                                                                             </button>
                                                                         )))}
                                                                     </Link>
-                                                                    {/* <Link href={`/Admin/school_shift/school_shift_copy/${school_shift.id}?page_group=${page_group}`}>
-                                                                        {filteredBtnIconCopy.map((filteredBtnIconEdit => (
-                                                                            <button
-                                                                                key={filteredBtnIconEdit.id}
-                                                                                title='Copy'
-                                                                                style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
-                                                                                className={filteredBtnIconEdit?.btn}
-                                                                            >
-                                                                                <a
-                                                                                    dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
-                                                                                ></a>
-                                                                            </button>
-                                                                        )))}
-                                                                    </Link> */}
+                                                                   
                                                                     {filteredBtnIconDelete.map((filteredBtnIconDelete => (
                                                                         <button
                                                                             key={filteredBtnIconDelete.id}
@@ -256,6 +353,44 @@ const SchoolShiftAll = () => {
                                             </tbody>
 
                                         </table>
+                                        <div className=" d-flex justify-content-between">
+                                            <div>
+                                                Total Data: {totalData}
+                                            </div>
+                                            <div class="pagination float-right pagination-sm border">
+                                                {
+                                                    currentPage - 3 >= 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${1}`}>‹ First</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage > 1 && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${activePage - 1}`}>&lt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    pageNumber.map((page) =>
+                                                        <Link
+                                                            key={page}
+                                                            href={`/Admin/shift/shift_all?page=${page}`}
+                                                            className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                                                        > {page}
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage < totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${activePage + 1}`}>&gt;</Link>
+                                                    )
+                                                }
+                                                {
+                                                    currentPage + 3 <= totalPages && (
+                                                        <Link className=" text-primary px-2 border-left py-1" href={`/Admin/shift/shift_all?page=${totalPages}`}>Last ›</Link>
+                                                    )
+                                                }
+                                            </div>
+
+                                        </div>
                                     </div>
 
                                 </div>

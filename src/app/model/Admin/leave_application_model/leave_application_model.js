@@ -1,7 +1,21 @@
 
 
 const connection = require('../../../../connection/config/database')
+var wkhtmltopdf = require('wkhtmltopdf');
+var fs = require("fs");
 
+wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
+
+const formatString = (str) => {
+    const words = str?.split('_');
+  
+    const formattedWords = words?.map((word) => {
+      const capitalizedWord = word?.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      return capitalizedWord;
+    });
+  
+    return formattedWords?.join(' ');
+  };
 
 const LeaveApplicationModel = {
 
@@ -350,8 +364,8 @@ const LeaveApplicationModel = {
                 whose_leave_user.full_name AS whose_leave_name,
                 CASE 
                     WHEN leave_application.application_status = 0 THEN 'pending'
-                    WHEN leave_application.application_status = 1 THEN 'approved'
-                    WHEN leave_application.application_status = 2 THEN 'rejected'
+                    WHEN leave_application.application_status = 2 THEN 'approved'
+                    WHEN leave_application.application_status = 1 THEN 'rejected'
                     ELSE 'unknown'
                 END AS application_status_name
             FROM 
@@ -421,53 +435,229 @@ const LeaveApplicationModel = {
     // },
 
 
+    // leave_application_list_search: async (req, res) => {
+    //     try {
+    //         console.log("Search button clicked.");
+
+    //         // Extract necessary data from request
+    //         const { fromDate, toDate, searchQuery, status } = req.body;
+
+    //         // Construct the base SQL query
+    //         let sql = `
+    //        SELECT 
+    //             leave_application.*,
+    //             leave_category.name AS leave_category_name,
+    //             created_by_user.full_name AS created_by_name,
+    //             receiver_user.full_name AS receiver_name,
+    //             whose_leave_user.full_name AS whose_leave_name,
+    //             CASE 
+    //                 WHEN leave_application.application_status = 0 THEN 'pending'
+    //                 WHEN leave_application.application_status = 2 THEN 'approved'
+    //                 WHEN leave_application.application_status = 1 THEN 'rejected'
+    //                 ELSE 'unknown'
+    //             END AS application_status_name
+    //         FROM 
+    //             leave_application
+    //         LEFT JOIN 
+    //             leave_category ON leave_application.leave_category = leave_category.id
+    //         LEFT JOIN 
+    //             users AS created_by_user ON leave_application.created_by = created_by_user.id
+    //         LEFT JOIN 
+    //             users AS receiver_user ON leave_application.receiver = receiver_user.id
+    //         LEFT JOIN 
+    //             users AS whose_leave_user ON leave_application.whose_leave = whose_leave_user.id
+    //         ORDER BY 
+    //             leave_application.id DESC
+
+    //         WHERE 1`;
+
+
+    //         if (fromDate && toDate) {
+    //             sql += ` AND leave_application.created_date BETWEEN '${fromDate}' AND '${toDate}'`;
+    //         }
+
+    //         if (searchQuery) {
+    //             sql += ` AND leave_application.leave_category = ${searchQuery}`;
+    //         }
+
+    //         if (status) {
+    //             sql += ` AND leave_application.application_status LIKE '%${status}%'`;
+    //         }
+    //         // Add invoice ID condition
+    //         // if (invoiceId && invoiceId !== '') {
+    //         //     sql += ` AND expense.voucher_id LIKE '%${invoiceId}%'`;
+    //         // }
+
+    //         // if (itemName) {
+
+    //         //     sql += ` AND LOWER(expense_item.item_name) LIKE '%${itemName}%'`;
+    //         // }
+
+    //         // Add expense name (item_name) search condition
+
+
+
+    //         console.log("SQL Query:", sql);
+
+    //         // Execute the constructed SQL query
+    //         connection.query(sql, (error, results, fields) => {
+    //             if (error) {
+    //                 console.error("Error occurred during search:", error);
+    //                 res.status(500).json({ error: "An error occurred during search." });
+    //             } else {
+    //                 console.log("Search results:", results);
+    //                 res.status(200).json({ results });
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error("An error occurred:", error);
+    //         res.status(500).json({ error: "An error occurred." });
+    //     }
+    // },
+
+    // leave_application_list_search: async (req, res) => {
+    //     try {
+    //         console.log("Search button clicked.");
+
+    //         // Extract necessary data from request
+    //         const { fromDate, toDate, searchQuery, status, userGroup } = req.body;
+
+    //         // Construct the base SQL query with placeholders for parameters
+    //         let sql = `
+    //         SELECT 
+    //             leave_application.*,
+    //             leave_category.name AS leave_category_name,
+    //             created_by_user.full_name AS created_by_name,
+    //             receiver_user.full_name AS receiver_name,
+    //             whose_leave_user.full_name AS whose_leave_name,
+    //             CASE 
+    //                 WHEN leave_application.application_status = 0 THEN 'pending'
+    //                 WHEN leave_application.application_status = 2 THEN 'approved'
+    //                 WHEN leave_application.application_status = 1 THEN 'rejected'
+    //                 ELSE 'unknown'
+    //             END AS application_status_name
+    //         FROM 
+    //             leave_application
+    //         LEFT JOIN 
+    //             leave_category ON leave_application.leave_category = leave_category.id
+    //         LEFT JOIN 
+    //             users AS created_by_user ON leave_application.created_by = created_by_user.id
+    //         LEFT JOIN 
+    //             users AS receiver_user ON leave_application.receiver = receiver_user.id
+    //         LEFT JOIN 
+    //             users AS whose_leave_user ON leave_application.whose_leave = whose_leave_user.id
+    //         WHERE 1=1`;
+
+    //         const queryParams = [];
+
+    //         // Add conditions to the SQL query
+    //         if (fromDate && toDate) {
+    //             sql += ` AND leave_application.created_date BETWEEN ? AND ?`;
+    //             queryParams.push(fromDate, toDate);
+    //         }
+
+    //         if (searchQuery) {
+    //             sql += ` AND leave_application.leave_category = ?`;
+    //             queryParams.push(searchQuery);
+    //         }
+
+    //         if (status) {
+    //             sql += ` AND leave_application.application_status = ?`;
+    //             queryParams.push(status);
+    //         }
+
+    //         // Append ORDER BY clause at the end
+    //         sql += ` ORDER BY leave_application.id DESC`;
+
+    //         console.log("SQL Query:", sql);
+    //         console.log("Query Params:", queryParams);
+
+    //         // Execute the constructed SQL query with parameters
+    //         connection.query(sql, queryParams, (error, results) => {
+    //             if (error) {
+    //                 console.error("Error occurred during search:", error);
+    //                 res.status(500).json({ error: "An error occurred during search." });
+    //             } else {
+    //                 console.log("Search results:", results);
+    //                 res.status(200).json({ results });
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error("An error occurred:", error);
+    //         res.status(500).json({ error: "An error occurred." });
+    //     }
+    // },
+
     leave_application_list_search: async (req, res) => {
         try {
             console.log("Search button clicked.");
 
             // Extract necessary data from request
-            const { fromDate, toDate, searchQuery, status } = req.body;
+            const { fromDate, toDate, searchQuery, status, userGroup } = req.body;
 
-            // Construct the base SQL query
+            console.log(userGroup)
+            // Construct the base SQL query with placeholders for parameters
             let sql = `
             SELECT 
-             leave_application.*, 
-                leave_category.name AS leave_category 
+                leave_application.*,
+                leave_category.name AS leave_category_name,
+                created_by_user.full_name AS created_by_name,
+                receiver_user.full_name AS receiver_name,
+                whose_leave_user.full_name AS whose_leave_name,
+                designation.designation_name AS designation_name,
+                CASE 
+                    WHEN leave_application.application_status = 0 THEN 'pending'
+                    WHEN leave_application.application_status = 2 THEN 'approved'
+                    WHEN leave_application.application_status = 1 THEN 'rejected'
+                    ELSE 'unknown'
+                END AS application_status_name
             FROM 
-                leave_application 
-                LEFT JOIN  leave_category ON leave_application.leave_category =  leave_category.id 
-            WHERE 1`;
+                leave_application
+            LEFT JOIN 
+                leave_category ON leave_application.leave_category = leave_category.id
+            LEFT JOIN 
+                users AS created_by_user ON leave_application.created_by = created_by_user.id
+            LEFT JOIN 
+                users AS receiver_user ON leave_application.receiver = receiver_user.id
+            LEFT JOIN 
+                users AS whose_leave_user ON leave_application.whose_leave = whose_leave_user.id
+            LEFT JOIN 
+                employee_promotion ON leave_application.whose_leave = employee_promotion.user_id
+            LEFT JOIN 
+                designation ON employee_promotion.designation_id = designation.id
+            WHERE 1=1`;
 
+            const queryParams = [];
 
+            // Add conditions to the SQL query
             if (fromDate && toDate) {
-                sql += ` AND leave_application.created_date BETWEEN '${fromDate}' AND '${toDate}'`;
+                sql += ` AND leave_application.created_date BETWEEN ? AND ?`;
+                queryParams.push(fromDate, toDate);
             }
 
             if (searchQuery) {
-                sql += ` AND leave_application.leave_category = ${searchQuery}`;
+                sql += ` AND leave_application.leave_category = ?`;
+                queryParams.push(searchQuery);
             }
 
             if (status) {
-                sql += ` AND leave_application.application_status LIKE '%${status}%'`;
+                sql += ` AND leave_application.application_status = ?`;
+                queryParams.push(status);
             }
-            // Add invoice ID condition
-            // if (invoiceId && invoiceId !== '') {
-            //     sql += ` AND expense.voucher_id LIKE '%${invoiceId}%'`;
-            // }
 
-            // if (itemName) {
+            if (userGroup) {
+                sql += ` AND designation.designation_name = ?`;
+                queryParams.push(userGroup);
+            }
 
-            //     sql += ` AND LOWER(expense_item.item_name) LIKE '%${itemName}%'`;
-            // }
-
-            // Add expense name (item_name) search condition
-
-
+            // Append ORDER BY clause at the end
+            sql += ` ORDER BY leave_application.id DESC`;
 
             console.log("SQL Query:", sql);
+            console.log("Query Params:", queryParams);
 
-            // Execute the constructed SQL query
-            connection.query(sql, (error, results, fields) => {
+            // Execute the constructed SQL query with parameters
+            connection.query(sql, queryParams, (error, results) => {
                 if (error) {
                     console.error("Error occurred during search:", error);
                     res.status(500).json({ error: "An error occurred during search." });
@@ -482,7 +672,185 @@ const LeaveApplicationModel = {
         }
     },
 
+    leave_application_pdf: async (req, res) => {
+        try {
+            const { searchResults, selectedColumns, orientation, selectedPrintSize } = req.body; // Assuming selectedColumns is an array of column names
 
+            console.log(searchResults, 'here all the searchResults');
+            const statusLabels = {
+                1: 'Rejected',
+                2: 'Approved',
+                0: 'Pending'
+            };
+            const longTextColumns = ['category_name', 'description'];
+            let tableRows = '';
+            searchResults?.forEach((result, index) => {
+                let row = '<tr>';
+                selectedColumns.forEach(column => {
+                    if (column === 'serial') {
+                        row += `<td>${index + 1}</td>`; // Displaying index number starting from 1
+                    } else if (column === 'action') {
+                        // Skip this column
+                    }
+                    else if (column === 'application_status') {
+                        const statusLabel = statusLabels[result[column]] || '';
+                        // Get corresponding label from statusLabels object
+                        row += `<td>${statusLabel}</td>`;
+                    }
+
+                    else if (column === 'receiver') {
+                        // Rendering serial number if the column is 'serial'
+                    
+                        row += `<td>${result.receiver_name}</td>`;
+
+                    }
+                    else if (column === 'whose_leave') {
+                    
+                        row += `<td>${result.whose_leave_name}</td>`;
+
+                    }
+
+                    else if (column === 'created_by') {
+                        // Rendering serial number if the column is 'serial'
+                        row += `<td>${result.created_by_name}</td>`;
+                      
+                    }
+
+                    else if (column === 'leave_category') {
+                        // Rendering serial number if the column is 'serial'
+             
+                        row += `<td>${result.leave_category_name}</td>`;
+                    }
+
+
+
+
+                    else if (column === 'application_status') {
+                        const statusLabel = statusLabels[result[column]] || '';
+                        // Get corresponding label from statusLabels object
+                        row += `<td>${statusLabel}</td>`;
+                    }
+                    // else if (column === 'file_path') {
+                    //   // Encode the image URL
+                    //   const encodedURL = encodeURIComponent(result[column]);
+                    //   console.log(`${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}`, 'encodedURL welcome');
+                    //   // const encodedURL = encode(result[column]);
+                    //   row += `<td><img src="${process.env.NEXT_PUBLIC_API_URL}:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
+                    // }
+                    else if (column === 'file_path') {
+                        if (result[column]) {
+                            // Encode the image URL
+                            const encodedURL = encodeURIComponent(result[column]);
+                            console.log(`http://192.168.0.194:5003/${result[column]}`, 'encodedURL welcome');
+                            // const encodedURL = encode(result[column]);
+                            row += `<td><img src="http://192.168.0.194:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
+                        } else {
+                            // No file path provided, show a placeholder message
+                            row += `<td></td>`;
+                        }
+                    }
+                    else {
+                        const style = longTextColumns.includes(column) ? 'word-wrap: break-word; word-break: break-all;' : '';
+                        row += `<td style="${style}">${result[column]}</td>`;
+                        // row += `<td>${result[column]}</td>`; // Displaying regular columns
+                    }
+                });
+                row += '</tr>';
+                tableRows += row;
+            });
+            // <link href='http://sonnetdp.github.io/nikosh/css/nikosh.css' rel='stylesheet' type='text/css'>
+            // <link href='./nikosh.css' rel='stylesheet' type='text/css'>
+            //  ${process.env.NEXT_PUBLIC_API_URL}:5002/get-css/nikosh.css
+            // @import url("nikosh.css");
+
+            const html = `<html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Document</title>
+      
+              <style>
+            
+              * { 
+                sheet-size: A4;font-family: 'Nikosh', sans-serif !important;
+              }
+      
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                  }
+                  th, td {
+                      padding: 8px;
+                      text-align: left;
+                      border: 1px solid #ddd;
+                  }
+                  th {
+                      background-color: #f2f2f2;
+                  }
+                  img {
+                      max-width: 100px;
+                      max-height: 100px;
+                  }
+                  .container {
+                    text-align: center;
+                }
+                .container2 {
+                  display: flex;
+                  justify-content: space-between;
+              }
+              </style>
+          </head>
+          <body>
+         <div class='container'>
+         <h2 style="margin: 0; padding: 0;">Pathshala School & College category List</h2>
+         <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+         <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+         <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+         <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">category List</h3>
+         </div>
+         <div class="container2" style:"display: flex;
+         justify-content: space-between;">
+         <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+         <p style="margin: 0; padding: 0;">Collected By:</p>
+         <p style="margin: 0; padding: 0;">Date: </p>
+        </div>
+              <table>
+                  <thead>
+                      <tr>
+                          ${selectedColumns.filter(column => column !== 'action').map(column => {
+                if (column === 'status_id') {
+                    return `<th>Status</th>`;
+                }
+                else if (column === 'file_path') {
+                    return `<th>File</th>`;
+                }
+                else {
+                    return `<th>${formatString(column)}</th>`;
+                }
+            }).join('')}
+                      </tr>
+                  </thead>
+                  <tbody >
+                      ${tableRows}
+                  </tbody>
+              </table>
+          </body>
+          </html>`;
+          const pdfPageSize = selectedPrintSize === '' ? 'A4' : selectedPrintSize;
+          const pdfOrientation = orientation === '' ? 'landscape' : orientation;
+            wkhtmltopdf(html, {  pageSize: pdfPageSize, orientation: pdfOrientation  }, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
+        } catch (error) {
+            console.error('Error in category_pdf:', error);
+            res.status(500).send('Error generating PDF');
+        }
+    }
 
 }
 

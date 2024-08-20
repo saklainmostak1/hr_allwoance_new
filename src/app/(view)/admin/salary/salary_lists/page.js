@@ -158,14 +158,20 @@ const SalaryLists = () => {
                 })
         }
     }
-    const employee_salary_print = async () => {
+    const employee_salary_print = async (id) => {
+
+        console.log(id)
+
         setLoading(true);
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/salary/salary_list_search`, {
                 designation, month
             });
     
-            const searchResults = response.data.results;
+            // const searchResults = response.data.results;
+            // console.log(searchResults)
+            const searchResults = response.data.results.filter(item => item.user_id === id);
+
     
             // Create a new window for printing
             const editWindow = window.open('', '_blank');
@@ -239,6 +245,63 @@ const SalaryLists = () => {
                             </tr>
                         </tbody>
                     </table>
+
+                    <p>Second Table</p>
+                     <table style="font-size: 12px;">
+                        <thead>
+                            <tr>
+                                <th>Earning</th>
+                                <th>Amount</th>
+                                <th>Deductions</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic & DA</td>
+                                <td>${item.paid_amount}</td>
+                                <td>Provident Fund</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td>HRA</td>
+                                <td>0.00</td>
+                                <td>E.S.I</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Conveyance</td>
+                                <td>0.00</td>
+                                <td>Loan</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td>TDA</td>
+                                <td>0.00</td>
+                                <td>Profession Tax</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Previous Due</td>
+                                <td>0.00</td>
+                                <td>Already Paid Amount</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>TSD/IT</td>
+                                <td>0.00</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>Absent 18 Day(s)</td>
+                                <td>${item.paid_amount}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
                 `);
             });
     
@@ -486,7 +549,7 @@ const SalaryLists = () => {
                                                                       
                                                                             {filteredBtnIconCopy.map((filteredBtnIconEdit => (
                                                                                 <button
-                                                                                onClick={employee_salary_print}
+                                                                                onClick={() => employee_salary_print(salary.user_id)}
                                                                                     key={filteredBtnIconEdit.id}
                                                                                     title='Print'
                                                                                     style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}

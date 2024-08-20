@@ -939,30 +939,17 @@ console.log(isSameAsLivingAddress)
                                 </div>
                                 <div class="card-body ">
                                     <form class="" method="post" autocomplete="off" onSubmit={employee_create}>
-                                        <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
-                                                <div class="card-title font-weight-bold mb-0  float-left mt-1">Employee Information</div>
+                                        <div class="card bg-white mb-3  shadow-sm ">
+                                            <div class="card-header p-2 bg-gradient-primary text-white">
+                                                <div class="card-title font-weight-bold mb-0   float-left mt-1 ">Employee Information</div>
                                             </div>
                                             <div class="card-body">
                                                 <div class=" row no-gutters">
                                                     <div class="col-md-6">
+                                                      
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Father Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <input 
-                                                                onChange={employee_input_change}
-                                                                type="text" name="father_name" class="form-control form-control-sm  required " id="father_name" placeholder="Enter Father Name" />
-                                                                {
-                                                                    fatherName && <p className='text-danger'>{fatherName}</p>
-                                                                }
-                                                               
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Full Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                                <label class="font-weight-bold  text-left">Employee Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <input 
@@ -975,26 +962,39 @@ console.log(isSameAsLivingAddress)
                                                             </div>
                                                         </div>
                                                         <div class="form-group row no-gutters">
-                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Gender:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-left">Employee NID:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
                                                             <div class="col-md-8">
-                                                                <select
-                                                                    onChange={employee_input_change}
-                                                                    name="gender" class="form-control form-control-sm  required integer_no_zero" id="gender_name">
-                                                                    <option value="" >Select Gender</option>
+                                                                <input 
+                                                                onChange={employee_input_change}
+                                                                    type="text" name="full_name" class="form-control form-control-sm  required " id="full_name" placeholder="Enter NID Number" />
                                                                     {
-                                                                        genderList.map(gender => 
-                                                                            
-                                                                            <>
-                                                                            <option value={gender.id}>{gender.gender_name}</option>
-                                                                            
-                                                                            </>
-                                                                        )
+                                                                        fullName && <p className='text-danger'>{fullName}</p>
                                                                     }
+                                                                
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Religion:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select 
+                                                                onChange={employee_input_change}
+                                                                name="religion" class="form-control form-control-sm  required integer_no_zero">
+                                                                    <option value=''>Select Religion</option>
+                                                                   {
+                                                                     religionList.map(religion => 
+
+                                                                        <>
+                                                                        <option value={religion.id}>{religion.name}</option>
+                                                                        </>
+                                                                     )
+                                                                   }
                                                                 </select>
-{
-    gender && <p className='text-danger'>{gender}</p>
-}
-                                                               
+                                                                {
+                                                                    religion && <p className='text-danger'>{religion}</p>
+                                                                }
+                                                              
                                                             </div>
                                                         </div>
                                                         <div class="form-group row no-gutters">
@@ -1022,43 +1022,16 @@ console.log(isSameAsLivingAddress)
                                                                
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  ">Confirm Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <input type="password" 
-                                                                onChange={employee_input_change}
-                                                                name="confirm_password" class="form-control form-control-sm  required matches_password" id="confirm_password" placeholder="Enter Confirm Password" />
-                                                                {
-                                                                    confirmPassword && <p className='text-danger'>{confirmPassword}</p>
-                                                                }
-                                                                  
-                                                            </div>
-                                                        </div>
+                                                      
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Mother Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <input 
-                                                                onChange={employee_input_change}
-                                                                type="text" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Mother Name" />
-                                                                {
-                                                                    motherName && <p className='text-danger'>{motherName}</p>
-                                                                }
-                                                                
-                                                                
-                                                            </div>
-                                                        </div>
+                                                       
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
                                                                 <label class="font-weight-bold  text-right">Date of Birth:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
                                                             <div class="col-md-8">
-                                                                {/* <input type="date" name="dob" class="form-control form-control-sm  required urban_datepicker" id="dob" placeholder="Enter Date of Birth" /> */}
+                                                                
                                                                 <input
                                                                     type="text"
                                                                     readOnly
@@ -1084,13 +1057,37 @@ console.log(isSameAsLivingAddress)
                                                                
                                                             </div>
                                                         </div>
+                                                       
                                                         <div class="form-group row no-gutters">
-                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Religion:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Gender:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+                                                                    onChange={employee_input_change}
+                                                                    name="gender" class="form-control form-control-sm  required integer_no_zero" id="gender_name">
+                                                                    <option value="" >Select Gender</option>
+                                                                    {
+                                                                        genderList.map(gender => 
+                                                                            
+                                                                            <>
+                                                                            <option value={gender.id}>{gender.gender_name}</option>
+                                                                            
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                </select>
+{
+    gender && <p className='text-danger'>{gender}</p>
+}
+                                                               
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Blood Group:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
                                                             <div class="col-md-8">
                                                                 <select 
                                                                 onChange={employee_input_change}
                                                                 name="religion" class="form-control form-control-sm  required integer_no_zero">
-                                                                    <option value=''>Select Religion</option>
+                                                                    <option value=''>Select Blood Group</option>
                                                                    {
                                                                      religionList.map(religion => 
 
@@ -1117,7 +1114,22 @@ console.log(isSameAsLivingAddress)
                                                                }
                                                             </div>
                                                         </div>
-                                                        <div class="form-group row no-gutters">
+                                                        
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card bg-white mb-3 shadow-sm ">
+                                            <div class="card-header p-2  bg-gradient-primary text-white ">
+                                                <div class="card-title font-weight-bold mb-0  float-left mt-1">Account Information</div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class=" row no-gutters">
+                                                    
+                                                    <div class="col-md-6">
+                                                    <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
                                                                 <label class="font-weight-bold  text-right"> Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
@@ -1131,16 +1143,126 @@ console.log(isSameAsLivingAddress)
                                                                
                                                             </div>
                                                         </div>
-
-
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                    <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  ">Confirm Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input type="password" 
+                                                                onChange={employee_input_change}
+                                                                name="confirm_password" class="form-control form-control-sm  required matches_password" id="confirm_password" placeholder="Enter Confirm Password" />
+                                                                {
+                                                                    confirmPassword && <p className='text-danger'>{confirmPassword}</p>
+                                                                }
+                                                                  
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
+                                        <div class="card bg-white mb-3 shadow-sm ">
+                                            <div class="card-header p-2  bg-gradient-primary text-white ">
+                                                <div class="card-title font-weight-bold mb-0  float-left mt-1">Parent Information</div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class=" row no-gutters">
+                                                    <div class="col-md-6">
+                                                    <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Father Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input 
+                                                                onChange={employee_input_change}
+                                                                type="text" name="father_name" class="form-control form-control-sm  required " id="father_name" placeholder="Enter Father Name" />
+                                                                {
+                                                                    fatherName && <p className='text-danger'>{fatherName}</p>
+                                                                }
+                                                               
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Father Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input 
+                                                                onChange={employee_input_change}
+                                                                type="text" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Father Mobile Number " />
+                                                                {
+                                                                    motherName && <p className='text-danger'>{motherName}</p>
+                                                                }
+                                                                
+                                                                
+                                                            </div>
+                                                        </div>
+                                                    
+
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold ">Father Profession :<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+onChange={employee_input_change}
+                                                                    name="branch_id" class=" form-control form-control-sm  required integer_no_zero lupazila">
+                                                                    <option value="">Select Father Profession</option>
+                                                                   
+                                                                </select>
+                                                               
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                    <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Mother Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input 
+                                                                onChange={employee_input_change}
+                                                                type="text" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Mother Name" />
+                                                                {
+                                                                    motherName && <p className='text-danger'>{motherName}</p>
+                                                                }
+                                                                
+                                                                
+                                                            </div>
+                                                        </div>
+                                                     
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Mother Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input 
+                                                                onChange={employee_input_change}
+                                                                type="text" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Mother Mobile number" />
+                                                               
+                                                                
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold ">Mother Profession:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+onChange={employee_input_change}
+                                                                    name="school_shift_id" class=" form-control form-control-sm  required integer_no_zero lupazila">
+                                                                    <option value="">Select Mother Profession</option>
+                                                                   
+                                                                </select>
+                                                               
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         <div>
-                                            <div className="card-header custom-card-header py-1 clearfix  bg-gradient-primary text-white">
+                                            <div className="card-header custom-card-header py-1 clearfix  bg-gradient-primary shadow-sm text-white">
 
                                                 <div className="card-title card-header-color font-weight-bold mb-0 float-left mt-1">
                                                     <strong>Educational Qualification</strong>
@@ -1283,7 +1405,7 @@ console.log(isSameAsLivingAddress)
 
                                             <div class="col-md-6">
                                                 <div class="card bg-white mb-3 shadow-sm ">
-                                                    <div class="card-header p-2   bg-light ">
+                                                    <div class="card-header p-2  bg-gradient-primary text-white ">
                                                         <div class="card-title font-weight-bold mb-0  float-left mt-1">Living Address</div>
                                                     </div>
                                                     <div class="card-body">
@@ -1371,7 +1493,7 @@ console.log(isSameAsLivingAddress)
 
                                             <div className="col-md-6">
                                                 <div className="card bg-white mb-3 shadow-sm ">
-                                                    <div className="card-header p-2 bg-light clearfix">
+                                                    <div className="card-header p-2 bg-gradient-primary text-white clearfix">
                                                         <div className="card-title font-weight-bold mb-0 float-left mt-1">Permanent Address</div>
                                                         <div className="form-check form-check-inline float-right">
                                                             <input
@@ -1476,7 +1598,7 @@ console.log(isSameAsLivingAddress)
                                         </div>
 
                                         <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
+                                            <div class="card-header p-2   bg-gradient-primary text-white ">
                                                 <div class="card-title font-weight-bold mb-0  float-left mt-1">Joining Information</div>
                                             </div>
                                             <div class="card-body">
@@ -1611,7 +1733,7 @@ onChange={employee_input_change}
                                             </div>
                                         </div>
                                         <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
+                                            <div class="card-header p-2  bg-gradient-primary text-white ">
                                                 <div class="card-title font-weight-bold mb-0  float-left mt-1">Attach Image</div>
                                             </div>
                                             <div class="card-body">
