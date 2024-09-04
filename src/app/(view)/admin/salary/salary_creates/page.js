@@ -1009,6 +1009,8 @@ const SalaryCreate = () => {
         return { user_id: emp.user_id, match_length: matchCount };
     });
 
+    console.log(matchLengths)
+
     const { data: holidays = [] } = useQuery({
         queryKey: ['holidays'],
         queryFn: async () => {
@@ -1022,7 +1024,7 @@ const SalaryCreate = () => {
         const checktimeMonthYear = att.start_date.substring(0, 7);
         return checktimeMonthYear === month;
     });
-console.log(month)
+console.log(filteredAttendances)
     const { data: leavesDays = [] } = useQuery({
         queryKey: ['leavesDays'],
         queryFn: async () => {
@@ -1048,7 +1050,7 @@ console.log(month)
         return { user_id: emp.whose_leave, match_length: matchCount };
     });
 
-
+console.log(matchLength)
     const { data: salaryList = [], } = useQuery({
         queryKey: ['salaryList'],
         queryFn: async () => {

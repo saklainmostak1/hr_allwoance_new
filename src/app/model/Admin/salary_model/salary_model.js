@@ -83,7 +83,14 @@ const SalaryModel = {
 
     employe_attendance_list: async (req, res) => {
         try {
-            const data = `SELECT * from attendance`;
+            const data = `SELECT a.*
+            FROM attendance a
+            INNER JOIN (
+                SELECT user_id, DATE(checktime) as date, MIN(checktime) as checktime
+                FROM attendance
+                GROUP BY user_id, DATE(checktime)
+            ) b
+            ON a.user_id = b.user_id AND DATE(a.checktime) = b.date AND a.checktime = b.checktime`;
 
             connection.query(data, function (error, result) {
                 console.log(result)
