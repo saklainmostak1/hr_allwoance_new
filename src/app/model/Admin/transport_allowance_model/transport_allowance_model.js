@@ -9,16 +9,16 @@ const TransportAllowanceModel = {
 
     transport_allowance_create: async (req, res) => {
         try {
-           
-            const { travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name,km_travel, amount, user_id, created_by } = req.body;
-    
+
+            const { travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, created_by } = req.body;
+
             // Using parameterized query to prevent SQL injection
             const insertQuery = 'INSERT INTO transport_allowance (travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name,km_travel, amount, user_id, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            const result = await connection.query(insertQuery, [travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name,km_travel, amount, user_id, created_by]);
-    
+            const result = await connection.query(insertQuery, [travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, created_by]);
+
             // Sending only the necessary data from the result object
             const { insertId, affectedRows } = result;
-    
+
             // Sending response with relevant data
             res.status(200).json({ insertId, affectedRows });
         } catch (error) {
@@ -51,7 +51,11 @@ const TransportAllowanceModel = {
 
     transport_allowance_single: async (req, res) => {
         try {
-            const query = 'SELECT * FROM transport_allowance WHERE id = ?';
+            // const query = 'SELECT * FROM transport_allowance WHERE id = ?';
+            const query = `SELECT ta.*, ep.branch_id 
+            FROM transport_allowance ta
+          LEFT JOIN employee_promotion ep ON ta.user_id = ep.user_id
+            WHERE ta.id = ?`;
             connection.query(query, [req.params.id], (error, result) => {
                 if (!error && result.length > 0) {
                     console.log(result);
@@ -71,11 +75,11 @@ const TransportAllowanceModel = {
     transport_allowance_update: async (req, res) => {
         try {
 
-            const {      travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, modified_by_by} = req.body;
+            const { travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, modified_by_by } = req.body;
 
-       
+
             const query = `UPDATE transport_allowance SET   travel_from = ?, travel_from_time = ?, travel_to = ?, travel_to_time= ?, vehicle_name = ?, km_travel = ?, amount = ?, user_id = ?, modified_by = ? WHERE id = ?`;
-            connection.query(query, [  travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, modified_by_by, req.params.id], (error, result) => {
+            connection.query(query, [travel_from, travel_from_time, travel_to, travel_to_time, vehicle_name, km_travel, amount, user_id, modified_by_by, req.params.id], (error, result) => {
                 if (!error && result.affectedRows > 0) {
                     console.log(result);
                     return res.send(result);
@@ -144,7 +148,7 @@ const TransportAllowanceModel = {
         }
     },
 
-    
+
 
 }
 

@@ -168,7 +168,7 @@ const NoticeCategoryList = ({ searchParams }) => {
                       href={`/Admin/notice_category/notice_category_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Notice Category List
+                      Back to Notice Category Create
                     </Link>
                   </div>
                 </div>

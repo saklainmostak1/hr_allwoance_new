@@ -2320,7 +2320,7 @@ HAVING mi.page_group IS NOT NULL AND mi.page_group != '';
             WHERE mi.parent_id != 0
                 AND mi.id IN (?)
             GROUP BY mi.page_group, mi.controller_name, mi.display_name, mi.method_name, mi.method_sort, mi.menu_type, mi.id
-            HAVING mi.page_group IS NOT NULL AND mi.page_group != '';
+            HAVING mi.page_group IS NOT NULL AND mi.page_group != '' ORDER BY mi.controller_sort ASC , mi.method_sort ASC;
         `;
 
             connection.query(getPageGroupAndControllerNamesQuery, [userPageListIds], (getPageGroupError, getPageGroupResults) => {
@@ -2330,6 +2330,7 @@ HAVING mi.page_group IS NOT NULL AND mi.page_group != '';
                     return;
                 }
 
+                
                 // Helper function to compare names case-insensitively
                 const areNamesEqual = (name1, name2) => name1.toLowerCase() === name2.toLowerCase();
 

@@ -109,6 +109,8 @@ const ProfessionModel = {
     }
   },
 
+  
+
   profession_delete: async (req, res) => {
     try {
       const query = "DELETE FROM profession WHERE id = ?";

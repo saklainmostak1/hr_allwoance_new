@@ -51,7 +51,7 @@ const NoticeCategoryModel = {
     try {
       const data = `SELECT nc.*, u.full_name AS author_name
                    FROM notice_category nc
-                   JOIN users u ON nc.created_by = u.id
+                   LEFT JOIN users u ON nc.created_by = u.id
                    ORDER BY nc.id DESC;`;
 
       connection.query(data, function (error, result) {

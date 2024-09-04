@@ -558,9 +558,22 @@ const ReligionCreate = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", created_by: created });
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState([])
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'name') {
+      setName('')
+    }
+
+    const existingBrand = religions.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -582,17 +595,35 @@ const ReligionCreate = () => {
   const user_create = async (e) => {
     e.preventDefault();
 
-    const duplicate = religions.some(
-      (existingReligion) =>
-        existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
-        formData.name.trim().replace(/\s+/g, "").toLowerCase()
-    );
+    // const duplicate = religions.some(
+    //   (existingReligion) =>
+    //     existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
+    //     formData.name.trim().replace(/\s+/g, "").toLowerCase()
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Religion name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Religion name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+
+    if (!formData.name) {
+      setName('Religion name  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = religions.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Religion name already exists. Please choose a different Religion name.");
+      return
+
     }
 
     try {
@@ -671,7 +702,7 @@ const ReligionCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${
                           errorMessage ? "is-invalid" : ""
@@ -685,6 +716,9 @@ const ReligionCreate = () => {
                       {errorMessage && (
                         <div className="invalid-feedback">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

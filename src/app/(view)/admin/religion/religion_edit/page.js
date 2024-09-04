@@ -199,6 +199,7 @@ const EditReligion = ({ id }) => {
     modified_by: localStorage.getItem("userId"),
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState("");
 
   const { data: noticeCategorySingle, isLoading } = useQuery({
     queryKey: ["noticeCategorySingle", id],
@@ -218,7 +219,9 @@ const EditReligion = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/religion/religion_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
 
@@ -234,6 +237,18 @@ const EditReligion = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'name') {
+      setName('')
+    }
+
+    const existingBrand = religions.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -244,18 +259,35 @@ const EditReligion = ({ id }) => {
     e.preventDefault();
 
     // সরাসরি নাম চেক করুন, কোনো নরমালাইজেশন ছাড়াই
-    const duplicate = religions.some(
-      (existingReligion) =>
-        existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
-          formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingReligion.id !== id
-    );
+    // const duplicate = religions.some(
+    //   (existingReligion) =>
+    //     existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
+    //       formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
+    //     existingReligion.id !== id
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Religion name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Religion name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+    if (!formData.name) {
+      setName('Religion name  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = religions.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Religion name already exists. Please choose a different Religion name.");
+      return
+
     }
     try {
       const response = await fetch(
@@ -332,7 +364,7 @@ const EditReligion = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         value={formData.name}
                         className="form-control form-control-sm required"
@@ -344,6 +376,9 @@ const EditReligion = ({ id }) => {
                       {errorMessage && (
                         <div className="text-danger mt-1">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

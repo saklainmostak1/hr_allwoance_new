@@ -668,7 +668,12 @@ const ExpenseList = ({ searchParams }) => {
     const category_column_change = (selectedItems) => {
         setSelectedColumns(selectedItems.map((item) => item.value));
         // expense_search(); 
-    };
+    }
+    useEffect(() => {
+        setSelectedColumns(columnListSelectedArray)
+    }, [])
+
+
     console.log(selectedColumns)
 
     const columnNames = expenseList && expenseList.length > 0 ? Object.keys(expenseList[0]) : [];

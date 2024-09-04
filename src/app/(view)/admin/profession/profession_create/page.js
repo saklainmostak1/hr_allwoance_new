@@ -176,46 +176,75 @@ const ProfessionCreate = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ profession_name: "", created_by });
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState([])
+
+
+    // Fetch existing professions to check for duplicates
+    const { data: professions = [] } = useQuery({
+      queryKey: ["professions"],
+      queryFn: async () => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/profession/profession_all`
+        );
+        const data = await res.json();
+        return data;
+      },
+    });
+  
+  
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'profession_name') {
+      setName('')
+    }
+
+    const existingBrand = professions.find((brand) => brand?.profession_name?.toLowerCase() === formData?.profession_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  // Fetch existing professions to check for duplicates
-  const { data: professions = [] } = useQuery({
-    queryKey: ["professions"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/profession/profession_all`
-      );
-      const data = await res.json();
-      return data;
-    },
-  });
 
-  // Remove only leading and trailing spaces, but keep internal spaces intact
-  const normalizeName = (name) => {
-    return name?.trim().replace(/\s+/g, "").toLowerCase();
-  };
 
   const user_create = async (e) => {
     e.preventDefault();
     // Normalize and check for existing profession names
-    const normalizedName = normalizeName(formData.profession_name);
-    const duplicate = professions.some(
-      (existingProfession) =>
-        normalizeName(existingProfession.profession_name) === normalizedName
-    );
+    // const normalizedName = normalizeName(formData.profession_name);
+    // const duplicate = professions.some(
+    //   (existingProfession) =>
+    //     normalizeName(existingProfession.profession_name) === normalizedName
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Profession name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Profession name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+    if (!formData.profession_name) {
+      setName('Profession name  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = professions.find((brand) => normalizebrandName(brand.profession_name.toLowerCase()) === normalizebrandName(formData.profession_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Profession name already exists. Please choose a different Profession name.");
+      return
+
     }
 
     try {
@@ -238,7 +267,7 @@ const ProfessionCreate = () => {
       }
     } catch (error) {
       console.error("Error creating profession:", error);
-      setErrorMessage("An error occurred. Please try again.");
+      // setErrorMessage("An error occurred. Please try again.");
     }
   };
 
@@ -294,7 +323,7 @@ const ProfessionCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${
                           errorMessage ? "is-invalid" : ""
@@ -305,9 +334,12 @@ const ProfessionCreate = () => {
                         name="profession_name"
                         value={formData.profession_name}
                       />
-                      {errorMessage && (
-                        <div className="invalid-feedback">{errorMessage}</div>
-                      )}
+                    {
+                      errorMessage && <p className="text-danger m-0">{errorMessage}</p>
+                    }
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

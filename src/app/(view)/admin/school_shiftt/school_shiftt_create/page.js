@@ -1106,6 +1106,8 @@ const SchoolShiftCreate = () => {
 			branch_id
 		};
 
+		console.log(schoolShift)
+
 		fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/school_shift/school_shift_create`, {
 			method: 'POST',
 			headers: {
@@ -1119,7 +1121,7 @@ const SchoolShiftCreate = () => {
 					if (typeof window !== 'undefined') {
 						sessionStorage.setItem("message", "Data saved successfully!");
 					}
-					router.push('/Admin/shift/shift_all');
+					// router.push('/Admin/shift/shift_all');
 				}
 			})
 			.catch((error) => console.error(error));

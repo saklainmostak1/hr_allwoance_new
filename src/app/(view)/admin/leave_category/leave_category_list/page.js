@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-const LeaveCategoryList = () => {
+const LeaveCategoryList = ({searchParams}) => {
   const {
     data: leaveCategoryAll = [],
     isLoading,
@@ -53,23 +53,96 @@ const LeaveCategoryList = () => {
     (btn) => btn.method_sort === 1
   );
 
-  const leaveCategoryAll_delete = (id) => {
-    console.log(id);
-    const proceed = window.confirm(`Are You Sure delete${id}`);
-    if (proceed) {
-      fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_delete/${id}`,
-        {
-          method: "POST",
-        }
-      )
-        .then((Response) => Response.json())
-        .then((data) => {
-          refetch();
-          console.log(data);
-        });
+
+  const parentUsers = leaveCategoryAll
+
+  const totalData = parentUsers?.length
+  const dataPerPage = 20
+
+  const totalPages = Math.ceil(totalData / dataPerPage)
+
+  let currentPage = 1
+
+
+  if (Number(searchParams.page) >= 1) {
+    currentPage = Number(searchParams.page)
+  }
+
+
+  let pageNumber = []
+  for (let index = currentPage - 2; index <= currentPage + 2; index++) {
+    if (index < 1) {
+      continue
     }
+    if (index > totalPages) {
+      break
+    }
+    pageNumber.push(index)
+  }
+  const [pageUsers, setPageUsers] = useState([]);
+  const caregory_list = async () => {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_all_paigination/${currentPage}/${dataPerPage}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    setPageUsers(data);
   };
+  useEffect(() => {
+    caregory_list();
+  }, [currentPage]);
+
+  const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
+
+
+  // const leaveCategoryAll_delete = (id) => {
+  //   console.log(id);
+  //   const proceed = window.confirm(`Are You Sure delete${id}`);
+  //   if (proceed) {
+  //     fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_delete/${id}`,
+  //       {
+  //         method: "POST",
+  //       }
+  //     )
+  //       .then((Response) => Response.json())
+  //       .then((data) => {
+  //         refetch();
+  //         console.log(data);
+  //       });
+  //   }
+  // };
+
+  const leaveCategoryAll_delete = id => {
+
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_delete/${id}`, {
+        method: "POST",
+    })
+        .then(response => {
+            console.log(response)
+            response.json()
+            if (response.ok === true) {
+                const procced = window.confirm(`Are You Sure delete`)
+                if (procced) {
+                    refetch();
+                    caregory_list()
+                }
+            }
+            else {
+                alert('Data already running. You cant Delete this item');
+            }
+        })
+        .then(data => {
+            if (data) {
+
+                console.log(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the data. Please try again.');
+        });
+
+}
 
   const [message, setMessage] = useState();
   useEffect(() => {
@@ -118,6 +191,46 @@ const LeaveCategoryList = () => {
                 </div>
                 <div class="card-body">
                   <div className="table-responsive">
+
+                    <div className=" d-flex justify-content-between">
+                      <div>
+                        Total Data: {totalData}
+                      </div>
+                      <div class="pagination float-right pagination-sm border">
+                        {
+                          currentPage - 3 >= 1 && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${1}`}>‹ First</Link>
+                          )
+                        }
+                        {
+                          currentPage > 1 && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${activePage - 1}`}>&lt;</Link>
+                          )
+                        }
+                        {
+                          pageNumber.map((page) =>
+                            <Link
+                              key={page}
+                              href={`/Admin/leave_category/leave_category_all?page=${page}`}
+                              className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                            > {page}
+                            </Link>
+                          )
+                        }
+                        {
+                          currentPage < totalPages && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${activePage + 1}`}>&gt;</Link>
+                          )
+                        }
+                        {
+                          currentPage + 3 <= totalPages && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${totalPages}`}>Last ›</Link>
+                          )
+                        }
+                      </div>
+
+                    </div>
+
                     <table className="table  table-bordered table-hover table-striped table-sm">
                       <thead>
                         <tr>
@@ -142,7 +255,7 @@ const LeaveCategoryList = () => {
                             </div>
                           </div>
                         ) : (
-                          leaveCategoryAll.map((leaveCategoryAll, i) => (
+                          pageUsers.map((leaveCategoryAll, i) => (
                             <tr key={leaveCategoryAll.id}>
                               <td> {i + 1}</td>
 
@@ -233,6 +346,44 @@ const LeaveCategoryList = () => {
                         )}
                       </tbody>
                     </table>
+                    <div className=" d-flex justify-content-between">
+                      <div>
+                        Total Data: {totalData}
+                      </div>
+                      <div class="pagination float-right pagination-sm border">
+                        {
+                          currentPage - 3 >= 1 && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${1}`}>‹ First</Link>
+                          )
+                        }
+                        {
+                          currentPage > 1 && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${activePage - 1}`}>&lt;</Link>
+                          )
+                        }
+                        {
+                          pageNumber.map((page) =>
+                            <Link
+                              key={page}
+                              href={`/Admin/leave_category/leave_category_all?page=${page}`}
+                              className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
+                            > {page}
+                            </Link>
+                          )
+                        }
+                        {
+                          currentPage < totalPages && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${activePage + 1}`}>&gt;</Link>
+                          )
+                        }
+                        {
+                          currentPage + 3 <= totalPages && (
+                            <Link className=" text-primary px-2 border-left py-1" href={`/Admin/leave_category/leave_category_all?page=${totalPages}`}>Last ›</Link>
+                          )
+                        }
+                      </div>
+
+                    </div>
                   </div>
                 </div>
               </div>

@@ -60,7 +60,7 @@ const CreateExpenceCategory = () => {
         // }
 
         if (!formData.expense_category_name || formData.expense_category_name.trim() === '') {
-            setCompany('Account Type name is required');
+            setCompany('Expense Category name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }

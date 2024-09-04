@@ -171,7 +171,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const VideoGalleryCategoryCreate = () => {
@@ -182,10 +182,36 @@ const VideoGalleryCategoryCreate = () => {
     status: "",
     created_by,
   });
+
+  const [status, setStatus] = useState([])
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
+      .then(res => res.json())
+      .then(data => setStatus(data))
+  }, [])
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -220,21 +246,43 @@ const VideoGalleryCategoryCreate = () => {
     //   return;
     // }
 
-    const normalizedInputName = formData.name
-      .trim()
+    // const normalizedInputName = formData.name
+    //   .trim()
 
-      .toLowerCase();
+    //   .toLowerCase();
 
-    const duplicate = noticeCategoryAll.some(
-      (existingCategory) =>
-        existingCategory.name.trim().toLowerCase() === normalizedInputName
-    )
-      ? "Video Gallery category name already exists. Please choose a different name."
-      : "";
+    // const duplicate = noticeCategoryAll.some(
+    //   (existingCategory) =>
+    //     existingCategory.name.trim().toLowerCase() === normalizedInputName
+    // )
+    //   ? "Video Gallery category name already exists. Please choose a different name."
+    //   : "";
 
-    if (duplicate) {
-      setErrorMessage(duplicate);
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(duplicate);
+    //   return;
+    // }
+
+    if (!formData.name) {
+      setName('Video gallery Category name  is required')
+      return
+    }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Video gallery Category name already exists. Please choose a different Video gallery Category name.");
+      return
+
     }
 
     try {
@@ -313,11 +361,10 @@ const VideoGalleryCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
-                        className={`form-control form-control-sm required ${
-                          errorMessage ? "is-invalid" : ""
-                        }`}
+                        className={`form-control form-control-sm required ${errorMessage ? "is-invalid" : ""
+                          }`}
                         id="name"
                         placeholder="Enter Events Category Name"
                         type="text"
@@ -327,6 +374,10 @@ const VideoGalleryCategoryCreate = () => {
                       {errorMessage && (
                         <div className="invalid-feedback">{errorMessage}</div>
                       )}
+
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 
@@ -352,9 +403,18 @@ const VideoGalleryCategoryCreate = () => {
                         placeholder="Enter Status"
                       >
                         <option>Select Status</option>
-                        <option value="1">Active</option>
-                        <option value="2">Inactive</option>
+                        {
+                          status.map(sta =>
+                            <>
+                              <option value={sta.id}>{sta.status_name}</option>
+                            </>
+                          )
+                        }
                       </select>
+                      {
+
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

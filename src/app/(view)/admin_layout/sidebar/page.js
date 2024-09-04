@@ -10,6 +10,7 @@ import { FaCaretDown } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
 import ContentLoader from 'react-content-loader';
 import { useEffect } from 'react';
+import AdminHome from '../../admin/admin_home/page';
 
 
 
@@ -361,6 +362,34 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
   };
 
   console.log(filteredCategories[0]?.side_menu_position)
+  
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Show button when page is scrolled down
+  const toggleVisibility = () => {
+    if (window.pageYOffset > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
+
+  // Scroll the window to the top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', toggleVisibility);
+
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+    };
+  }, []);
+
 
   return (
     <div class="wrapper w-100" style={wrapperStyle}>
@@ -523,45 +552,87 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
                 {
                   isLoading ?
-                    <>
+                  <div style={{width:'320px', }} className='overflow-hidden'>
+                    
+                  <ContentLoader
+                  className='mt-2 ml-2'
+                  style={{marginBottom:"-80px"}}
+   speed={2}
+   backgroundColor="#f5f5f5"
+   foregroundColor="#ebebeb"
+   {...props}
+>
+ 
+ <rect x="0" y="0" rx="35" ry="35" width="70" height="70" /> 
+  <rect x="80" y="17" rx="4" ry="4" width="100" height="13" />
+  <rect x="80" y="40" rx="3" ry="3" width="100" height="10" />
+ 
+</ContentLoader>
 
-                      <ContentLoader
+<ContentLoader
+speed={2}
+viewBox="0 0 300 900"
+backgroundColor="#f5f5f5"
+foregroundColor="#ebebeb"
+{...props}
+>
+<rect x="22" y="20" rx="0" ry="0" width="129" height="23" />
+<rect x="35" y="76" rx="4" ry="4" width="81" height="9" />
+<rect x="271" y="22" rx="4" ry="4" width="18" height="18" />
+<rect x="186" y="76" rx="4" ry="4" width="81" height="9" />
+<rect x="150" y="63" rx="0" ry="0" width="2" height="44" />
+<rect x="6" y="104" rx="0" ry="0" width="144" height="3" />
+<rect x="152" y="106" rx="0" ry="0" width="145" height="1" />
 
-                        speed={2}
-                        width={300}
-                        height={615}
-                        viewBox="0 0 300 615"
-                        backgroundColor="#f5f5f5"
-                        foregroundColor="#ebebeb"
-                        {...props}
-                      >
-                        <rect x="79" y="20" rx="0" ry="0" width="0" height="1" />
-                        <rect x="4" y="1" rx="0" ry="0" width="3" height="600" />
-                        <rect x="4" y="598" rx="0" ry="0" width="294" height="3" />
-                        <rect x="158" y="596" rx="0" ry="0" width="5" height="3" />
-                        <rect x="5" y="1" rx="0" ry="0" width="294" height="3" />
-                        <rect x="296" y="1" rx="0" ry="0" width="3" height="600" />
-                        <rect x="5" y="60" rx="0" ry="0" width="294" height="3" />
-                        <rect x="22" y="20" rx="0" ry="0" width="129" height="23" />
-                        <rect x="35" y="76" rx="4" ry="4" width="81" height="9" />
-                        <rect x="271" y="22" rx="4" ry="4" width="18" height="18" />
-                        <rect x="186" y="76" rx="4" ry="4" width="81" height="9" />
-                        <rect x="150" y="63" rx="0" ry="0" width="2" height="44" />
-                        <rect x="6" y="104" rx="0" ry="0" width="144" height="3" />
-                        <rect x="152" y="106" rx="0" ry="0" width="145" height="1" />
-                        <rect x="28" y="127" rx="4" ry="4" width="243" height="31" />
-                        <rect x="62" y="188" rx="4" ry="4" width="148" height="19" />
-                        <circle cx="39" cy="197" r="10" />
-                        <circle cx="39" cy="247" r="10" />
-                        <circle cx="39" cy="297" r="10" />
-                        <circle cx="39" cy="347" r="10" />
-                        <rect x="64" y="237" rx="4" ry="4" width="148" height="19" />
-                        <rect x="65" y="287" rx="4" ry="4" width="148" height="19" />
-                        <rect x="64" y="337" rx="4" ry="4" width="148" height="19" />
-                        <circle cx="39" cy="547" r="10" />
-                      </ContentLoader>
+<rect x="28" y="127" rx="4" ry="4" width="243" height="31" />
+<rect x="62" y="188" rx="4" ry="4" width="148" height="19" />
 
-                    </>
+<circle cx="39" cy="197" r="10" />
+<circle cx="39" cy="247" r="10" />
+<circle cx="39" cy="297" r="10" />
+<circle cx="39" cy="347" r="10" />
+
+<rect x="64" y="237" rx="4" ry="4" width="148" height="19" />
+<rect x="65" y="287" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="337" rx="4" ry="4" width="148" height="19" />
+
+
+<circle cx="39" cy="397" r="10" />
+<circle cx="39" cy="447" r="10" />
+<circle cx="39" cy="497" r="10" />
+<circle cx="39" cy="547" r="10" />
+
+<rect x="64" y="387" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="437" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="487" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="537" rx="4" ry="4" width="148" height="19" />
+
+
+<circle cx="39" cy="597" r="10" />
+<circle cx="39" cy="647" r="10" />
+<circle cx="39" cy="697" r="10" />
+<circle cx="39" cy="747" r="10" />
+<circle cx="39" cy="797" r="10" />
+<circle cx="39" cy="847" r="10" />
+<circle cx="39" cy="897" r="10" />
+<circle cx="39" cy="947" r="10" />
+<circle cx="39" cy="997" r="10" />
+<circle cx="39" cy="1047" r="10" />
+
+<rect x="64" y="587" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="637" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="687" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="737" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="787" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="837" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="887" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="937" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="987" rx="4" ry="4" width="148" height="19" />
+<rect x="64" y="1037" rx="4" ry="4" width="148" height="19" />
+</ContentLoader>
+
+
+                  </div>
                     :
                     <>
                       <nav id="sidebar" className={`sidebar ${isSidebarActive ? 'active' : ''} side_menu_bg custom-sidebar`}>
@@ -703,6 +774,89 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
                       </nav>
 
                     </>
+                    
+  //                   <div style={{width:'320px' }} className='overflow-hidden'>
+                    
+  //                   <ContentLoader
+  //                   className='mt-2 ml-2'
+  //                   style={{marginBottom:"-80px"}}
+  //    speed={2}
+  //    backgroundColor="#f5f5f5"
+  //    foregroundColor="#ebebeb"
+  //    {...props}
+  // >
+   
+  //  <rect x="0" y="0" rx="35" ry="35" width="70" height="70" /> 
+  //   <rect x="80" y="17" rx="4" ry="4" width="80" height="13" />
+  //   <rect x="80" y="40" rx="3" ry="3" width="140" height="10" />
+   
+  // </ContentLoader>
+  
+  // <ContentLoader
+  // speed={2}
+  // viewBox="0 0 300 700"
+  // backgroundColor="#f5f5f5"
+  // foregroundColor="#ebebeb"
+  // {...props}
+  // >
+  // <rect x="22" y="20" rx="0" ry="0" width="129" height="23" />
+  // <rect x="35" y="76" rx="4" ry="4" width="81" height="9" />
+  // <rect x="271" y="22" rx="4" ry="4" width="18" height="18" />
+  // <rect x="186" y="76" rx="4" ry="4" width="81" height="9" />
+  // <rect x="150" y="63" rx="0" ry="0" width="2" height="44" />
+  // <rect x="6" y="104" rx="0" ry="0" width="144" height="3" />
+  // <rect x="152" y="106" rx="0" ry="0" width="145" height="1" />
+  
+  // <rect x="28" y="127" rx="4" ry="4" width="243" height="31" />
+  // <rect x="62" y="188" rx="4" ry="4" width="148" height="19" />
+  
+  // <circle cx="39" cy="197" r="10" />
+  // <circle cx="39" cy="247" r="10" />
+  // <circle cx="39" cy="297" r="10" />
+  // <circle cx="39" cy="347" r="10" />
+  
+  // <rect x="64" y="237" rx="4" ry="4" width="148" height="19" />
+  // <rect x="65" y="287" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="337" rx="4" ry="4" width="148" height="19" />
+  
+  
+  // <circle cx="39" cy="397" r="10" />
+  // <circle cx="39" cy="447" r="10" />
+  // <circle cx="39" cy="497" r="10" />
+  // <circle cx="39" cy="547" r="10" />
+  
+  // <rect x="64" y="387" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="437" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="487" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="537" rx="4" ry="4" width="148" height="19" />
+  
+  
+  // <circle cx="39" cy="597" r="10" />
+  // <circle cx="39" cy="647" r="10" />
+  // <circle cx="39" cy="697" r="10" />
+  // <circle cx="39" cy="747" r="10" />
+  // <circle cx="39" cy="797" r="10" />
+  // <circle cx="39" cy="847" r="10" />
+  // <circle cx="39" cy="897" r="10" />
+  // <circle cx="39" cy="947" r="10" />
+  // <circle cx="39" cy="997" r="10" />
+  // <circle cx="39" cy="1047" r="10" />
+  
+  // <rect x="64" y="587" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="637" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="687" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="737" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="787" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="837" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="887" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="937" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="987" rx="4" ry="4" width="148" height="19" />
+  // <rect x="64" y="1037" rx="4" ry="4" width="148" height="19" />
+  // </ContentLoader>
+  
+  
+  //                   </div>
+
 
 
                 }
@@ -721,11 +875,11 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
         <AdminHeader toggleSidebar={toggleSidebar}></AdminHeader>
 
         {/* className='sticky-top'  */}
-        <div className=''>
+        {/* <div className=''> */}
           {
             pageGroupNav &&
             // sticky-top
-            <nav className="navbar  navbar-expand-lg navbar-light bg-light sub_header_background_color">
+            <nav className="navbar sticky-top navbar-expand-lg navbar-light bg-light sub_header_background_color">
               <div className="container-fluid" >
                 <Link className="navbar-brand sub_header_pg_text_color" style={{ color: '#4267b2' }} href="">{formatString(page_group)}</Link>
                 <button className="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#customNavbarCollapse" aria-controls="customNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -787,9 +941,9 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
           {/* px-md-4 py-md-5 px-lg-4 py-lg-5 px-2 py-2 */}
           {/* body_bg */}
-          <div className=''>
+          {/* <div className=''> */}
             {
-              isLoading ?
+              isLoading  ?
 
                 <ContentLoader
 
@@ -855,9 +1009,26 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
                 <>
 
+                
+
                   {child}
-
-
+                  <div>
+      {isVisible && (
+        <button 
+          className="btn btn-primary rounded-circle"
+          onClick={scrollToTop}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '30px',
+            zIndex: 1000,
+          }}
+        >
+          <i className="fa fa-arrow-up"></i>
+        </button>
+      )}
+    </div>
+                
                   <div className='d-flex justify-content-between px-4 mt-5 '>
                     <div>
                       <ul class="navbar-nav mr-auto">
@@ -875,12 +1046,13 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
                     </div>
                   </div>
                 </>
+                
 
             }
 
-          </div>
+          {/* </div> */}
 
-        </div>
+        {/* </div> */}
 
 
       </div>

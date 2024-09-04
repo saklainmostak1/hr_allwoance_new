@@ -10,6 +10,14 @@ const CopyVideoGalleryCategory = ({ id }) => {
     created_by: localStorage.getItem("userId"),
   });
 
+  const [status, setStatus] = useState([])
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
+      .then(res => res.json())
+      .then(data => setStatus(data))
+  }, [])
+
   const {
     data: videogallerySingle,
     isLoading,
@@ -152,8 +160,13 @@ const CopyVideoGalleryCategory = ({ id }) => {
                         placeholder="Enter Status"
                       >
                         <option>Select Status</option>
-                        <option value="1">Active</option>
-                        <option value="2">Inactive</option>
+                        {
+                          status.map(sta => 
+                            <>
+                            <option value={sta.id}>{sta.status_name}</option>
+                            </>
+                          )
+                        }
                       </select>
                     </div>
                   </div>

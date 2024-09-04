@@ -361,37 +361,68 @@ console.log(pageUsers)
 console.log(photogalleryCategoryAll)
   // Paigination end
 
-  const photogalleryCategoryAll_delete = (id) => {
+  // const photogalleryCategoryAll_delete = (id) => {
+  //   console.log(id);
+  //   const procced = window.confirm(`Are you sure to delete this item.`);
+  //   if (!procced) return;
+  //   // const proceed = window.confirm(`Are You Sure delete${id}`)
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/religion/religion_delete/${id}`,
+  //     {
+  //       method: "POST",
+  //     }
+  //   )
+  //     .then((response) => {
+  //       console.log(response);
+  //       response.json();
+  //       if (response.ok === true) {
+  //         refetch();
+  //         caregory_list();
+  //       } else {
+  //         alert("Data already running. You cant Delete this item.");
+  //       }
+  //     })
+  //     .then((data) => {
+  //       if (data) {
+  //         refetch();
+  //         console.log(data);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // alert("An error occurred while deleting the data. Please try again.");
+  //     });
+  // };
+
+  const religion_delete = async (id) => {
     console.log(id);
-    const procced = window.confirm(`Are you sure to delete this item.`);
-    if (!procced) return;
-    // const proceed = window.confirm(`Are You Sure delete${id}`)
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/religion/religion_delete/${id}`,
-      {
-        method: "POST",
-      }
-    )
-      .then((response) => {
-        console.log(response);
-        response.json();
-        if (response.ok === true) {
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/religion/religion_delete/${id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        const proceed = window.confirm(
+          "Are you sure you want to delete this item?"
+        );
+        if (proceed) {
           refetch();
           caregory_list();
+          console.log("Item deleted successfully.");
         } else {
-          alert("Data already running. You cant Delete this item.");
+          console.log("Delete action canceled.");
         }
-      })
-      .then((data) => {
-        if (data) {
-          refetch();
-          console.log(data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        // alert("An error occurred while deleting the data. Please try again.");
-      });
+      } else {
+        alert("Data already running. You can't delete this item.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while deleting the data. Please try again.");
+    }
   };
 
   const [message, setMessage] = useState();
@@ -423,7 +454,7 @@ console.log(photogalleryCategoryAll)
                       href={`/Admin/religion/religion_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Religion List
+                      Back to Create Religion
                     </Link>
                   </div>
                 </div>
@@ -551,7 +582,7 @@ console.log(photogalleryCategoryAll)
                                       key={btn.id}
                                       title="Delete"
                                       onClick={() =>
-                                        photogalleryCategoryAll_delete(item.id)
+                                        religion_delete(item.id)
                                       }
                                       style={{
                                         width: "35px ",

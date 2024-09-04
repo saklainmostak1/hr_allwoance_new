@@ -199,7 +199,7 @@ const GenderEdit = ({ id }) => {
     modified_by: localStorage.getItem("userId"),
   });
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [name, setName] = useState([])
   const { data: noticeCategorySingle, isLoading } = useQuery({
     queryKey: ["noticeCategorySingle", id],
     queryFn: async () => {
@@ -211,14 +211,16 @@ const GenderEdit = ({ id }) => {
     },
   });
 
-  const { data: religions = [] } = useQuery({
-    queryKey: ["religions"],
+  const { data: genders = [] } = useQuery({
+    queryKey: ["genders"],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
 
@@ -234,6 +236,16 @@ const GenderEdit = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'gender_name') {
+      setName('')
+    }
+
+
+    const existingBrand = genders.find((brand) => brand?.gender_name?.toLowerCase() === formData?.gender_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -243,22 +255,41 @@ const GenderEdit = ({ id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const duplicate = religions.some(
-      (existingReligion) =>
-        existingReligion.gender_name
-          .trim()
-          .replace(/\s+/g, "")
-          .toLowerCase() ===
-          formData.gender_name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingReligion.id !== id // Ensure it's not the same religion being edited
-    );
+    // const duplicate = religions.some(
+    //   (existingReligion) =>
+    //     existingReligion.gender_name
+    //       .trim()
+    //       .replace(/\s+/g, "")
+    //       .toLowerCase() ===
+    //       formData.gender_name.trim().replace(/\s+/g, "").toLowerCase() &&
+    //     existingReligion.id !== id // Ensure it's not the same religion being edited
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Gender name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Gender name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+    if (!formData.gender_name) {
+      setName('Gender name  is required')
+      return
     }
+
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = genders.find((brand) => normalizebrandName(brand.gender_name.toLowerCase()) === normalizebrandName(formData.gender_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Gender name already exists. Please choose a different Gender name.");
+      return
+
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_edit/${id}`,
@@ -334,7 +365,7 @@ const GenderEdit = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         value={formData.gender_name}
                         className="form-control form-control-sm required"
@@ -346,6 +377,9 @@ const GenderEdit = ({ id }) => {
                       {errorMessage && (
                         <div className="text-danger mt-1">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

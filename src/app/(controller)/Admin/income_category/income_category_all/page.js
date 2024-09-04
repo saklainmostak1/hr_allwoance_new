@@ -1,10 +1,12 @@
 import IncomeAllCategory from '@/app/(view)/admin/income_category/income_category_list/page';
 import React from 'react';
 
-const IncomeCategoryAll = () => {
+const IncomeCategoryAll = ({searchParams}) => {
     return (
         <div>
-            <IncomeAllCategory></IncomeAllCategory>
+            <IncomeAllCategory
+            searchParams={searchParams}
+            ></IncomeAllCategory>
         </div>
     );
 };

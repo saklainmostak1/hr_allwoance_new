@@ -234,7 +234,9 @@ const EditnewsCategory = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news_category/news_category_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
 
@@ -249,8 +251,27 @@ const EditnewsCategory = ({ id }) => {
     }
   }, [noticeCategorySingle]);
 
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategory.find((brand) => brand?.name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -260,19 +281,43 @@ const EditnewsCategory = ({ id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const duplicate = noticeCategory.some(
-      (existingReligion) =>
-        existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
-          formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingReligion.id !== id // Ensure it's not the same religion being edited
-    );
+    // const duplicate = noticeCategory.some(
+    //   (existingReligion) =>
+    //     existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
+    //       formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
+    //     existingReligion.id !== id // Ensure it's not the same religion being edited
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "News category name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "News category name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+
+
+    if (!formData.name) {
+      setName('News Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategory.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("News Category name already exists. Please choose a different News Category name.");
+      return
+
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news_category/news_category_edit/${id}`,
@@ -360,6 +405,9 @@ const EditnewsCategory = ({ id }) => {
                       {errorMessage && (
                         <div className="text-danger mt-1">{errorMessage}</div>
                       )}
+                      {name && (
+                        <div className="text-danger mt-1">{name}</div>
+                      )}
                     </div>
                   </div>
 
@@ -394,6 +442,9 @@ const EditnewsCategory = ({ id }) => {
                           )
                         }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

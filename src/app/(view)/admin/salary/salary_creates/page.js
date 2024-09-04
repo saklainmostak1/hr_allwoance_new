@@ -999,10 +999,10 @@ const SalaryCreate = () => {
         }
     });
 
-    const filteredAttendance = attendance.filter(att => {
-        const checktimeMonthYear = att.checktime.substring(0, 7);
-        return checktimeMonthYear === month;
-    });
+    // const filteredAttendance = attendance.filter(att => {
+    //     const checktimeMonthYear = att.checktime.substring(0, 7);
+    //     return checktimeMonthYear === month;
+    // });
 
     const matchLengths = salaries.map(emp => {
         const matchCount = attendance.filter(att => att.user_id === emp.user_id).length;
@@ -1022,7 +1022,7 @@ const SalaryCreate = () => {
         const checktimeMonthYear = att.start_date.substring(0, 7);
         return checktimeMonthYear === month;
     });
-
+console.log(month)
     const { data: leavesDays = [] } = useQuery({
         queryKey: ['leavesDays'],
         queryFn: async () => {

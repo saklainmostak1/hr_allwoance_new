@@ -193,15 +193,6 @@ const PhotoGalleryCategoryCreate = () => {
     created_by,
   });
   const [errorMessage, setErrorMessage] = useState("");
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
   const { data: noticeCategoryAll = [] } = useQuery({
     queryKey: ["noticeCategoryAll"],
     queryFn: async () => {
@@ -212,6 +203,37 @@ const PhotoGalleryCategoryCreate = () => {
       return data;
     },
   });
+
+
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+
 
   const user_create = async (e) => {
     e.preventDefault();
@@ -230,22 +252,44 @@ const PhotoGalleryCategoryCreate = () => {
     //   return;
     // }
 
-    const normalizedInputName = formData.name
-      .trim()
-
-      .toLowerCase();
-
-    const duplicate = noticeCategoryAll.some(
-      (existingCategory) =>
-        existingCategory.name.trim().toLowerCase() === normalizedInputName
-    )
-      ? "Events category name already exists. Please choose a different name."
-      : "";
-
-    if (duplicate) {
-      setErrorMessage(duplicate);
-      return;
+    if (!formData.name) {
+      setName('Event Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Event Category name already exists. Please choose a different Event Category name.");
+      return
+
+    }
+
+    // const normalizedInputName = formData.name
+    //   .trim()
+
+    //   .toLowerCase();
+
+    // const duplicate = noticeCategoryAll.some(
+    //   (existingCategory) =>
+    //     existingCategory.name.trim().toLowerCase() === normalizedInputName
+    // )
+    //   ? "Events category name already exists. Please choose a different name."
+    //   : "";
+
+    // if (duplicate) {
+    //   setErrorMessage(duplicate);
+    //   return;
+    // }
 
     try {
       const response = await fetch(
@@ -323,20 +367,21 @@ const PhotoGalleryCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
-                        className={`form-control form-control-sm required ${
-                          errorMessage ? "is-invalid" : ""
-                        }`}
+                        className='form-control form-control-sm required'
                         id="name"
                         placeholder="Enter Events Category Name"
                         type="text"
                         name="name"
                         value={formData.name}
                       />
-                      {errorMessage && (
-                        <div className="invalid-feedback">{errorMessage}</div>
-                      )}
+                     {
+                      name && <p className="text-danger m-0">{name}</p>
+                     }
+                     {
+                      errorMessage && <p  className="text-danger m-0">{errorMessage}</p>
+                     }
                     </div>
                   </div>
 
@@ -371,6 +416,9 @@ const PhotoGalleryCategoryCreate = () => {
                           )
                         }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

@@ -97,6 +97,47 @@ const OfficeVisitModel = {
         }
     },
 
+    office_visit_list_single: async (req, res) => {
+        try {
+            const query = 'SELECT * FROM office_visit WHERE id = ?';
+            connection.query(query, [req.params.id], (error, result) => {
+                if (!error && result.length > 0) {
+                    console.log(result);
+                    return res.send(result);
+                } else {
+                    console.log(error || 'Product not found');
+                    return res.status(404).json({ message: 'Product not found.' });
+                }
+            });
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
+   
+    
+    office_visit_list_single_update: async (req, res) => {
+        try {
+            const { office_name, office_address, office_mobile, office_email, add_office_date, modified_by} = req.body;
+    
+            const query = `UPDATE office_visit SET office_name = ?, office_address = ?, office_mobile = ?, office_email = ?, add_office_date = ?, modified_by = ? WHERE id = ?`;
+            connection.query(query, [office_name, office_address, office_mobile, office_email, add_office_date, modified_by, req.params.id], (error, result) => {
+                if (error) {
+                    console.log(error);
+                    return res.status(500).json({ message: 'Database error occurred.' });
+                }
+                if (result.affectedRows > 0) {
+                    console.log(result);
+                    return res.send(result);
+                } else {
+                    return res.status(404).json({ message: 'Payroll record not found.' });
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ message: 'An error occurred.' });
+        }
+    },
 
 
 

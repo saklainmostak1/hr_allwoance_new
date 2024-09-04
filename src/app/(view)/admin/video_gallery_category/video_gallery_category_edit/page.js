@@ -201,10 +201,20 @@ import { useRouter } from "next/navigation";
 const EditVideoGalleryCategory = ({ id }) => {
   const router = useRouter();
 
+  const [status, setStatus] = useState([])
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
+      .then(res => res.json())
+      .then(data => setStatus(data))
+  }, [])
   const [formData, setFormData] = useState({
-    name: "",
+    name: "", status: '',
     modified_by: localStorage.getItem("userId"),
   });
+
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
   const [errorMessage, setErrorMessage] = useState("");
 
   const { data: noticeCategorySingle, isLoading } = useQuery({
@@ -225,14 +235,17 @@ const EditVideoGalleryCategory = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery_category/video_gallery_category_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
 
   useEffect(() => {
     if (noticeCategorySingle && noticeCategorySingle[0]) {
-      const { name } = noticeCategorySingle[0];
+      const { name, status } = noticeCategorySingle[0];
       setFormData({
+        status,
         name,
         modified_by: localStorage.getItem("userId"),
       });
@@ -241,6 +254,22 @@ const EditVideoGalleryCategory = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategory.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -250,19 +279,44 @@ const EditVideoGalleryCategory = ({ id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const duplicate = noticeCategory.some(
-      (existingReligion) =>
-        existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
-          formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingReligion.id !== id // Ensure it's not the same religion being edited
-    );
+    // const duplicate = noticeCategory.some(
+    //   (existingReligion) =>
+    //     existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
+    //       formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
+    //     existingReligion.id !== id // Ensure it's not the same religion being edited
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Events category name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Events category name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+
+
+    if (!formData.name) {
+      setName('Video gallery Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategory.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Video gallery Category name already exists. Please choose a different Video gallery Category name.");
+      return
+
+    }
+
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery_category/video_gallery_category_edit/${id}`,
@@ -338,7 +392,7 @@ const EditVideoGalleryCategory = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         value={formData.name}
                         className="form-control form-control-sm required"
@@ -350,6 +404,44 @@ const EditVideoGalleryCategory = ({ id }) => {
                       {errorMessage && (
                         <div className="text-danger mt-1">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger">{name}</p>
+                      }
+                    </div>
+                  </div>
+                  <div className="form-group row">
+                    <label className="col-form-label font-weight-bold col-md-3">
+                      {" "}
+                      Status:
+                      <small>
+                        <sup>
+                          <small>
+                            <i className="text-danger fas fa-star"></i>
+                          </small>
+                        </sup>
+                      </small>
+                    </label>
+                    <div className="col-md-6">
+                      <select
+                        onChange={handleChange}
+                        value={formData.status}
+                        name="status"
+                        id="status"
+                        className="form-control form-control-sm required"
+                        placeholder="Enter Status"
+                      >
+                        <option>Select Status</option>
+                        {
+                          status.map(sta => 
+                            <>
+                            <option value={sta.id}>{sta.status_name}</option>
+                            </>
+                          )
+                        }
+                      </select>
+                      {
+                        statuss && <p className="text-danger">{statuss}</p>
+                      }
                     </div>
                   </div>
 

@@ -195,7 +195,7 @@ import { useRouter } from "next/navigation";
 
 const EditCompanyType = ({ id }) => {
   const router = useRouter();
-
+  const [name, setName] = useState([])
   const [formData, setFormData] = useState({
     company_type_name: "",
     modified_by: localStorage.getItem("userId"),
@@ -220,7 +220,9 @@ const EditCompanyType = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/company_type/company_type_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
 
@@ -236,6 +238,9 @@ const EditCompanyType = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'company_type_name') {
+      setName('')
+    }
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -244,6 +249,10 @@ const EditCompanyType = ({ id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.company_type_name) {
+      setName('Company Type name is required')
+      return
+    }
 
     const duplicate = companyTypes.some(
       (existingCompanyType) =>
@@ -251,7 +260,7 @@ const EditCompanyType = ({ id }) => {
           ?.trim()
           .replace(/\s+/g, "")
           .toLowerCase() ===
-          formData.company_type_name.trim().replace(/\s+/g, "").toLowerCase() &&
+        formData.company_type_name.trim().replace(/\s+/g, "").toLowerCase() &&
         existingCompanyType.id !== id
     );
 
@@ -339,7 +348,7 @@ const EditCompanyType = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+
                         onChange={handleChange}
                         value={formData.company_type_name}
                         className="form-control form-control-sm required"
@@ -351,6 +360,10 @@ const EditCompanyType = ({ id }) => {
                       {errorMessage && (
                         <div className="text-danger mt-1">{errorMessage}</div>
                       )}
+
+                      {
+                        name && <p className="text-danger">{name}</p>
+                      }
                     </div>
                   </div>
 

@@ -11,6 +11,31 @@ const CopynewsCategory = ({ id }) => {
     created_by: localStorage.getItem("userId"),
   });
 
+  const [status, setStatus] = useState([])
+ 
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
+      .then(res => res.json())
+      .then(data => setStatus(data))
+  }, [])
+
+
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+  const [errorMessage, setErrorMessage] = useState([])
+
+  const { data: noticeCategoryAll = [] } = useQuery({
+    queryKey: ["noticeCategoryAll"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news_category/news_category_all`
+      );
+      const data = await res.json();
+      return data;
+    },
+  });
+
   const {
     data: newsSingle,
     isLoading,
@@ -41,6 +66,21 @@ const CopynewsCategory = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -51,6 +91,31 @@ const CopynewsCategory = ({ id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+
+    if (!formData.name) {
+      setName('News Category name  is required')
+      return
+    }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("News Category name already exists. Please choose a different News Category name.");
+      return
+
+    }
+
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news_category/news_category_create`,
@@ -65,7 +130,7 @@ const CopynewsCategory = ({ id }) => {
       const data = await response.json();
       console.log(data);
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        sessionStorage.setItem("message", "Data Copy successfully!");
         router.push("/Admin/news_category/news_category_all");
       }  // Handle response data or success message
     } catch (error) {
@@ -135,6 +200,12 @@ const CopynewsCategory = ({ id }) => {
                         type="text"
                         name="name"
                       />
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
+                      {
+                        errorMessage && <p className="text-danger m-0">{errorMessage}</p>
+                      }
                     </div>
                   </div>
 
@@ -159,9 +230,17 @@ const CopynewsCategory = ({ id }) => {
                         placeholder="Enter Status"
                       >
                         <option>Select Status</option>
-                        <option value="1">Active</option>
-                        <option value="2">Inactive</option>
+                        {
+                          status.map(sta => 
+                            <>
+                            <option value={sta.id}>{sta.status_name}</option>
+                            </>
+                          )
+                        }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

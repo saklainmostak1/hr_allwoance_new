@@ -1,6 +1,7 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const AccountHeadUpdate = ({ id }) => {
@@ -117,6 +118,8 @@ const AccountHeadUpdate = ({ id }) => {
         // }));
     };
 
+    const router = useRouter()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -158,7 +161,12 @@ const AccountHeadUpdate = ({ id }) => {
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
-            console.log(data); // Handle response data or success message
+            console.log(data); 
+            if (data) {
+                sessionStorage.setItem("message", "Data Update successfully!");
+                router.push('/Admin/account_head/account_head_all');
+            }
+            // Handle response data or success message
         } catch (error) {
             console.error('Error updating school shift:', error);
             // Handle error or show an error message to the user
@@ -190,10 +198,10 @@ const AccountHeadUpdate = ({ id }) => {
                                             value={formData.account_head_name}
                                             class="form-control form-control-sm required" id="title" placeholder="Enter Account Head Type Name" type="text" name="account_head_name" />
                                         {
-                                            account_head_name && <p className='text-danger'>{account_head_name}</p>
+                                            account_head_name && <p className='text-danger m-0'>{account_head_name}</p>
                                         }
                                         {
-                                            sameBrandName && <p className='text-danger'>{sameBrandName}</p>
+                                            sameBrandName && <p className='text-danger m-0'>{sameBrandName}</p>
                                         }
                                     </div></div>
                                     <div class="form-group row">
@@ -215,7 +223,7 @@ const AccountHeadUpdate = ({ id }) => {
                                                 }
                                             </select>
                                             {
-                                            account_type_id && <p className='text-danger'>{account_type_id}</p>
+                                            account_type_id && <p className='text-danger m-0'>{account_type_id}</p>
                                         }
 
                                         </div>
@@ -226,7 +234,7 @@ const AccountHeadUpdate = ({ id }) => {
                                             value={formData.opening_balance}
                                             class="form-control form-control-sm required" id="title" placeholder="Enter Account Head Type Name" type="text" name="opening_balance" />
                                         {
-                                            opening_balance && <p className='text-danger'>{opening_balance}</p>
+                                            opening_balance && <p className='text-danger m-0'>{opening_balance}</p>
                                         }
                                     </div></div>
 

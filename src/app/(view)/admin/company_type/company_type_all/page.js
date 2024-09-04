@@ -170,7 +170,7 @@ const CompanyTypeList = ({ searchParams }) => {
                       href={`/Admin/company_type/company_type_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create company Type
+                      Back to Create company Type
                     </Link>
                   </div>
                 </div>

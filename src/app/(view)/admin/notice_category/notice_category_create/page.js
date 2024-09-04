@@ -418,6 +418,12 @@ import { useQuery } from "@tanstack/react-query";
 const NoticeCategoryCreate = () => {
 
 
+
+
+ 
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
   const [status, setStatus] = useState([])
 
   useEffect(() => {
@@ -425,6 +431,17 @@ const NoticeCategoryCreate = () => {
       .then(res => res.json())
       .then(data => setStatus(data))
   }, [])
+
+  const { data: noticeCategoryAll = [] } = useQuery({
+    queryKey: ["noticeCategoryAll"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_all`
+      );
+      const data = await res.json();
+      return data;
+    },
+  });
 
 
   const created_by = localStorage.getItem("userId");
@@ -438,22 +455,30 @@ const NoticeCategoryCreate = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const { data: noticeCategoryAll = [] } = useQuery({
-    queryKey: ["noticeCategoryAll"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_all`
-      );
-      const data = await res.json();
-      return data;
-    },
-  });
+
 
   const user_create = async (e) => {
     e.preventDefault();
@@ -472,21 +497,43 @@ const NoticeCategoryCreate = () => {
     //   return;
     // }
 
-    const normalizedInputName = formData.name
-      .trim()
+    // const normalizedInputName = formData.name
+    //   .trim()
 
-      .toLowerCase();
+    //   .toLowerCase();
 
-    const duplicate = noticeCategoryAll.some(
-      (existingCategory) =>
-        existingCategory.name.trim().toLowerCase() === normalizedInputName
-    )
-      ? "Notice category name already exists. Please choose a different name."
-      : "";
+    // const duplicate = noticeCategoryAll.some(
+    //   (existingCategory) =>
+    //     existingCategory.name.trim().toLowerCase() === normalizedInputName
+    // )
+    //   ? "Notice category name already exists. Please choose a different name."
+    //   : "";
 
-    if (duplicate) {
-      setErrorMessage(duplicate);
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(duplicate);
+    //   return;
+    // }
+
+    if (!formData.name) {
+      setName('Notice Category name  is required')
+      return
+    }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Notice Category name already exists. Please choose a different Notice Category name.");
+      return
+
     }
 
     try {
@@ -565,7 +612,7 @@ const NoticeCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${
                           errorMessage ? "is-invalid" : ""
@@ -579,6 +626,9 @@ const NoticeCategoryCreate = () => {
                       {errorMessage && (
                         <div className="invalid-feedback">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 
@@ -612,6 +662,9 @@ const NoticeCategoryCreate = () => {
                         )
                        }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

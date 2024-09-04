@@ -5,9 +5,43 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const CopyleaveCategory = ({ id }) => {
+
+
+  const [created_by, setCreated_by] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  // Effect to initialize created_by state from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setCreated_by(storedUserId);
+    }
+  }, []);
+
+  const [name, setName] = useState([])
+  const [sameBrandName, setSameBrandName] = useState([])
+
+
+  const { data: brands = []
+  } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_all`)
+
+      const data = await res.json()
+      return data
+    }
+  })
+
+
+
   const [formData, setFormData] = useState({
     name: "",
-    created_by: localStorage.getItem("userId"),
+    created_by: created_by,
   });
 
   const {
@@ -24,7 +58,7 @@ const CopyleaveCategory = ({ id }) => {
       return data;
     },
   });
-console.log(leaveCategorySingle)
+  console.log(leaveCategorySingle)
   useEffect(() => {
     if (leaveCategorySingle && leaveCategorySingle[0]) {
       const { name } = leaveCategorySingle[0];
@@ -34,7 +68,7 @@ console.log(leaveCategorySingle)
       });
     }
   }, [leaveCategorySingle]);
-console.log(formData)
+  console.log(formData)
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
@@ -44,14 +78,48 @@ console.log(formData)
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'name') {
+      setName('')
+    }
+
+    const existingBrand = brands.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setSameBrandName("");
+    }
+
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
-const router = useRouter()
+  const router = useRouter()
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+
+    if (!formData.name) {
+      setName('Leave Category name is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = brands.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setSameBrandName("Leave Category name already exists. Please choose a different Leave Category name.");
+      return
+
+    }
+
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_create`,
@@ -64,8 +132,8 @@ const router = useRouter()
         }
       );
       const data = await response.json();
-      console.log(data); 
-      if(data){
+      console.log(data);
+      if (data) {
         sessionStorage.setItem("message", "Data Copy successfully!");
         router.push(`/Admin/leave_category/leave_category_all`)
       }
@@ -137,6 +205,14 @@ const router = useRouter()
                         type="text"
                         name="name"
                       />
+
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
+                      {
+                        sameBrandName && <p className="text-danger m-0">{sameBrandName}</p>
+                      }
+
                     </div>
                   </div>
 

@@ -186,11 +186,26 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const CompanyTypeCreate = () => {
-  const created_by = localStorage.getItem("userId");
+  const [created_by, setCreated_by] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  // Effect to initialize created_by state from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setCreated_by(storedUserId);
+    }
+  }, []);
+
+
   const router = useRouter();
   const [formData, setFormData] = useState({
     company_type_name: "",
@@ -208,9 +223,22 @@ const CompanyTypeCreate = () => {
       return data;
     },
   });
+const [name, setName] = useState([])
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'company_type_name') {
+      setName('')
+    }
+
+    const existingBrand = companyTypes.find((brand) => brand?.company_type_name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -220,16 +248,34 @@ const CompanyTypeCreate = () => {
   const user_create = async (e) => {
     e.preventDefault();
 
-    const duplicate = companyTypes.some(
-      (existingCompanyType) =>
-        existingCompanyType.company_type_name === formData.company_type_name
-    );
+    // const duplicate = companyTypes.some(
+    //   (existingCompanyType) =>
+    //     existingCompanyType?.company_type_name?.toLowerCase() === formData?.company_type_name?.toLowerCase()
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Company type name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Company type name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+
+    if (!formData.company_type_name) {
+      setName('company type name  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = companyTypes.find((brand) => normalizebrandName(brand.company_type_name.toLowerCase()) === normalizebrandName(formData.company_type_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("company type name already exists. Please choose a different company type name.");
+      return
+
     }
 
     try {
@@ -308,20 +354,23 @@ const CompanyTypeCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
-                        className={`form-control form-control-sm required ${
-                          errorMessage ? "is-invalid" : ""
-                        }`}
+                        className='form-control form-control-sm required'
                         id="company_type_name"
                         placeholder="Enter Company Type Name"
                         type="text"
                         name="company_type_name"
                         value={formData.company_type_name}
                       />
-                      {errorMessage && (
-                        <div className="invalid-feedback">{errorMessage}</div>
-                      )}
+                      {
+                        errorMessage && <p className="text-danger m-0">{errorMessage}</p>
+                      }
+                      
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
+                      
                     </div>
                   </div>
 

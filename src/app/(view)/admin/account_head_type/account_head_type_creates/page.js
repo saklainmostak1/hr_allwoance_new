@@ -79,7 +79,7 @@ const CoountHeadTypeCreate = () => {
     const user_create = (event) => {
         event.preventDefault();
         if (!formData.account_head_type_name || formData.account_head_type_name.trim() === '') {
-            setCompany('Account Type name is required');
+            setCompany('Account Head Type name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }

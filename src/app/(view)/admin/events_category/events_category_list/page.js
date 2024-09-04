@@ -545,7 +545,7 @@ const PhotoGelleryCategoryList = ({ searchParams }) => {
                       href={`/Admin/events_category/events_category_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Events Category
+                      Back to Create Events Category
                     </Link>
                   </div>
                 </div>

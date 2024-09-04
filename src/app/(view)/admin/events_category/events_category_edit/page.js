@@ -216,7 +216,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
     name: "", status: '',
     modified_by: localStorage.getItem("userId"),
   });
-  const [errorMessage, setErrorMessage] = useState("");
+
 
   const { data: noticeCategorySingle, isLoading } = useQuery({
     queryKey: ["noticeCategorySingle", id],
@@ -229,16 +229,24 @@ const EditPhotoGalleryCategory = ({ id }) => {
     },
   });
 
-  const { data: noticeCategory = [] } = useQuery({
-    queryKey: ["noticeCategory"],
+  const [errorMessage, setErrorMessage] = useState("");
+  const { data: noticeCategoryAll = [] } = useQuery({
+    queryKey: ["noticeCategoryAll"],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/events_category/events_category_all`
       );
       const data = await res.json();
-      return data;
+
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
+
+
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
 
   useEffect(() => {
     if (noticeCategorySingle && noticeCategorySingle[0]) {
@@ -253,6 +261,22 @@ const EditPhotoGalleryCategory = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -262,19 +286,28 @@ const EditPhotoGalleryCategory = ({ id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const duplicate = noticeCategory.some(
-      (existingReligion) =>
-        existingReligion.name.trim().replace(/\s+/g, "").toLowerCase() ===
-          formData.name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingReligion.id !== id // Ensure it's not the same religion being edited
-    );
-
-    if (duplicate) {
-      setErrorMessage(
-        "Events category name already exists. Please choose a different name."
-      );
-      return;
+    if (!formData.name) {
+      setName('Event Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Event Category name already exists. Please choose a different Event Category name.");
+      return
+
+    }
+   
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/events_category/events_category_edit/${id}`,
@@ -350,7 +383,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         value={formData.name}
                         className="form-control form-control-sm required"
@@ -359,9 +392,13 @@ const EditPhotoGalleryCategory = ({ id }) => {
                         type="text"
                         name="name"
                       />
-                      {errorMessage && (
-                        <div className="text-danger mt-1">{errorMessage}</div>
-                      )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
+                      {
+                        errorMessage && <p className="text-danger m-0">{errorMessage}</p>
+                      }
+                      
                     </div>
                   </div>
                   <div className="form-group row">
@@ -395,6 +432,9 @@ const EditPhotoGalleryCategory = ({ id }) => {
                           )
                         }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

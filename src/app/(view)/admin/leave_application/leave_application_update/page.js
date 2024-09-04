@@ -366,7 +366,7 @@ const LeaveApplicationEdit = ({ id }) => {
 
     // State for form data
     const [formData, setFormData] = useState({
-        leave_category: '', start_date: '', receiver: '', whose_leave: '', end_date: '', modified_by: created_by, leave_date: '',
+        leave_category: '', start_date: '', receiver: '', whose_leave: '', end_date: '', modified_by: created_by, leave_date: '', branch_id: '',
     });
 
     const { data: LeaveApplicationSingle } = useQuery({
@@ -383,12 +383,21 @@ const LeaveApplicationEdit = ({ id }) => {
 
     useEffect(() => {
         if (LeaveApplicationSingle && LeaveApplicationSingle[0]) {
-            const { leave_category, whose_leave, start_date, end_date, receiver, } = LeaveApplicationSingle[0];
+            const { leave_category, whose_leave, start_date, end_date, receiver, branch_id } = LeaveApplicationSingle[0];
             setFormData({
-                leave_category, whose_leave, start_date, end_date, receiver, modified_by: created_by
+                leave_category, whose_leave, start_date, end_date, receiver, branch_id, modified_by: created_by
             });
         }
     }, [LeaveApplicationSingle, created_by]);
+
+    
+    const [leave_category, setleave_category] = useState([])
+    const [start_date, setstart_date] = useState([])
+    const [receiver, setreceiver] = useState([])
+    const [branch_id, setbranch_id] = useState([])
+    const [end_date, setend_date] = useState([])
+    const [whose_leave, setwhose_leave] = useState([])
+
 
     // Handle input changes for the form fields
     const handleChange = (event) => {
@@ -398,6 +407,35 @@ const LeaveApplicationEdit = ({ id }) => {
         if (name === 'whose_leave') {
             setLeaveFor(value); // Update leaveFor state
         }
+        if (name === 'branch_id') {
+            setFormData(prevData => ({
+                ...prevData,
+                branch_id: value,
+                whose_leave: '' // Clear the employee selection when branch changes
+            }));
+            return;
+        }
+
+
+        if(name === 'leave_category'){
+            setleave_category('')
+        }
+        if(name === 'start_date'){
+            setstart_date('')
+        }
+        if(name === 'receiver'){
+            setreceiver('')
+        }
+        if(name === 'branch_id'){
+            setbranch_id('')
+        }
+        if(name === 'end_date'){
+            setend_date('')
+        }
+        if(name === 'whose_leave'){
+            setwhose_leave('')
+        }
+        
 
         setFormData(prevData => ({
             ...prevData,
@@ -431,13 +469,13 @@ const LeaveApplicationEdit = ({ id }) => {
 
     // Filter employees based on selected branch
     useEffect(() => {
-        if (selectedBranch) {
-            const employeesInBranch = employeeList.filter(employee => employee.branch_id === parseFloat(selectedBranch));
+        if (formData.branch_id) {
+            const employeesInBranch = employeeList.filter(employee => employee.branch_id === parseFloat(formData.branch_id));
             setFilteredEmployees(employeesInBranch);
         } else {
-            setFilteredEmployees(employeeList);
+            setFilteredEmployees([]);
         }
-    }, [selectedBranch, employeeList]);
+    }, [formData, employeeList]);
 
     // Group employees by their designation
     const groupedEmployees = filteredEmployees.reduce((groups, employee) => {
@@ -465,6 +503,10 @@ const LeaveApplicationEdit = ({ id }) => {
             ...prevData,
             start_date: formattedDatabaseDate
         }));
+
+        if(formattedDatabaseDate){
+            setstart_date('')
+        }
     };
 
     useEffect(() => {
@@ -495,6 +537,9 @@ const LeaveApplicationEdit = ({ id }) => {
             ...prevData,
             end_date: formattedDatabaseDate
         }));
+        if(formattedDatabaseDate){
+            setend_date('')
+        }
     };
 
     useEffect(() => {
@@ -528,12 +573,41 @@ const LeaveApplicationEdit = ({ id }) => {
         return dateArray;
     };
 
- 
+
 
     const router = useRouter()
 
     const user_create = (event) => {
         event.preventDefault();
+
+
+        if(!formData.leave_category){
+            setleave_category('Select a leave category')
+            return
+        }
+        if(!formData.start_date){
+            setstart_date('Start date is required')
+            return
+        }
+        if(!formData.receiver){
+            setreceiver('Receiver is required')
+            return
+        }
+        if(!formData.branch_id){
+            setbranch_id('Branch is required')
+            return
+        }
+        else{
+            setbranch_id('')
+        }
+        if(!formData.end_date){
+            setend_date('End date is required')
+            return
+        }
+        if(!formData.whose_leave){
+            setwhose_leave('whose leave  is required')
+            return
+        }
 
 
         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_edit/${id}`, {
@@ -570,37 +644,37 @@ const LeaveApplicationEdit = ({ id }) => {
         }
     });
 
-   
 
-    const groupedReceivers = employeeList.reduce((groups, employee) => {
+
+    // const groupedReceivers = employeeList.reduce((groups, employee) => {
+    //     const designation = employee.designation_name;
+
+    //     // Skip the employee with user_id 14012
+    //     if (employee.user_id === parseFloat(leaveFor)) {
+    //         return groups;
+    //     }
+
+    //     if (!groups[designation]) {
+    //         groups[designation] = [];
+    //     }
+
+    //     groups[designation].push(employee);
+    //     return groups;
+    // }, {});
+
+    const filteredOutEmployee = filteredEmployees.filter(employee => employee.user_id !== parseFloat(leaveFor));
+
+    const groupedReceivers = filteredOutEmployee.reduce((groups, employee) => {
         const designation = employee.designation_name;
-
-        // Skip the employee with user_id 14012
-        if (employee.user_id === parseFloat(leaveFor)) {
-            return groups;
-        }
-
         if (!groups[designation]) {
             groups[designation] = [];
         }
-
         groups[designation].push(employee);
         return groups;
     }, {});
 
 
 
-    
-    // Extract the employee with user_id 14012
-    const employee14012 = filteredEmployees.find(employee => employee.user_id === parseFloat(formData.whose_leave));
-
-    console.log(employee14012);
-    
-
-    // console.log(groupedReceivers)
-
-    console.log(groupedEmployees)
-    console.log(groupedEmployees)
 
     return (
         <div className="container-fluid">
@@ -620,7 +694,7 @@ const LeaveApplicationEdit = ({ id }) => {
                                 </div>
                                 <div className="card-body">
                                     <form method="post" autoComplete="off" onSubmit={user_create}>
-                                        <div className="form-group row">
+                                        {/* <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Branch Name:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <select
@@ -666,14 +740,87 @@ const LeaveApplicationEdit = ({ id }) => {
                                                     ))}
                                                 </select>
                                             </div>
+                                        </div> */}
+                                        <div className="form-group row">
+                                            <label className="col-form-label font-weight-bold col-md-3">Branch Name:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                            <div className="col-md-6">
+                                                <select
+                                                    value={formData.branch_id}
+                                                    onChange={(e) => {
+                                                      
+                                                        setSelectedBranch(e.target.value);
+                                                        handleChange(e)
+                                                    }}
+                                                    name="branch_id"
+                                                    className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                    id="branch"
+                                                >
+                                                    <option value="">Select Branch</option>
+                                                    {branches.map(branch => (
+                                                        <option key={branch.id} value={branch.id}>{branch.branch_name}</option>
+                                                    ))}
+                                                </select>
+                                                {
+                                                    branch_id && <p className='text-danger m-0'>{branch_id}</p>
+                                                }
+                                                 {/* <select
+                                                className="form-control"
+                                                id="branch_id"
+                                                name="branch_id"
+                                                value={formData.branch_id}
+                                                onChange={(e) => {
+                                                    setEmployeeName(e.target.value);
+                                                    handleChange(e)
+                                                }}
+                                            >
+                                                <option value="">Select a Branch</option>
+                                                {branches.map(branch => (
+                                                    <option key={branch.id} value={branch.id}>
+                                                        {branch.branch_name}
+                                                    </option>
+                                                ))}
+                                            </select> */}
+                                            </div>
                                         </div>
+
+                                        <div className="form-group row">
+                                            <label className="col-form-label font-weight-bold col-md-3">Leave For:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                            <div className="col-md-6">
+                                                <select
+                                                    onChange={(e) => {
+                                                        setLeaveFor(e.target.value);
+                                                        handleChange(e);
+                                                    }}
+                                                    value={formData.whose_leave}
+                                                    name="whose_leave"
+                                                    className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                    id="whose_leave"
+                                                // disabled={!selectedBranch}  // Disable if no branch is selected
+                                                >
+                                                    <option value="">Select Applicant</option>
+                                                    {Object.keys(groupedEmployees).map(designation => (
+                                                        <optgroup key={designation} label={designation}>
+                                                            {groupedEmployees[designation].map(employee => (
+                                                                <option key={employee.user_id} value={employee.user_id}>
+                                                                    {employee.full_name}
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                    ))}
+                                                </select>
+                                                {
+                                                    whose_leave && <p className='text-danger m-0'>{whose_leave}</p>
+                                                }
+                                            </div>
+                                        </div>
+
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Leave Category:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <select
-                                                 value={formData.leave_category}
+                                                    value={formData.leave_category}
                                                     onChange={handleChange}
-                                                    required
+                                                    
                                                     name="leave_category"
                                                     className="form-control form-control-sm trim integer_no_zero"
                                                     id="leave_category"
@@ -684,6 +831,9 @@ const LeaveApplicationEdit = ({ id }) => {
                                                         <option key={category.id} value={category.id}>{category.name}</option>
                                                     ))}
                                                 </select>
+                                                {
+                                                    leave_category && <p className='text-danger m-0'>{leave_category}</p>
+                                                }
                                             </div>
                                         </div>
                                         <div className="form-group row">
@@ -705,6 +855,9 @@ const LeaveApplicationEdit = ({ id }) => {
                                                     onChange={(e) => handleDateSelection(e)}
                                                     style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
                                                 />
+                                                 {
+                                                    start_date && <p className='text-danger m-0'>{start_date}</p>
+                                                }
                                             </div>
                                         </div>
                                         <div className="form-group row">
@@ -726,6 +879,9 @@ const LeaveApplicationEdit = ({ id }) => {
                                                     onChange={(e) => handleDateSelections(e)}
                                                     style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
                                                 />
+                                                 {
+                                                    end_date && <p className='text-danger m-0'>{end_date}</p>
+                                                }
                                             </div>
                                         </div>
                                         {/* <div className="form-group row">
@@ -752,7 +908,7 @@ const LeaveApplicationEdit = ({ id }) => {
                                             <div className="col-md-6">
                                                 <select
                                                     onChange={handleChange}
-                                                    required
+                                                    
                                                     name="receiver"
                                                     className="form-control form-control-sm trim integer_no_zero"
                                                     id="receiver"
@@ -769,6 +925,9 @@ const LeaveApplicationEdit = ({ id }) => {
                                                         </optgroup>
                                                     ))}
                                                 </select>
+                                                {
+                                                    receiver && <p className='text-danger m-0'>{receiver}</p>
+                                                }
                                             </div>
                                         </div>
                                         <div className="form-group row">

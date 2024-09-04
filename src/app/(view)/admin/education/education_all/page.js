@@ -109,40 +109,73 @@ const EducationList = ({ searchParams }) => {
 
   // Paigination end
 
-  const photogalleryCategoryAll_delete = (id) => {
-    console.log(id);
-    const procced = window.confirm(`Are you sure to delete this item?`);
-    if (!procced) return;
+  // const photogalleryCategoryAll_delete = (id) => {
+  //   console.log(id);
+  //   const procced = window.confirm(`Are you sure to delete this item?`);
+  //   if (!procced) return;
 
-    // const proceed = window.confirm(`Are You Sure delete${id}`)
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/education/education_delete/${id}`,
-      {
-        method: "POST",
-      }
-    )
-      .then((response) => {
-        console.log(response);
-        response.json();
+  //   // const proceed = window.confirm(`Are You Sure delete${id}`)
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/education/education_delete/${id}`,
+  //     {
+  //       method: "POST",
+  //     }
+  //   )
+  //     .then((response) => {
+  //       console.log(response);
+  //       response.json();
+  //       if (response.ok === true) {
+  //         refetch();
+  //         caregory_list();
+  //       } else {
+  //         alert("Data already running. You cant Delete this item.");
+  //       }
+  //     })
+  //     .then((data) => {
+  //       if (data) {
+  //         refetch();
+  //         console.log(data);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // alert("An error occurred while deleting the data. Please try again.");
+  //     });
+  // };
+
+
+  const education_delete = id => {
+
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/education/education_delete/${id}`, {
+      method: "POST",
+    })
+      .then(response => {
+        console.log(response)
+        response.json()
         if (response.ok === true) {
-          refetch();
-          caregory_list();
-        } else {
-          alert("Data already running. You cant Delete this item.");
+          const procced = window.confirm(`Are You Sure delete`)
+          if (procced) {
+            refetch();
+            caregory_list()
+          }
+        }
+        else {
+          alert('Data already running. You cant Delete this item');
         }
       })
-      .then((data) => {
+      .then(data => {
         if (data) {
-          refetch();
+
           console.log(data);
         }
       })
-      .catch((error) => {
-        console.error("Error:", error);
-        // alert("An error occurred while deleting the data. Please try again.");
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the data. Please try again.');
       });
-  };
 
+  }
   const [message, setMessage] = useState();
   useEffect(() => {
     if (sessionStorage.getItem("message")) {
@@ -150,6 +183,8 @@ const EducationList = ({ searchParams }) => {
       sessionStorage.removeItem("message");
     }
   }, []);
+
+
 
   return (
     <div className="container-fluid">
@@ -172,7 +207,7 @@ const EducationList = ({ searchParams }) => {
                       href={`/Admin/education/education_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Education List
+                      Back to Create Education
                     </Link>
                   </div>
                 </div>
@@ -194,9 +229,8 @@ const EducationList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/education/education_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/education/education_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -205,11 +239,10 @@ const EducationList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/education/education_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -218,9 +251,8 @@ const EducationList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/education/education_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/education/education_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -271,8 +303,8 @@ const EducationList = ({ searchParams }) => {
                               <td>
                                 {photogalleryCategoryAll?.created_date
                                   ? formatDateTime(
-                                      photogalleryCategoryAll.created_date
-                                    )
+                                    photogalleryCategoryAll.created_date
+                                  )
                                   : ""}
                               </td>
 
@@ -310,7 +342,7 @@ const EducationList = ({ searchParams }) => {
                                         key={filteredBtnIconDelete.id}
                                         title="Delete"
                                         onClick={() =>
-                                          photogalleryCategoryAll_delete(
+                                          education_delete(
                                             photogalleryCategoryAll.id
                                           )
                                         }
@@ -353,9 +385,8 @@ const EducationList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/education/education_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/education/education_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -364,11 +395,10 @@ const EducationList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/education/education_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -377,9 +407,8 @@ const EducationList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/education/education_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/education/education_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

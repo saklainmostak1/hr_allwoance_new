@@ -314,9 +314,23 @@ const GenderCreate = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ gender_name: "", created_by });
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState([])
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if (name === 'gender_name') {
+      setName('')
+    }
+
+
+    const existingBrand = genders.find((brand) => brand?.gender_name?.toLowerCase() === formData?.gender_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -339,19 +353,36 @@ const GenderCreate = () => {
     e.preventDefault();
 
     // Check for exact duplicate gender names
-    const duplicate = genders.some(
-      (existingGender) =>
-        existingGender.gender_name.trim().replace(/\s+/g, "").toLowerCase() ===
-        formData.gender_name.trim().replace(/\s+/g, "").toLowerCase()
-    );
+    // const duplicate = genders.some(
+    //   (existingGender) =>
+    //     existingGender.gender_name.trim().replace(/\s+/g, "").toLowerCase() ===
+    //     formData.gender_name.trim().replace(/\s+/g, "").toLowerCase()
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Gender name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Gender name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+    if (!formData.gender_name) {
+      setName('Gender name  is required')
+      return
     }
 
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = genders.find((brand) => normalizebrandName(brand.gender_name.toLowerCase()) === normalizebrandName(formData.gender_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Gender name already exists. Please choose a different Gender name.");
+      return
+
+    }
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_create`,
@@ -428,11 +459,10 @@ const GenderCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
-                        className={`form-control form-control-sm required ${
-                          errorMessage ? "is-invalid" : ""
-                        }`}
+                        className={`form-control form-control-sm required ${errorMessage ? "is-invalid" : ""
+                          }`}
                         id="gender_name"
                         placeholder="Enter Gender Name"
                         type="text"
@@ -442,6 +472,9 @@ const GenderCreate = () => {
                       {errorMessage && (
                         <div className="invalid-feedback">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

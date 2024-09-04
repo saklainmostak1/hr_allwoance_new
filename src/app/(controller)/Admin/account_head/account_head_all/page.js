@@ -1,10 +1,12 @@
 import AccountHeadList from '@/app/(view)/admin/account_head/account_head_list/page';
 import React from 'react';
 
-const AccountHeadAll = () => {
+const AccountHeadAll = ({searchParams}) => {
     return (
         <div>
-            <AccountHeadList></AccountHeadList>
+            <AccountHeadList
+            searchParams={searchParams}
+            ></AccountHeadList>
         </div>
     );
 };

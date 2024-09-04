@@ -445,7 +445,7 @@ const NewsCategoryList = ({ searchParams }) => {
                       href={`/Admin/news_category/news_category_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create News Category
+                      Back to Create News Category
                     </Link>
                   </div>
                 </div>
@@ -548,7 +548,7 @@ const NewsCategoryList = ({ searchParams }) => {
                               <td>
                                 {noticeCategoryAll?.created_date
                                   ? formatDateTime(
-                                      noticeCategoryAll.created_date
+                                      noticeCategoryAll.created_date.slice(0,10)
                                     )
                                   : ""}
                               </td>

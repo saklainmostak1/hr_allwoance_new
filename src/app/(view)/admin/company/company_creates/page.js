@@ -1,10 +1,22 @@
 'use client'
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const ComapanyCreate = () => {
 
+
+    const { data: companyAll = [], isLoading, refetch
+    } = useQuery({
+        queryKey: ['companyAll'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/company/company_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
 
 
     const [created_by, setCreated_by] = useState(() => {
@@ -36,6 +48,7 @@ const ComapanyCreate = () => {
     }, [formData.basic]);
 
     const [company, setCompany] = useState([])
+    const [errorMessage, setErrorMessage] = useState([])
     const handleChange = (event) => {
         // const { name, value } = event.target;
         const name = event.target.name
@@ -48,6 +61,12 @@ const ComapanyCreate = () => {
             setCompany('')
         }
 
+        const existingBrand = companyAll.find((brand) => brand?.company_name?.toLowerCase() === formData?.company_name?.toLowerCase());
+        if (!existingBrand) {
+          // Show error message
+          setErrorMessage("");
+        }
+
         setFormData(attribute)
 
         // setFormData(prevData => ({
@@ -58,11 +77,29 @@ const ComapanyCreate = () => {
 
     const user_create = (event) => {
         event.preventDefault();
+
+
+
         if (!formData.company_name || formData.company_name.trim() === '') {
             setCompany('Company name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }
+
+        const normalizebrandName = (name) => {
+            return name?.trim().replace(/\s+/g, ' ');
+          };
+      
+      
+          const existingBrand = companyAll.find((brand) => normalizebrandName(brand.company_name.toLowerCase()) === normalizebrandName(formData.company_name.toLowerCase()));
+          if (existingBrand) {
+            // Show error message
+            setErrorMessage("company  name already exists. Please choose a different company  name.");
+            return
+      
+          }
+
+
         const schoolShift = {
             ...formData,
             created_by
@@ -116,7 +153,10 @@ const ComapanyCreate = () => {
                                             onChange={handleChange}
                                             class="form-control form-control-sm required" id="title" placeholder="Enter Company Name" type="text" name="company_name" />
                                             {
-                                                company && <p className='text-danger'>{company}</p>
+                                                company && <p className='text-danger m-0'>{company}</p>
+                                            }
+                                            {
+                                                errorMessage && <p className='text-danger m-0'>{errorMessage}</p>
                                             }
                                     </div></div>
 

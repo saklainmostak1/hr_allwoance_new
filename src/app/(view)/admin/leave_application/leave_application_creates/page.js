@@ -1092,6 +1092,12 @@ const CreateLeaveApplication = () => {
     });
 
     // Handle input changes for the form fields
+
+
+
+
+
+
     const handleChange = (event) => {
         const name = event.target.name;
         const value = event.target.value;
@@ -1136,7 +1142,7 @@ const CreateLeaveApplication = () => {
             const employeesInBranch = employeeList.filter(employee => employee.branch_id === parseFloat(selectedBranch));
             setFilteredEmployees(employeesInBranch);
         } else {
-            setFilteredEmployees(employeeList);
+            setFilteredEmployees([]);
         }
     }, [selectedBranch, employeeList]);
 
@@ -1266,24 +1272,35 @@ const CreateLeaveApplication = () => {
     //     return groups;
     // }, {});
 
-    const groupedReceivers = employeeList.reduce((groups, employee) => {
+    // const groupedReceivers = employeeList.reduce((groups, employee) => {
+    //     const designation = employee.designation_name;
+    //     // Skip the employee with user_id 14012
+    //     if (employee.user_id === parseFloat(leaveFor)) {
+    //         return groups;
+    //     }
+
+    //     if (!groups[designation]) {
+    //         groups[designation] = [];
+    //     }
+
+    //     groups[designation].push(employee);
+    //     return groups;
+    // }, {});
+
+
+    // console.log(groupedReceivers)
+
+    const filteredOutEmployee = filteredEmployees.filter(employee => employee.user_id !== parseFloat(leaveFor));
+
+    const groupedReceivers = filteredOutEmployee.reduce((groups, employee) => {
         const designation = employee.designation_name;
-        
-        // Skip the employee with user_id 14012
-        if (employee.user_id === parseFloat(leaveFor)) {
-            return groups;
-        }
-    
         if (!groups[designation]) {
             groups[designation] = [];
         }
-    
         groups[designation].push(employee);
         return groups;
     }, {});
-    
 
-    console.log(groupedReceivers)
 
     return (
         <div className="container-fluid">
@@ -1303,7 +1320,7 @@ const CreateLeaveApplication = () => {
                                 </div>
                                 <div className="card-body">
                                     <form method="post" autoComplete="off" onSubmit={user_create}>
-                                        <div className="form-group row">
+                                        {/* <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Branch Name:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">
                                                 <select
@@ -1346,7 +1363,54 @@ const CreateLeaveApplication = () => {
                                                     ))}
                                                 </select>
                                             </div>
+                                        </div> */}
+                                        <div className="form-group row">
+                                            <label className="col-form-label font-weight-bold col-md-3">Branch Name:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                            <div className="col-md-6">
+                                                <select
+                                                    onChange={(e) => {
+                                                        const branchId = e.target.value;
+                                                        setSelectedBranch(branchId);
+                                                    }}
+                                                    name="branch"
+                                                    className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                    id="branch"
+                                                >
+                                                    <option value="">Select Branch</option>
+                                                    {branches.map(branch => (
+                                                        <option key={branch.id} value={branch.id}>{branch.branch_name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
+
+                                        <div className="form-group row">
+                                            <label className="col-form-label font-weight-bold col-md-3">Leave For:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
+                                            <div className="col-md-6">
+                                                <select
+                                                    onChange={(e) => {
+                                                        setLeaveFor(e.target.value);
+                                                        handleChange(e);
+                                                    }}
+                                                    name="whose_leave"
+                                                    className="form-control form-control-sm trim integer_no_zero whose_leave"
+                                                    id="whose_leave"
+                                                // disabled={!selectedBranch}  // Disable if no branch is selected
+                                                >
+                                                    <option value="">Select Applicant</option>
+                                                    {Object.keys(groupedEmployees).map(designation => (
+                                                        <optgroup key={designation} label={designation}>
+                                                            {groupedEmployees[designation].map(employee => (
+                                                                <option key={employee.user_id} value={employee.user_id}>
+                                                                    {employee.full_name}
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
                                         <div className="form-group row">
                                             <label className="col-form-label font-weight-bold col-md-3">Leave Category:<small><sup><small><i className="text-danger fas fa-star"></i></small></sup></small></label>
                                             <div className="col-md-6">

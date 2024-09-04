@@ -42,13 +42,12 @@ const EditBloodGroup = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
     },
   });
 
-  const normalizeBrandName = (name) => {
-    return name?.trim().replace(/\s+/g, "").toLowerCase();
-  };
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -63,62 +62,7 @@ const EditBloodGroup = ({ id }) => {
     }));
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   let hasErrors = false;
-
-  //   const normalizedCurrentName = normalizeBrandName(formData.blood_group_name);
-  //   const duplicate = bloodgroups.some(
-  //     (existingGroup) =>
-  //       normalizeBrandName(existingGroup.blood_group_name) ===
-  //         normalizedCurrentName && existingGroup.id !== id
-  //   );
-
-  //   const newErrors = {
-  //     blood_group_name: duplicate
-  //       ? "Blood Group name already exists. Please choose a different name."
-  //       : "",
-  //   };
-
-  //   if (duplicate) {
-  //     hasErrors = true;
-  //   }
-
-  //   setErrors(newErrors);
-
-  //   if (hasErrors) {
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_edit/${id}`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(formData),
-  //       }
-  //     );
-  //     const data = await response.json();
-  //     if (data) {
-  //       sessionStorage.setItem("message", "Data Updated successfully!");
-  //       router.push("/Admin/blood_group/blood_group_all");
-  //     } else {
-  //       setErrors((prevErrors) => ({
-  //         ...prevErrors,
-  //         form: "Error updating blood group. Please try again.",
-  //       }));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating blood group:", error);
-  //     setErrors((prevErrors) => ({
-  //       ...prevErrors,
-  //       form: "An error occurred while updating the blood group.",
-  //     }));
-  //   }
-  // };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

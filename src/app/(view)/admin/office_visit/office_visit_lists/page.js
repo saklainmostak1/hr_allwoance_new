@@ -119,7 +119,7 @@ const OfficeVisitList = ({ searchParams }) => {
     useEffect(() => {
         caregory_list();
     }, [currentPage]);
-  
+
 
     const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
 
@@ -318,7 +318,20 @@ const OfficeVisitList = ({ searchParams }) => {
                                                             <td>
 
                                                                 <div className="flex items-center ">
-
+                                                                    <Link href={`/Admin/office_visit/office_visit_edit/${office_visit.id}?page_group=${page_group}`}>
+                                                                        {filteredBtnIconEdit.map((filteredBtnIconEdit => (
+                                                                            <button
+                                                                                key={filteredBtnIconEdit.id}
+                                                                                title='Edit'
+                                                                                style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                className={filteredBtnIconEdit?.btn}
+                                                                            >
+                                                                                <a
+                                                                                    dangerouslySetInnerHTML={{ __html: filteredBtnIconEdit?.icon }}
+                                                                                ></a>
+                                                                            </button>
+                                                                        )))}
+                                                                    </Link>
                                                                     <Link href={`/Admin/office_visit/office_visit_remarks/${office_visit.id}?page_group=${page_group}`}>
                                                                         {filteredBtnIconRemarks.map((filteredBtnIconEdit => (
                                                                             <button
@@ -333,6 +346,7 @@ const OfficeVisitList = ({ searchParams }) => {
                                                                             </button>
                                                                         )))}
                                                                     </Link>
+
                                                                     <Link href={`/Admin/office_visit/office_visit_person/${office_visit.id}?page_group=${page_group}`}>
                                                                         {filteredBtnIconPerson?.map((filteredBtnIconEdit => (
                                                                             <button

@@ -265,25 +265,48 @@ const LeaveApplicationModel = {
             res.status(500).send('Server error');
         }
     },
-
-
+    
     leave_application_single: async (req, res) => {
         try {
-            const query = 'SELECT * FROM leave_application WHERE id = ?';
+            const query = `
+                SELECT la.*, ep.branch_id 
+                FROM leave_application la
+                JOIN employee_promotion ep ON la.whose_leave = ep.user_id
+                WHERE la.id = ?`;
+            
             connection.query(query, [req.params.id], (error, result) => {
                 if (!error && result.length > 0) {
                     console.log(result);
                     return res.send(result);
                 } else {
-                    console.log(error || 'Product not found');
-                    return res.status(404).json({ message: 'Product not found.' });
+                    console.log(error || 'Record not found');
+                    return res.status(404).json({ message: 'Record not found.' });
                 }
             });
-        }
-        catch (error) {
-            console.log(error)
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ message: 'Server error.' });
         }
     },
+    
+
+    // leave_application_single: async (req, res) => {
+    //     try {
+    //         const query = 'SELECT * FROM leave_application WHERE id = ?';
+    //         connection.query(query, [req.params.id], (error, result) => {
+    //             if (!error && result.length > 0) {
+    //                 console.log(result);
+    //                 return res.send(result);
+    //             } else {
+    //                 console.log(error || 'Product not found');
+    //                 return res.status(404).json({ message: 'Product not found.' });
+    //             }
+    //         });
+    //     }
+    //     catch (error) {
+    //         console.log(error)
+    //     }
+    // },
 
 
     leave_application_update: async (req, res) => {

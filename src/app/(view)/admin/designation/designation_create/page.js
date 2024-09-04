@@ -1,11 +1,48 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 const DesignationCreate = () => {
-  const created_by = localStorage.getItem("userId");
+
+
+  const [created_by, setCreated_by] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  // Effect to initialize created_by state from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setCreated_by(storedUserId);
+    }
+  }, []);
+
+
+  const [errorMessage, setErrorMessage] = useState([])
+
   const router = useRouter();
+
+
+  const {
+    data: designations = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["designations"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_all`
+      );
+
+      const data = await res.json();
+      return data;
+    },
+  });
 
   const [formData, setFormData] = useState({
     designation_name: "",
@@ -35,6 +72,15 @@ const DesignationCreate = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    const existingBrand = designations.find((brand) => brand?.designation_name?.toLowerCase() === formData?.designation_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -106,6 +152,19 @@ const DesignationCreate = () => {
     if (hasErrors) {
       setErrorMessages(newErrors);
       return;
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = designations.find((brand) => normalizebrandName(brand.designation_name.toLowerCase()) === normalizebrandName(formData.designation_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("company type name already exists. Please choose a different company type name.");
+      return
+
     }
 
     try {
@@ -190,7 +249,7 @@ const DesignationCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+
                         onChange={handleChange}
                         value={formData.designation_name}
                         className="form-control form-control-sm required"
@@ -219,16 +278,21 @@ const DesignationCreate = () => {
                       </small>
                     </label>
                     <div className="col-md-6">
-                      <input
-                        required
+                      <select
+                        name="serial_number"
+                        className="form-control form-control-sm trim integer_no_zero serial_number"
+                        id="serial_number"
                         value={formData.serial_number}
                         onChange={handleChange}
-                        className="form-control form-control-sm required"
-                        id="serial_number"
-                        placeholder="Enter Serial Number"
-                        type="number"
-                        name="serial_number"
-                      />
+                      >
+                        {Array.from({ length: 200 }, (_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {i + 1}
+                          </option>
+                        ))}
+
+                      </select>
+
                       {errorMessages.serial_number && (
                         <div className="text-danger mt-2">
                           {errorMessages.serial_number}

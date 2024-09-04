@@ -2134,7 +2134,383 @@
 
 // // export default UpdateEmployee;
 
+// 'use client'
+// import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
+// import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { useQuery } from '@tanstack/react-query';
+// import axios from 'axios';
+// import Link from 'next/link';
+// import { useRouter } from 'next/navigation';
+// import React, { useEffect, useState } from 'react';
 
+// const EmployeeEdit = ({ id }) => {
+//     const modified_by = localStorage.getItem('userId')
+
+//     const { data: allEmployeeList = [] } = useQuery({
+//         queryKey: ['allEmployeeList'],
+//         queryFn: async () => {
+//             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_list/${id}`)
+//             const data = await res.json()
+//             return data
+//         }
+//     })
+
+//     const { data: divisions = [] } = useQuery({
+//         queryKey: ['divisions'],
+//         queryFn: async () => {
+//             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/divisions/divisions_list`)
+//             const data = await res.json()
+//             return data
+//         }
+//     })
+
+//     const { data: districts = [] } = useQuery({
+//         queryKey: ['districts'],
+//         queryFn: async () => {
+//             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/district/district_list`)
+//             const data = await res.json()
+//             return data
+//         }
+//     })
+
+//     const { data: upazilas = [] } = useQuery({
+//         queryKey: ['upazilas'],
+//         queryFn: async () => {
+//             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/upazilas/upazilas_list`)
+//             const data = await res.json()
+//             return data
+//         }
+//     })
+
+//     const [formData, setFormData] = useState({
+//         id: '',
+//         user_id: '',
+//         experience: '',
+//         living_division_id: '',
+//         living_district_id: '',
+//         living_upazila_id: '',
+//         living_address: '',
+//         permanent_division_id: '',
+//         permanent_district_id: '',
+//         permanent_upazila_id: '',
+//         permanent_address: '',
+//         join_date: '',
+//         payroll_id: '',
+//         school_shift_id: '',
+//         modified_by: modified_by,
+//         designation_id: '',
+//         branch_id: '',
+//         promotion_month: '',
+//         fields: ''
+//     });
+
+//     const [isAddressSame, setIsAddressSame] = useState(false);
+//     const [selectedDivision, setSelectedDivision] = useState('');
+//     const [selectedDistrict, setSelectedDistrict] = useState('');
+//     const [filteredDistricts, setFilteredDistricts] = useState([]);
+//     const [filteredUpazilas, setFilteredUpazilas] = useState([]);
+//     console.log(filteredUpazilas)
+
+
+
+//     const handleDivisionChange = (e) => {
+//         setSelectedDivision(e.target.value);
+//         setFormData({
+//             ...formData,
+//             living_division_id: e.target.value,
+//             living_district_id: '',
+//             living_upazila_id: ''
+//         });
+//     };
+
+//     const handleDistrictChange = (e) => {
+//         setSelectedDistrict(e.target.value);
+//         setFormData({
+//             ...formData,
+//             living_district_id: e.target.value,
+//             living_upazila_id: ''
+//         });
+//     };
+
+//     const handleUpazilaChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             living_upazila_id: e.target.value
+//         });
+//     };
+
+//     const handleLivingAddressChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             living_address: e.target.value
+//         });
+//     };
+
+//     const handlePermanentDivisionChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             permanent_division_id: e.target.value
+//         });
+//     };
+
+//     const handlePermanentDistrictChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             permanent_district_id: e.target.value
+//         });
+//     };
+
+//     const handlePermanentUpazilaChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             permanent_upazila_id: e.target.value
+//         });
+//     };
+
+//     const handlePermanentAddressChange = (e) => {
+//         setFormData({
+//             ...formData,
+//             permanent_address: e.target.value
+//         });
+//     };
+
+//     const handleCheckboxChange = (e) => {
+//         const isChecked = e.target.checked;
+//         setIsAddressSame(isChecked);
+//         if (isChecked) {
+//             setFormData({
+//                 ...formData,
+//                 permanent_division_id: formData.living_division_id,
+//                 permanent_district_id: formData.living_district_id,
+//                 permanent_upazila_id: formData.living_upazila_id,
+//                 permanent_address: formData.living_address
+//             });
+//         } else {
+//             setFormData({
+//                 ...formData,
+//                 permanent_division_id: '',
+//                 permanent_district_id: '',
+//                 permanent_upazila_id: '',
+//                 permanent_address: ''
+//             });
+//         }
+//     };
+//     useEffect(() => {
+//         if (allEmployeeList) {
+//             setSelectedDivision(allEmployeeList.living_division_id); // Set the selected division
+//             setSelectedDistrict(allEmployeeList.living_district_id); // Set the selected district
+//             setFormData({
+//                 id: allEmployeeList.id,
+//                 user_id: allEmployeeList.user_id,
+//                 experience: allEmployeeList.experience,
+//                 living_division_id: allEmployeeList.living_division_id,
+//                 living_district_id: allEmployeeList.living_district_id,
+//                 living_upazila_id: allEmployeeList.living_upazila_id,
+//                 living_address: allEmployeeList.living_address,
+//                 permanent_division_id: allEmployeeList.permanent_division_id,
+//                 permanent_district_id: allEmployeeList.permanent_district_id,
+//                 permanent_upazila_id: allEmployeeList.permanent_upazila_id,
+//                 permanent_address: allEmployeeList.permanent_address,
+//                 join_date: allEmployeeList.join_date,
+//                 payroll_id: allEmployeeList.payroll_id,
+//                 school_shift_id: allEmployeeList.school_shift_id,
+//                 modified_by: modified_by,
+//                 designation_id: allEmployeeList.designation_id,
+//                 promotion_month: allEmployeeList.promotion_month,
+//                 fields: allEmployeeList.educational_qualifications,
+//                 branch_id: allEmployeeList.branch_id
+//             });
+//         }
+//     }, [allEmployeeList, modified_by]);
+
+//     useEffect(() => {
+//         if (selectedDivision) {
+//             const filtered = districts.filter(district => district.division_id === parseInt(selectedDivision));
+//             setFilteredDistricts(filtered);
+//         } else {
+//             setFilteredDistricts([]);
+//         }
+//     }, [selectedDivision, districts]);
+
+//     useEffect(() => {
+//         if (selectedDistrict) {
+//             const filtered = upazilas.filter(upazila => upazila.district_id === parseInt(selectedDistrict));
+//             setFilteredUpazilas(filtered);
+//         } else {
+//             setFilteredUpazilas([]);
+//         }
+//     }, [selectedDistrict, upazilas]);
+
+//     const employee_edit = (e) => {
+//         e.preventDefault();
+
+//         const apiUrl1 = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_edit/${id}`;
+
+//         const requestOptions1 = {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(formData)
+//         };
+
+
+
+//         Promise.all([
+//             fetch(apiUrl1, requestOptions1),
+
+//         ])
+//             .then(([response1]) => {
+//                 if (!response1.ok) {
+//                     throw new Error('One or both requests failed');
+//                 }
+//                 return Promise.all([response1.json()]);
+//             })
+//             .then(([data1]) => {
+//                 console.log('Data1:', data1);
+
+//                 if (data1.error || data2.error) {
+//                     alert('Error occurred during employee update');
+//                 } else {
+//                     alert('Employee updated successfully');
+
+//                 }
+//             })
+//             .catch((error) => {
+//                 console.error('Error:', error);
+//                 alert('An error occurred during employee update');
+//             });
+//     };
+
+//     return (
+//         <div className='bg-[#f7f7f8]'>
+//             <div className="container mx-auto py-5">
+//                 <h1 className="text-2xl font-bold mb-5">Edit Employee Information</h1>
+//                 <div className="bg-white shadow-md rounded p-5">
+//                     <form onSubmit={employee_edit}>
+//                         <div className="grid grid-cols-2 gap-4">
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Living Division</label>
+//                                 <select
+//                                     value={formData.living_division_id}
+//                                     onChange={handleDivisionChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 >
+//                                     <option value="">Select Division</option>
+//                                     {divisions.map(division => (
+//                                         <option key={division.id} value={division.id}>{division.division_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Living District</label>
+//                                 <select
+//                                     value={formData.living_district_id}
+//                                     onChange={handleDistrictChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 >
+//                                     <option value="">Select District</option>
+//                                     {filteredDistricts.map(district => (
+//                                         <option key={district.id} value={district.id}>{district.district_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Living Upazila</label>
+//                                 <select
+//                                     value={formData.living_upazila_id}
+//                                     onChange={handleUpazilaChange}
+//                                     className=""
+//                                 >
+//                                     <option value="">Select Upazila</option>
+//                                     {filteredUpazilas.map(upazila => (
+//                                         <option key={upazila.id} value={upazila.id}>{upazila.upazila_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Living Address</label>
+//                                 <input
+//                                     type="text"
+//                                     value={formData.living_address}
+//                                     onChange={handleLivingAddressChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 />
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Permanent Division</label>
+//                                 <select
+//                                     value={formData.permanent_division_id}
+//                                     onChange={handlePermanentDivisionChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 >
+//                                     <option value="">Select Division</option>
+//                                     {divisions.map(division => (
+//                                         <option key={division.id} value={division.id}>{division.division_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Permanent District</label>
+//                                 <select
+//                                     value={formData.permanent_district_id}
+//                                     onChange={handlePermanentDistrictChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 >
+//                                     <option value="">Select District</option>
+//                                     {districts.filter(district => district.division_id === parseInt(formData.permanent_division_id)).map(district => (
+//                                         <option key={district.id} value={district.id}>{district.district_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Permanent Upazila</label>
+//                                 <select
+//                                     value={formData.permanent_upazila_id}
+//                                     onChange={handlePermanentUpazilaChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 >
+//                                     <option value="">Select Upazila</option>
+//                                     {upazilas.filter(upazila => upazila.district_id === parseInt(formData.permanent_district_id)).map(upazila => (
+//                                         <option key={upazila.id} value={upazila.id}>{upazila.upazila_bn}</option>
+//                                     ))}
+//                                 </select>
+//                             </div>
+//                             <div>
+//                                 <label className="block text-sm font-medium text-gray-700">Permanent Address</label>
+//                                 <input
+//                                     type="text"
+//                                     value={formData.permanent_address}
+//                                     onChange={handlePermanentAddressChange}
+//                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//                                 />
+//                             </div>
+//                             <div className="col-span-2">
+//                                 <label className="inline-flex items-center mt-3">
+//                                     <input
+//                                         type="checkbox"
+//                                         className="form-checkbox h-5 w-5 text-gray-600"
+//                                         checked={isAddressSame}
+//                                         onChange={handleCheckboxChange}
+//                                     />
+//                                     <span className="ml-2 text-gray-700">Permanent address same as living address</span>
+//                                 </label>
+//                             </div>
+//                         </div>
+//                         <div className="row no-gutters">
+//                             <div className="col-md-12 offset-md-3">
+//                                 <input type="submit" name="create" className="btn btn-sm btn-success" value="Submit" />
+//                             </div>
+//                         </div>
+//                     </form>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default EmployeeEdit;
 
 'use client'
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
@@ -2150,7 +2526,7 @@ import React, { useEffect, useState } from 'react';
 const EmployeeEdit = ({ id }) => {
 
 
-    const [isAddressSame, setIsAddressSame] = useState(false);
+    // const [isAddressSame, setIsAddressSame] = useState(false);
 
     const [modified_by, setModified_by] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -2190,6 +2566,16 @@ const EmployeeEdit = ({ id }) => {
         }
     })
 
+    const { data: professions = [],
+    } = useQuery({
+        queryKey: ['professions'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/profession/profession_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
     const { data: educationName = [],
     } = useQuery({
         queryKey: ['educationName'],
@@ -2294,32 +2680,41 @@ const EmployeeEdit = ({ id }) => {
         designation_id: '',
         branch_id: '',
         promotion_month: '',
-        fields: ''
+        fields: '',
+        mother_phone: '',
+        mother_name: '',
+        father_phone: '',
+        father_name: '',
+        mother_service: '',
+        father_service: '',
+        same_as: ''
+
     });
 
-    useEffect(() => {
-        setFormData({
-            id: allEmployeeList.id,
-            user_id: allEmployeeList.user_id,
-            experience: allEmployeeList.experience,
-            living_division_id: allEmployeeList.living_division_id,
-            living_district_id: allEmployeeList.living_district_id,
-            living_upazila_id: allEmployeeList.living_upazila_id,
-            living_address: allEmployeeList.living_address,
-            permanent_division_id: allEmployeeList.permanent_division_id,
-            permanent_district_id: allEmployeeList.permanent_district_id,
-            permanent_upazila_id: allEmployeeList.permanent_upazila_id,
-            permanent_address: allEmployeeList.permanent_address,
-            join_date: allEmployeeList.join_date,
-            payroll_id: allEmployeeList.payroll_id,
-            school_shift_id: allEmployeeList.school_shift_id,
-            modified_by: modified_by,
-            designation_id: allEmployeeList.designation_id,
-            promotion_month: allEmployeeList.promotion_month,
-            fields: allEmployeeList.educational_qualifications,
-            branch_id: allEmployeeList.branch_id
-        })
-    }, [allEmployeeList, modified_by])
+    // useEffect(() => {
+    //     setFormData({
+    //         id: allEmployeeList.id,
+
+    //         user_id: allEmployeeList.user_id,
+    //         experience: allEmployeeList.experience,
+    //         living_division_id: allEmployeeList.living_division_id,
+    //         living_district_id: allEmployeeList.living_district_id,
+    //         living_upazila_id: allEmployeeList.living_upazila_id,
+    //         living_address: allEmployeeList.living_address,
+    //         permanent_division_id: allEmployeeList.permanent_division_id,
+    //         permanent_district_id: allEmployeeList.permanent_district_id,
+    //         permanent_upazila_id: allEmployeeList.permanent_upazila_id,
+    //         permanent_address: allEmployeeList.permanent_address,
+    //         join_date: allEmployeeList.join_date,
+    //         payroll_id: allEmployeeList.payroll_id,
+    //         school_shift_id: allEmployeeList.school_shift_id,
+    //         modified_by: modified_by,
+    //         designation_id: allEmployeeList.designation_id,
+    //         promotion_month: allEmployeeList.promotion_month,
+    //         fields: allEmployeeList.educational_qualifications,
+    //         branch_id: allEmployeeList.branch_id
+    //     })
+    // }, [allEmployeeList, modified_by])
 
     console.log(formData)
     console.log(allEmployeeList)
@@ -2465,29 +2860,121 @@ const EmployeeEdit = ({ id }) => {
     // };
 
 
+    // const [selectedDivision, setSelectedDivision] = useState('');
+    // const [selectedDistrict, setSelectedDistrict] = useState('');
+    // const [filteredDistricts, setFilteredDistricts] = useState([]);
+    // const [filteredUpazilas, setFilteredUpazilas] = useState([]);
+
+    // useEffect(() => {
+    //     if (selectedDivision) {
+    //         const filtered = districts.filter(district => district.division_id === parseInt(selectedDivision));
+    //         setFilteredDistricts(filtered);
+    //     } else {
+    //         setFilteredDistricts([]);
+    //     }
+    //     setSelectedDistrict(""); // Reset selected district when division changes
+    // }, [selectedDivision, districts]);
+
+    // useEffect(() => {
+    //     if (selectedDistrict) {
+    //         const filtered = upazilas.filter(upazila => upazila.district_id === parseInt(selectedDistrict));
+    //         setFilteredUpazilas(filtered);
+    //     } else {
+    //         setFilteredUpazilas([]);
+    //     }
+    // }, [selectedDistrict, upazilas]);
+
+    // const handleDivisionChange = (e) => {
+    //     setSelectedDivision(e.target.value);
+    //     setFormData({
+    //         ...formData,
+    //         living_division_id: e.target.value,
+    //         living_district_id: '',
+    //         living_upazila_id: ''
+    //     });
+    // };
+
+    // const handleDistrictChange = (e) => {
+    //     setSelectedDistrict(e.target.value);
+    //     setFormData({
+    //         ...formData,
+    //         living_district_id: e.target.value,
+    //         living_upazila_id: ''
+    //     });
+    // };
+
+    // const handleUpazilaChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         living_upazila_id: e.target.value
+    //     });
+    // };
+
+    // const handleLivingAddressChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         living_address: e.target.value
+    //     });
+    // };
+
+    // const handlePermanentDivisionChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         permanent_division_id: e.target.value
+    //     });
+    // };
+
+    // const handlePermanentDistrictChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         permanent_district_id: e.target.value
+    //     });
+    // };
+
+    // const handlePermanentUpazilaChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         permanent_upazila_id: e.target.value
+    //     });
+    // };
+
+    // const handlePermanentAddressChange = (e) => {
+    //     setFormData({
+    //         ...formData,
+    //         permanent_address: e.target.value
+    //     });
+    // };
+
+    // const handleCheckboxChange = (e) => {
+    //     const isChecked = e.target.checked;
+    //     setIsAddressSame(isChecked);
+    //     if (isChecked) {
+    //         setFormData({
+    //             ...formData,
+    //             permanent_division_id: formData.living_division_id,
+    //             permanent_district_id: formData.living_district_id,
+    //             permanent_upazila_id: formData.living_upazila_id,
+    //             permanent_address: formData.living_address
+    //         });
+    //     } else {
+    //         setFormData({
+    //             ...formData,
+    //             permanent_division_id: '',
+    //             permanent_district_id: '',
+    //             permanent_upazila_id: '',
+    //             permanent_address: ''
+    //         });
+    //     }
+    // };
+    const [isAddressSame, setIsAddressSame] = useState(formData.same_as === 1);
     const [selectedDivision, setSelectedDivision] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [filteredDistricts, setFilteredDistricts] = useState([]);
     const [filteredUpazilas, setFilteredUpazilas] = useState([]);
 
-    useEffect(() => {
-        if (selectedDivision) {
-            const filtered = districts.filter(district => district.division_id === parseInt(selectedDivision));
-            setFilteredDistricts(filtered);
-        } else {
-            setFilteredDistricts([]);
-        }
-        setSelectedDistrict(""); // Reset selected district when division changes
-    }, [selectedDivision, districts]);
+    console.log(isAddressSame)
 
-    useEffect(() => {
-        if (selectedDistrict) {
-            const filtered = upazilas.filter(upazila => upazila.district_id === parseInt(selectedDistrict));
-            setFilteredUpazilas(filtered);
-        } else {
-            setFilteredUpazilas([]);
-        }
-    }, [selectedDistrict, upazilas]);
+
 
     const handleDivisionChange = (e) => {
         setSelectedDivision(e.target.value);
@@ -2549,29 +3036,99 @@ const EmployeeEdit = ({ id }) => {
             permanent_address: e.target.value
         });
     };
-
     const handleCheckboxChange = (e) => {
         const isChecked = e.target.checked;
         setIsAddressSame(isChecked);
-        if (isChecked) {
+
+        setFormData({
+            ...formData,
+            same_as: isChecked ? 1 : 0,
+            permanent_division_id: isChecked ? formData.living_division_id : '',
+            permanent_district_id: isChecked ? formData.living_district_id : '',
+            permanent_upazila_id: isChecked ? formData.living_upazila_id : '',
+            permanent_address: isChecked ? formData.living_address : ''
+        });
+    };
+    // const handleCheckboxChange = (e) => {
+    //     const isChecked = e.target.checked;
+    //     setIsAddressSame(isChecked);
+
+    //     if (isChecked) {
+    //         setFormData({
+    //             ...formData,
+    //             permanent_division_id: formData.living_division_id,
+    //             permanent_district_id: formData.living_district_id,
+    //             permanent_upazila_id: formData.living_upazila_id,
+    //             permanent_address: formData.living_address
+
+    //         });
+    //     } else {
+    //         setFormData({
+    //             ...formData,
+    //             permanent_division_id: '',
+    //             permanent_district_id: '',
+    //             permanent_upazila_id: '',
+    //             permanent_address: ''
+    //         });
+    //     }
+    // };
+
+
+    useEffect(() => {
+        if (allEmployeeList) {
+            setSelectedDivision(allEmployeeList.living_division_id); // Set the selected division
+            setSelectedDistrict(allEmployeeList.living_district_id); // Set the selected district
             setFormData({
-                ...formData,
-                permanent_division_id: formData.living_division_id,
-                permanent_district_id: formData.living_district_id,
-                permanent_upazila_id: formData.living_upazila_id,
-                permanent_address: formData.living_address
-            });
-        } else {
-            setFormData({
-                ...formData,
-                permanent_division_id: '',
-                permanent_district_id: '',
-                permanent_upazila_id: '',
-                permanent_address: ''
+                id: allEmployeeList.id,
+                user_id: allEmployeeList.user_id,
+                experience: allEmployeeList.experience,
+                living_division_id: allEmployeeList.living_division_id,
+                living_district_id: allEmployeeList.living_district_id,
+                living_upazila_id: allEmployeeList.living_upazila_id,
+                living_address: allEmployeeList.living_address,
+                permanent_division_id: allEmployeeList.permanent_division_id,
+                permanent_district_id: allEmployeeList.permanent_district_id,
+                permanent_upazila_id: allEmployeeList.permanent_upazila_id,
+                permanent_address: allEmployeeList.permanent_address,
+                join_date: allEmployeeList.join_date,
+                payroll_id: allEmployeeList.payroll_id,
+                school_shift_id: allEmployeeList.school_shift_id,
+                modified_by: modified_by,
+                designation_id: allEmployeeList.designation_id,
+                promotion_month: allEmployeeList.promotion_month,
+                fields: allEmployeeList.educational_qualifications,
+                branch_id: allEmployeeList.branch_id,
+                same_as: allEmployeeList.same_as,
+                father_service: allEmployeeList.father_service,
+                mother_service: allEmployeeList.mother_service,
+                father_name: allEmployeeList.e_father_name,
+                mother_name: allEmployeeList.e_mother_name,
+                father_phone: allEmployeeList.father_phone,
+                mother_phone: allEmployeeList.mother_phone,
             });
         }
-    };
+    }, [allEmployeeList, modified_by]);
 
+    console.log(allEmployeeList)
+    console.log(formData)
+
+    useEffect(() => {
+        if (selectedDivision) {
+            const filtered = districts.filter(district => district.division_id === parseInt(selectedDivision));
+            setFilteredDistricts(filtered);
+        } else {
+            setFilteredDistricts([]);
+        }
+    }, [selectedDivision, districts]);
+
+    useEffect(() => {
+        if (selectedDistrict) {
+            const filtered = upazilas.filter(upazila => upazila.district_id === parseInt(selectedDistrict));
+            setFilteredUpazilas(filtered);
+        } else {
+            setFilteredUpazilas([]);
+        }
+    }, [selectedDistrict, upazilas]);
     const { data: schoolShiftList = [],
     } = useQuery({
         queryKey: ['schoolShiftList'],
@@ -2606,13 +3163,19 @@ const EmployeeEdit = ({ id }) => {
         password: '',
         signature_image: '',
         photo: '',
-        modified_by: modified_by
+        modified_by: modified_by,
+        unique_id: '',
+        blood_group_id: '',
+        NID: '',
+
     });
 
     useEffect(() => {
         setUser({
-            father_name: allEmployeeList.father_name,
-            mother_name: allEmployeeList.mother_name,
+            blood_group_id: allEmployeeList.blood_group_id,
+            NID: allEmployeeList.NID,
+            unique_id: allEmployeeList.unique_id,
+          
             full_name: allEmployeeList.full_name,
             dob: allEmployeeList.dob,
             gender: allEmployeeList.gender,
@@ -2713,6 +3276,10 @@ const EmployeeEdit = ({ id }) => {
 
     };
 
+
+    const [passwordError, setPasswordError] = useState('');
+
+
     const users_input_change = (event) => {
         const name = event.target.name
         const value = event.target.value
@@ -2720,6 +3287,22 @@ const EmployeeEdit = ({ id }) => {
         attribute[name] = value
 
 
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (name === 'email') {
+            // Validate the email format
+            if (!emailRegex.test(value)) {
+                setEmail("Please enter a valid email in the format abcd@abcd.com");
+            } else {
+                setEmail(""); // Clear the error message if valid
+            }
+        }
+
+        if (password !== confirmPassword) {
+            setPasswordError('Passwords do not match.');
+        } else {
+            setPasswordError('');
+        }
 
         setUser(attribute)
 
@@ -2728,11 +3311,29 @@ const EmployeeEdit = ({ id }) => {
 
 
 
-
+    console.log(passwordError)
     const router = useRouter()
     const employee_edit = (e) => {
         e.preventDefault();
+        const form = e.target;
+        const password = form.password.value
+        if (password !== confirmPassword) {
+            setPasswordError('Passwords do not match.');
+            return
+        } else {
+            setPasswordError('');
+        }
 
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!user.email) {
+            setEmail("email Is required"); // Clear the error message if valid
+
+            return
+        } else if (!emailRegex.test(user.email)) {
+            setEmail("Please enter a valid email in the format abcd@abcd.com");
+            return
+        }
 
 
         const apiUrl1 = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_edit/${id}`;
@@ -2806,7 +3407,7 @@ const EmployeeEdit = ({ id }) => {
         const extension = file.name.split('.').pop();
         const newName = `${fileName}.${extension}`;
         const time = `${year}/${month}/${day}/${hours}/${minutes}`;
-        const path = `brand/${time}/${newName}`;
+        const path = `employe/${time}/${newName}`;
 
         const newSelectedFile = { ...file, path };
 
@@ -2831,7 +3432,7 @@ const EmployeeEdit = ({ id }) => {
         const newName = `${fileName}.${extension}`;
         formData.append('files', file, newName);
 
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5003/brand/brand_image`, formData, {
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5003/employe/employe_image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
@@ -2873,7 +3474,7 @@ const EmployeeEdit = ({ id }) => {
         const extension = file.name.split('.').pop();
         const newName = `${fileName}.${extension}`;
         const time = `${year}/${month}/${day}/${hours}/${minutes}`;
-        const path = `brand/${time}/${newName}`;
+        const path = `employe/${time}/${newName}`;
 
         const newFile = { ...file, path };
 
@@ -2898,7 +3499,7 @@ const EmployeeEdit = ({ id }) => {
         const newName = `${fileName}.${extension}`;
         formData.append('files', file, newName);
 
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5003/brand/brand_image`, formData, {
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5003/employe/employe_image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
@@ -2925,6 +3526,17 @@ const EmployeeEdit = ({ id }) => {
         queryKey: ['genderList'],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_list`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
+    const { data: bloods = [],
+    } = useQuery({
+        queryKey: ['bloods'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_all`)
 
             const data = await res.json()
             return data
@@ -2965,7 +3577,8 @@ const EmployeeEdit = ({ id }) => {
     })
 
 
-    console.log(uploadedImageUrl)
+    console.log(formData)
+    console.log(user)
 
     return (
         <div className="container-fluid">
@@ -2990,29 +3603,16 @@ const EmployeeEdit = ({ id }) => {
                                 <div class="card-body ">
                                     <form class="" method="post" autocomplete="off" onSubmit={employee_edit}>
                                         <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
+                                            <div class="card-header p-2   bg-gradient-primary text-white ">
                                                 <div class="card-title font-weight-bold mb-0  float-left mt-1">Employee Information</div>
                                             </div>
                                             <div class="card-body">
                                                 <div class=" row no-gutters">
                                                     <div class="col-md-6">
+
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Father Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <input type="text" required=""
-                                                                    value={user.father_name}
-                                                                    onChange={users_input_change}
-                                                                    name="father_name" class="form-control form-control-sm  required " id="father_name" placeholder="Enter Father Name" />
-                                                                {
-                                                                    fatherName && <p className='text-danger'>{fatherName}</p>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Full Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                                <label class="font-weight-bold  text-left">Employee Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <input
@@ -3020,117 +3620,24 @@ const EmployeeEdit = ({ id }) => {
                                                                     value={user.full_name}
                                                                     type="text" required="" name="full_name" class="form-control form-control-sm  required " id="full_name" placeholder="Enter Full Name" />
                                                                 {
-                                                                    fullName && <p className='text-danger'>{fullName}</p>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Gender:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
-                                                            <div class="col-md-8">
-                                                                <select
-                                                                    onChange={users_input_change}
-                                                                    value={user.gender}
-                                                                    required="" name="gender" class="form-control form-control-sm  required integer_no_zero" id="gender_name">
-                                                                    <option value=''>Select Gender</option>
-                                                                    {
-                                                                        genderList.map(gender =>
-
-                                                                            <>
-                                                                                <option value={gender.id}>{gender.gender_name}</option>
-
-                                                                            </>
-                                                                        )
-                                                                    }
-                                                                </select>
-                                                                {
-                                                                    gender && <p className='text-danger'>{gender}</p>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
-                                                            <div class="col-md-8">
-                                                                <input type="text"
-                                                                    onChange={users_input_change}
-                                                                    value={user.mobile}
-                                                                    required="" name="mobile" maxlength="11" class="form-control form-control-sm  required " id="mobile" placeholder="Enter Mobile" />
-                                                                {
-                                                                    mobile && <p className='text-danger'>{mobile}</p>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3"><label class="font-weight-bold">Year of Experience:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
-                                                            <div class="col-md-8">
-                                                                <input
-                                                                    onChange={employee_input_change}
-                                                                    value={formData.experience}
-                                                                    type="text" required="" name="experience" class="form-control form-control-sm  required " id="experience" placeholder="Enter Year of Experience" />
-                                                                {
-                                                                    experience && <p className='text-danger'>{experience}</p>
+                                                                    fullName && <p className='text-danger m-0'>{fullName}</p>
                                                                 }
                                                             </div>
                                                         </div>
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
-                                                                <label class="font-weight-bold  ">Confirm Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                                <label class="font-weight-bold  text-left">NID:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <input
-
-                                                                    type="password" required="" name="confirm_password" class="form-control form-control-sm  required matches_password" id="confirm_password" placeholder="Enter Confirm Password" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Mother Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <input type="text"
                                                                     onChange={users_input_change}
-                                                                    value={user.mother_name}
-                                                                    required="" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Mother Name" />
-                                                                {
-                                                                    motherName && <p className='text-danger'>{motherName}</p>
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group row no-gutters">
-                                                            <div class="col-md-3">
-                                                                <label class="font-weight-bold  text-right">Date of Birth:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
-                                                            </div>
+                                                                    type="number"
+                                                                    value={user.NID}
+                                                                    name='NID'
+                                                                    class="form-control form-control-sm  required " placeholder="Enter NID Number" />
 
-                                                            <div class="col-md-8">
-                                                                {/* <input type="date"
-                                                                    onChange={users_input_change}
-                                                                    value={user.dob}
-                                                                    name="dob" class="form-control form-control-sm  required urban_datepicker" id="dob" placeholder="Enter Date of Birth" /> */}
-                                                                <input
-                                                                    type="text"
-                                                                    readOnly
-
-                                                                    defaultValue={reformattedDate}
-                                                                    onClick={() => document.getElementById(`dateInput-n`).showPicker()}
-                                                                    placeholder="dd-mm-yyyy"
-                                                                    className="form-control form-control-sm mb-2"
-                                                                    style={{ display: 'inline-block', }}
-                                                                />
-                                                                <input
-                                                                    name='dob'
-                                                                    type="date"
-                                                                    id={`dateInput-n`}
-                                                                    onChange={(e) => handleDateChange(e)}
-                                                                    style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
-
-                                                                />
-                                                                {
-                                                                    dob && <p className='text-danger'>{dob}</p>
-                                                                }
 
                                                             </div>
-
                                                         </div>
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3"><label class="font-weight-bold  text-right">Religion:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
@@ -3151,8 +3658,111 @@ const EmployeeEdit = ({ id }) => {
                                                                     }
                                                                 </select>
                                                                 {
-                                                                    religion && <p className='text-danger'>{religion}</p>
+                                                                    religion && <p className='text-danger m-0'>{religion}</p>
                                                                 }
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <input type="number"
+                                                                    onChange={users_input_change}
+                                                                    value={user.mobile}
+                                                                    required="" name="mobile" maxlength="11" class="form-control form-control-sm  required " id="mobile" placeholder="Enter Mobile" />
+                                                                {
+                                                                    mobile && <p className='text-danger m-0'>{mobile}</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold">Year of Experience:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <input
+                                                                    onChange={employee_input_change}
+                                                                    value={formData.experience}
+                                                                    type="text" required="" name="experience" class="form-control form-control-sm  required " id="experience" placeholder="Enter Year of Experience" />
+                                                                {
+                                                                    experience && <p className='text-danger m-0'>{experience}</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-md-6">
+
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Date of Birth:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+
+                                                            <div class="col-md-8">
+
+                                                                <input
+                                                                    type="text"
+                                                                    readOnly
+
+                                                                    defaultValue={reformattedDate}
+                                                                    onClick={() => document.getElementById(`dateInput-n`).showPicker()}
+                                                                    placeholder="dd-mm-yyyy"
+                                                                    className="form-control form-control-sm mb-2"
+                                                                    style={{ display: 'inline-block', }}
+                                                                />
+                                                                <input
+                                                                    name='dob'
+                                                                    type="date"
+                                                                    id={`dateInput-n`}
+                                                                    onChange={(e) => handleDateChange(e)}
+                                                                    style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
+
+                                                                />
+                                                                {
+                                                                    dob && <p className='text-danger m-0'>{dob}</p>
+                                                                }
+
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Gender:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+                                                                    onChange={users_input_change}
+                                                                    value={user.gender}
+                                                                    required="" name="gender" class="form-control form-control-sm  required integer_no_zero" id="gender_name">
+                                                                    <option value=''>Select Gender</option>
+                                                                    {
+                                                                        genderList.map(gender =>
+
+                                                                            <>
+                                                                                <option value={gender.id}>{gender.gender_name}</option>
+
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                </select>
+                                                                {
+                                                                    gender && <p className='text-danger m-0'>{gender}</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold  text-right">Blood Group:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+                                                                    onChange={users_input_change}
+                                                                    value={user.blood_group_id}
+                                                                    name="blood_group_id" class="form-control form-control-sm  required integer_no_zero">
+                                                                    <option value=''>Select Blood Group</option>
+                                                                    {
+                                                                        bloods.map(blood =>
+
+                                                                            <>
+                                                                                <option value={blood.id}>{blood.blood_group_name}</option>
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                </select>
+
                                                             </div>
                                                         </div>
                                                         <div class="form-group row no-gutters">
@@ -3163,25 +3773,168 @@ const EmployeeEdit = ({ id }) => {
                                                                     value={user.email}
                                                                     type="text" required="" name="email" class="form-control form-control-sm  required " id="email" placeholder="Enter Email ID" />
                                                                 {
-                                                                    email && <p className='text-danger'>{email}</p>
+                                                                    email && <p className='text-danger m-0'>{email}</p>
                                                                 }
                                                             </div>
                                                         </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card bg-white mb-3 shadow-sm ">
+                                            <div class="card-header p-2  bg-gradient-primary text-white ">
+                                                <div class="card-title font-weight-bold mb-0  float-left mt-1">Account Information</div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class=" row no-gutters">
+
+                                                    <div class="col-md-6">
                                                         <div class="form-group row no-gutters">
                                                             <div class="col-md-3">
                                                                 <label class="font-weight-bold  text-right"> Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <input
-                                                                    onChange={users_input_change}
-                                                                    type="password" required="" name="password" class="form-control form-control-sm  required password" id="password" placeholder="Enter password" />
+                                                                    onChange={employee_input_change}
+                                                                    type="password" name="password" class="form-control form-control-sm  required password" id="password" placeholder="Enter password" />
                                                                 {
-                                                                    password && <p className='text-danger'>{password}</p>
+                                                                    password && <p className='text-danger m-0'>{password}</p>
                                                                 }
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  ">Confirm Password:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input
+                                                                    // value={confirm_password}
+                                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                                    type="password" required="" name="confirm_password" class="form-control form-control-sm  required matches_password" id="confirm_password" placeholder="Enter Confirm Password" />
+                                                                {
+                                                                    passwordError && <p className='text-danger m-0'>{passwordError}</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card bg-white mb-3 shadow-sm ">
+                                            <div class="card-header p-2  bg-gradient-primary text-white ">
+                                                <div class="card-title font-weight-bold mb-0  float-left mt-1">Parent Information</div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class=" row no-gutters">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Father Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input type="text" required=""
+                                                                    value={formData.father_name}
+                                                                    onChange={employee_input_change}
+                                                                    name="father_name" class="form-control form-control-sm  required " id="father_name" placeholder="Enter Father Name" />
+                                                                {
+                                                                    fatherName && <p className='text-danger m-0'>{fatherName}</p>
+                                                                }
+                                                                {/* {
+                                                                    fatherName && <p className='text-danger m-0'>{fatherName}</p>
+                                                                } */}
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Father Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input
+                                                                value={formData.father_phone}
+                                                                    onChange={employee_input_change}
+                                                                    type="text" name="father_phone" class="form-control form-control-sm  required " placeholder="Enter Father Mobile Number " />
+
                                                             </div>
                                                         </div>
 
 
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold ">Father Profession :<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+                                                                    value={formData.father_service}
+                                                                    onChange={employee_input_change}
+                                                                    name="father_service" class=" form-control form-control-sm  required integer_no_zero lupazila">
+                                                                    <option value="">Select Father Profession</option>
+                                                                    {
+                                                                        professions.map(profession =>
+                                                                            <>
+                                                                                <option value={profession.id}>{profession.profession_name}</option>
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                </select>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Mother Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input type="text"
+                                                                    onChange={employee_input_change}
+                                                                    value={formData.mother_name}
+                                                                    required="" name="mother_name" class="form-control form-control-sm  required " id="mother_name" placeholder="Enter Mother Name" />
+                                                                {
+                                                                    motherName && <p className='text-danger m-0'>{motherName}</p>
+                                                                }
+
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3">
+                                                                <label class="font-weight-bold  text-right">Mother Mobile:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input
+                                                                value={formData.mother_phone}
+                                                                    onChange={employee_input_change}
+                                                                    type="text" name="mother_phone" class="form-control form-control-sm  required " placeholder="Enter Mother Mobile number"/>
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row no-gutters">
+                                                            <div class="col-md-3"><label class="font-weight-bold ">Mother Profession:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
+                                                            <div class="col-md-8">
+                                                                <select
+                                                                    value={formData.mother_service}
+                                                                    onChange={employee_input_change}
+                                                                    name="mother_service" class=" form-control form-control-sm  required integer_no_zero lupazila">
+                                                                    <option value="">Select Mother Profession</option>
+                                                                    {
+                                                                        professions.map(profession =>
+                                                                            <>
+                                                                                <option value={profession.id}>{profession.profession_name}</option>
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                </select>
+
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -3317,7 +4070,7 @@ const EmployeeEdit = ({ id }) => {
 
                                             <div class="col-md-6">
                                                 <div class="card bg-white mb-3 shadow-sm ">
-                                                    <div class="card-header p-2   bg-light ">
+                                                    <div class="card-header p-2  bg-gradient-primary text-white">
                                                         <div class="card-title font-weight-bold mb-0  float-left mt-1">Living Address</div>
                                                     </div>
                                                     <div class="card-body">
@@ -3408,16 +4161,17 @@ const EmployeeEdit = ({ id }) => {
 
                                             <div className="col-md-6">
                                                 <div className="card bg-white mb-3 shadow-sm ">
-                                                    <div className="card-header p-2 bg-light clearfix">
+                                                    <div className="card-header p-2 bg-gradient-primary text-white clearfix">
                                                         <div className="card-title font-weight-bold mb-0 float-left mt-1">Permanent Address</div>
                                                         <div className="form-check form-check-inline float-right">
                                                             <input
                                                                 type="checkbox"
                                                                 name="same_as"
                                                                 className="same_as"
-                                                                value="1"
+                                                                value={isAddressSame ? 1 : 0}
                                                                 id="sameAsCheckbox"
-                                                                checked={isAddressSame}
+                                           
+                                                                checked={formData.same_as === 1}
                                                                 onChange={handleCheckboxChange}
                                                             />
                                                             <label className="font-weight-bold form-check-label ml-2" htmlFor="inlineCheckbox1">Same as Living Address</label>
@@ -3498,7 +4252,7 @@ const EmployeeEdit = ({ id }) => {
                                                                             id="paddress"
                                                                             placeholder="Enter Address"
                                                                             value={formData.permanent_address}
-                                    onChange={handlePermanentAddressChange}
+                                                                            onChange={handlePermanentAddressChange}
                                                                         />
                                                                     </div>
                                                                 </div>
@@ -3512,7 +4266,7 @@ const EmployeeEdit = ({ id }) => {
                                         </div>
 
                                         <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
+                                            <div class="card-header p-2   bg-gradient-primary text-white ">
                                                 <div class="card-title font-weight-bold mb-0  float-left mt-1">Joining Information</div>
                                             </div>
                                             <div class="card-body">
@@ -3541,7 +4295,7 @@ const EmployeeEdit = ({ id }) => {
 
                                                                 />
                                                                 {
-                                                                    joinDate && <p className='text-danger'>{joinDate}</p>
+                                                                    joinDate && <p className='text-danger m-0'>{joinDate}</p>
                                                                 }
                                                             </div>
                                                         </div>
@@ -3550,10 +4304,11 @@ const EmployeeEdit = ({ id }) => {
                                                             <div class="col-md-3"><label class="font-weight-bold  text-right">Employee ID:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small></label></div>
                                                             <div class="col-md-8">
                                                                 <input
-                                                                    onChange={employee_input_change}
-                                                                    type="text" required="" name="finger_print_id" class=" form-control form-control-sm  required " id="finger_print_id" placeholder="Enter Employee ID" />
+                                                                    value={user.unique_id}
+                                                                    onChange={users_input_change}
+                                                                    type="text" required="" name="unique_id" class=" form-control form-control-sm  required " id="finger_print_id" placeholder="Enter Employee ID" />
                                                                 {
-                                                                    employeeId && <p className='text-danger'>{employeeId}</p>
+                                                                    employeeId && <p className='text-danger m-0'>{employeeId}</p>
                                                                 }
                                                             </div>
                                                         </div>
@@ -3575,7 +4330,7 @@ const EmployeeEdit = ({ id }) => {
                                                                     }
                                                                 </select>
                                                                 {
-                                                                    shift && <p className='text-danger'>{shift}</p>
+                                                                    shift && <p className='text-danger m-0'>{shift}</p>
                                                                 }
                                                             </div>
                                                         </div>
@@ -3599,7 +4354,7 @@ const EmployeeEdit = ({ id }) => {
                                                                     }
                                                                 </select>
                                                                 {
-                                                                    designation && <p className='text-danger'>{designation}</p>
+                                                                    designation && <p className='text-danger m-0'>{designation}</p>
                                                                 }
 
                                                             </div>
@@ -3620,7 +4375,7 @@ const EmployeeEdit = ({ id }) => {
                                                                     ))}
                                                                 </select>
                                                                 {
-                                                                    payroll && <p className='text-danger'>{payroll}</p>
+                                                                    payroll && <p className='text-danger m-0'>{payroll}</p>
                                                                 }
                                                             </div>
                                                         </div>
@@ -3642,7 +4397,7 @@ const EmployeeEdit = ({ id }) => {
                                                                     }
                                                                 </select>
                                                                 {
-                                                                    shift && <p className='text-danger'>{shift}</p>
+                                                                    shift && <p className='text-danger m-0'>{shift}</p>
                                                                 }
                                                             </div>
                                                         </div>
@@ -3651,7 +4406,7 @@ const EmployeeEdit = ({ id }) => {
                                             </div>
                                         </div>
                                         <div class="card bg-white mb-3 shadow-sm ">
-                                            <div class="card-header p-2   bg-light ">
+                                            <div class="card-header p-2   bg-gradient-primary text-white ">
                                                 <div class="card-title font-weight-bold mb-0  float-left mt-1">Attach Image</div>
                                             </div>
                                             <div class="card-body">
@@ -3677,7 +4432,7 @@ const EmployeeEdit = ({ id }) => {
                                                                     </span>
                                                                 </div>
 
-                                                                {fileSizeError && <div className="text-danger">{fileSizeError}</div>}
+                                                                {fileSizeError && <div className="text-danger m-0">{fileSizeError}</div>}
                                                                 <div id="progress_client" className="progress">
                                                                     <div
                                                                         className="progress-bar progress_client1 progress-bar-success"
@@ -3722,7 +4477,7 @@ const EmployeeEdit = ({ id }) => {
                                                                         />
                                                                     </span>
                                                                 </div>
-                                                                {errorMessage && <div className="text-danger">{errorMessage}</div>}
+                                                                {errorMessage && <div className="text-danger m-0">{errorMessage}</div>}
                                                                 <div id="progress_client" className="progress">
                                                                     <div
                                                                         className="progress-bar progress_client1 progress-bar-success"

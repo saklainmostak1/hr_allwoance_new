@@ -183,6 +183,7 @@ const NewsCategoryCreate = () => {
 
 
   const [status, setStatus] = useState([])
+ 
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
@@ -192,8 +193,30 @@ const NewsCategoryCreate = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+ 
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
+
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.company_type_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -211,39 +234,51 @@ const NewsCategoryCreate = () => {
     },
   });
 
+
   const user_create = async (e) => {
     e.preventDefault();
 
-    // // Check for exact duplicate gender names
+   
+
+    // const normalizedInputName = formData.name
+    //   .trim()
+
+    //   .toLowerCase();
+
     // const duplicate = noticeCategoryAll.some(
-    //   (existingGender) =>
-    //     existingGender.name.trim().replace(/\s+/g, "").toLowerCase() ===
-    //     formData.name.trim().replace(/\s+/g, "").toLowerCase()
-    // );
+    //   (existingCategory) =>
+    //     existingCategory.name.trim().toLowerCase() === normalizedInputName
+    // )
+    //   ? "News category name already exists. Please choose a different name."
+    //   : "";
 
     // if (duplicate) {
-    //   setErrorMessage(
-    //     "Notice category name already exists. Please choose a different name."
-    //   );
+    //   setErrorMessage(duplicate);
     //   return;
     // }
 
-    const normalizedInputName = formData.name
-      .trim()
-
-      .toLowerCase();
-
-    const duplicate = noticeCategoryAll.some(
-      (existingCategory) =>
-        existingCategory.name.trim().toLowerCase() === normalizedInputName
-    )
-      ? "News category name already exists. Please choose a different name."
-      : "";
-
-    if (duplicate) {
-      setErrorMessage(duplicate);
-      return;
+    if (!formData.name) {
+      setName('News Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("News Category name already exists. Please choose a different News Category name.");
+      return
+
+    }
+
 
     try {
       const response = await fetch(
@@ -321,7 +356,7 @@ const NewsCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        required
+                        
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${errorMessage ? "is-invalid" : ""
                           }`}
@@ -334,6 +369,10 @@ const NewsCategoryCreate = () => {
                       {errorMessage && (
                         <div className="invalid-feedback">{errorMessage}</div>
                       )}
+
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 
@@ -368,6 +407,9 @@ const NewsCategoryCreate = () => {
                           )
                         }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

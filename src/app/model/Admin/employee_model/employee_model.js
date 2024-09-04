@@ -338,10 +338,17 @@ const EmployeeModel = {
                 u.gender,
                 u.religion,
                 u.mobile,
+                u.unique_id,
                 u.email,
                 u.password,
                 u.signature_image,
-                u.photo
+                u.photo,
+                up.father_name AS e_father_name,
+                up.mother_name AS e_mother_name,
+                up.father_service AS father_service,
+                up.mother_service AS mother_service,
+                pc.father_phone AS father_phone,
+                pc.mother_phone AS mother_phone
             FROM 
                 employe_info ei
             LEFT JOIN 
@@ -358,17 +365,21 @@ const EmployeeModel = {
                 users u ON ei.user_id = u.id
             LEFT JOIN 
                 designation d ON ep.designation_id = d.id
+            LEFT JOIN 
+                user_parent up ON ej.user_id = up.user_id
+            LEFT JOIN 
+                parent_contact pc ON ej.user_id = pc.user_id
             WHERE
                 ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
             `;
-            
+
             connection.query(employeeDataQuery, async (err, results) => {
                 if (err) {
                     console.error(err);
                     res.status(500).json({ message: 'Failed to fetch employee data' });
                     return;
                 }
-    
+
                 // Process results to aggregate educational qualifications
                 const employees = {};
                 results.forEach(row => {
@@ -388,7 +399,7 @@ const EmployeeModel = {
                         });
                     }
                 });
-    
+
                 const processedResults = Object.values(employees);
                 res.status(200).json(processedResults);
             });
@@ -402,7 +413,7 @@ const EmployeeModel = {
     employee_all_list_single: async (req, res) => {
 
         const { id } = req.params; // Destructure id from req.params
-    
+
         try {
             const employeeDataQuery = `
             SELECT 
@@ -455,14 +466,14 @@ const EmployeeModel = {
             WHERE
                 ei.user_id = ?
             `;
-    
+
             connection.query(employeeDataQuery, [id], async (err, results) => {
                 if (err) {
                     console.error(err);
                     res.status(500).json({ message: 'Failed to fetch employee data' });
                     return;
                 }
-    
+
                 // Process results to aggregate educational qualifications
                 const employees = {};
                 results.forEach(row => {
@@ -482,7 +493,7 @@ const EmployeeModel = {
                         });
                     }
                 });
-    
+
                 const processedResults = Object.values(employees);
                 res.status(200).json(processedResults);
             });
@@ -491,9 +502,9 @@ const EmployeeModel = {
             res.status(500).json({ message: "Error fetching employee data" });
         }
     },
-    
-    
-    
+
+
+
 
     // employee_all_single: async (req, res) => {
     //     try {
@@ -569,6 +580,107 @@ const EmployeeModel = {
     //     }
     // },
 
+    // employee_all_single: async (req, res) => {
+    //     try {
+    //         const employeeId = req.params.id; // Assuming the ID is passed as a parameter
+
+    //         const employeeDataQuery = `
+    //             SELECT 
+    //                 ei.*, 
+    //                 la.division_id AS living_division_id,
+    //                 la.same_as AS same_as,
+    //                 la.district_id AS living_district_id,
+    //                 la.upazila_id AS living_upazila_id,
+    //                 la.address AS living_address,
+    //                 pa.division_id AS permanent_division_id,
+    //                 pa.district_id AS permanent_district_id,
+    //                 pa.upazila_id AS permanent_upazila_id,
+    //                 pa.address AS permanent_address,
+    //                 ej.join_date AS join_date,
+    //                 ej.payroll_id AS payroll_id,
+    //                 ej.school_shift_id AS school_shift_id,
+    //                 ej.branch_id AS branch_id,
+    //                 ep.designation_id AS designation_id,
+    //                 d.designation_name,
+    //                 u.full_name,
+    //                 u.unique_id,
+    //                 u.father_name,
+    //                 u.mother_name,
+    //                 u.blood_group_id,
+    //                 u.dob,
+    //                 u.gender,
+    //                 u.religion,
+    //                 u.mobile,
+    //                 u.email,
+    //                 u.password,
+    //                 u.signature_image,
+    //                 u.photo,
+    //                 up.father_name as e_father_name,
+    //                 up.mother_name as e_mother_name,
+    //                 up.father_service as father_service,
+    //                 up.mother_service as mother_service,
+    //             FROM 
+    //                 employe_info ei
+    //             LEFT JOIN 
+    //                 living_address la ON ei.user_id = la.user_id
+    //             LEFT JOIN 
+    //                 parmanent_address pa ON ei.user_id = pa.user_id
+    //             LEFT JOIN 
+    //                 employe_joining ej ON ei.user_id = ej.user_id
+    //             LEFT JOIN 
+    //                 employee_promotion ep ON ei.user_id = ep.user_id
+    //             LEFT JOIN 
+    //                 users u ON ei.user_id = u.id
+    //             LEFT JOIN 
+    //                 designation d ON ep.designation_id = d.id
+    //             LEFT JOIN 
+    //                 user_parent up ON ej.user_id =  up.user_id
+    //             WHERE
+    //                 ei.user_id = ?`;
+
+    //         const educationalQualificationQuery = `
+    //             SELECT 
+    //                 eq.education, 
+    //                 eq.institute, 
+    //                 eq.result, 
+    //                 eq.passing_year
+    //             FROM 
+    //                 educational_qualification eq 
+    //             WHERE 
+    //                 eq.user_id = ?`;
+
+    //         connection.query(employeeDataQuery, [employeeId], (err, employeeResults) => {
+    //             if (err) {
+    //                 console.error(err);
+    //                 res.status(500).json({ message: 'Failed to fetch employee data' });
+    //                 return;
+    //             }
+    //             if (employeeResults.length === 0) {
+    //                 res.status(404).json({ message: 'Employee not found' });
+    //                 return;
+    //             }
+
+    //             connection.query(educationalQualificationQuery, [employeeId], (err, educationResults) => {
+    //                 if (err) {
+    //                     console.error(err);
+    //                     res.status(500).json({ message: 'Failed to fetch educational qualifications' });
+    //                     return;
+    //                 }
+
+    //                 const employeeData = {
+    //                     ...employeeResults[0],
+    //                     educational_qualifications: educationResults
+    //                 };
+
+    //                 res.status(200).json(employeeData);
+    //             });
+    //         });
+    //     } catch (error) {
+    //         console.error("Error fetching employee data:", error);
+    //         res.status(500).json({ message: "Error fetching employee data" });
+    //     }
+    // },
+
     employee_all_single: async (req, res) => {
         try {
             const employeeId = req.params.id; // Assuming the ID is passed as a parameter
@@ -577,6 +689,7 @@ const EmployeeModel = {
                 SELECT 
                     ei.*, 
                     la.division_id AS living_division_id,
+                    la.same_as AS same_as,
                     la.district_id AS living_district_id,
                     la.upazila_id AS living_upazila_id,
                     la.address AS living_address,
@@ -591,8 +704,8 @@ const EmployeeModel = {
                     ep.designation_id AS designation_id,
                     d.designation_name,
                     u.full_name,
-                    u.father_name,
-                    u.mother_name,
+                    u.unique_id,
+                    u.blood_group_id,
                     u.dob,
                     u.gender,
                     u.religion,
@@ -600,7 +713,14 @@ const EmployeeModel = {
                     u.email,
                     u.password,
                     u.signature_image,
-                    u.photo
+                    u.photo,
+                    u.NID,
+                    up.father_name AS e_father_name,
+                    up.mother_name AS e_mother_name,
+                    up.father_service AS father_service,
+                    up.mother_service AS mother_service,
+                    pc.father_phone AS father_phone,
+                    pc.mother_phone AS mother_phone
                 FROM 
                     employe_info ei
                 LEFT JOIN 
@@ -615,6 +735,10 @@ const EmployeeModel = {
                     users u ON ei.user_id = u.id
                 LEFT JOIN 
                     designation d ON ep.designation_id = d.id
+                LEFT JOIN 
+                    user_parent up ON ej.user_id = up.user_id
+                LEFT JOIN 
+                    parent_contact pc ON ej.user_id = pc.user_id
                 WHERE
                     ei.user_id = ?`;
 
@@ -629,9 +753,10 @@ const EmployeeModel = {
                 WHERE 
                     eq.user_id = ?`;
 
+            // Execute the main employee data query
             connection.query(employeeDataQuery, [employeeId], (err, employeeResults) => {
                 if (err) {
-                    console.error(err);
+                    console.error("Error fetching employee data:", err);
                     res.status(500).json({ message: 'Failed to fetch employee data' });
                     return;
                 }
@@ -640,17 +765,125 @@ const EmployeeModel = {
                     return;
                 }
 
+                // Execute the educational qualifications query
                 connection.query(educationalQualificationQuery, [employeeId], (err, educationResults) => {
                     if (err) {
-                        console.error(err);
+                        console.error("Error fetching educational qualifications:", err);
                         res.status(500).json({ message: 'Failed to fetch educational qualifications' });
                         return;
                     }
 
+                    // Combine the results
                     const employeeData = {
                         ...employeeResults[0],
                         educational_qualifications: educationResults
                     };
+
+                    res.status(200).json(employeeData);
+                });
+            });
+        } catch (error) {
+            console.error("Error fetching employee data:", error);
+            res.status(500).json({ message: "Error fetching employee data" });
+        }
+    },
+
+
+
+    employee_all_for_attendance: async (req, res) => {
+        try {
+            const employeeDataQuery = `
+                SELECT 
+                    ei.*, 
+                    la.division_id AS living_division_id,
+                    la.same_as AS same_as,
+                    la.district_id AS living_district_id,
+                    la.upazila_id AS living_upazila_id,
+                    la.address AS living_address,
+                    pa.division_id AS permanent_division_id,
+                    pa.district_id AS permanent_district_id,
+                    pa.upazila_id AS permanent_upazila_id,
+                    pa.address AS permanent_address,
+                    ej.join_date AS join_date,
+                    ej.payroll_id AS payroll_id,
+                    ej.school_shift_id AS school_shift_id,
+                    ej.branch_id AS branch_id,
+                    ep.designation_id AS designation_id,
+                    d.designation_name,
+                    u.full_name,
+                    u.unique_id,
+                    u.blood_group_id,
+                    u.dob,
+                    u.gender,
+                    u.religion,
+                    u.mobile,
+                    u.email,
+                    u.password,
+                    u.signature_image,
+                    u.photo,
+                    u.NID,
+                    up.father_name AS e_father_name,
+                    up.mother_name AS e_mother_name,
+                    up.father_service AS father_service,
+                    up.mother_service AS mother_service,
+                    pc.father_phone AS father_phone,
+                    pc.mother_phone AS mother_phone
+                FROM 
+                    employe_info ei
+                LEFT JOIN 
+                    living_address la ON ei.user_id = la.user_id
+                LEFT JOIN 
+                    parmanent_address pa ON ei.user_id = pa.user_id
+                LEFT JOIN 
+                    employe_joining ej ON ei.user_id = ej.user_id
+                LEFT JOIN 
+                    employee_promotion ep ON ei.user_id = ep.user_id
+                LEFT JOIN 
+                    users u ON ei.user_id = u.id
+                LEFT JOIN 
+                    designation d ON ep.designation_id = d.id
+                LEFT JOIN 
+                    user_parent up ON ej.user_id = up.user_id
+                LEFT JOIN 
+                    parent_contact pc ON ej.user_id = pc.user_id`;
+
+            const educationalQualificationQuery = `
+                SELECT 
+                    eq.user_id,
+                    eq.education, 
+                    eq.institute, 
+                    eq.result, 
+                    eq.passing_year
+                FROM 
+                    educational_qualification eq`;
+
+            // Execute the main employee data query
+            connection.query(employeeDataQuery, (err, employeeResults) => {
+                if (err) {
+                    console.error("Error fetching employee data:", err);
+                    res.status(500).json({ message: 'Failed to fetch employee data' });
+                    return;
+                }
+                if (employeeResults.length === 0) {
+                    res.status(404).json({ message: 'No employees found' });
+                    return;
+                }
+
+                // Execute the educational qualifications query
+                connection.query(educationalQualificationQuery, (err, educationResults) => {
+                    if (err) {
+                        console.error("Error fetching educational qualifications:", err);
+                        res.status(500).json({ message: 'Failed to fetch educational qualifications' });
+                        return;
+                    }
+
+                    // Map educational qualifications to the respective employees
+                    const employeeData = employeeResults.map(employee => {
+                        return {
+                            ...employee,
+                            educational_qualifications: educationResults.filter(eq => eq.user_id === employee.user_id)
+                        };
+                    });
 
                     res.status(200).json(employeeData);
                 });
@@ -1117,6 +1350,7 @@ const EmployeeModel = {
                 signature_image,
                 photo,
                 created_by,
+                unique_id,
                 // Defaulting the following values to 0
                 experience = 0,
                 education = 0,
@@ -1159,9 +1393,9 @@ const EmployeeModel = {
                     return;
                 }
 
-                const userQuery = `INSERT INTO users (full_name, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-                const userParams = [full_name, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
+                const userQuery = `INSERT INTO users (full_name,unique_id, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                const userParams = [full_name, unique_id, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
 
                 connection.query(userQuery, userParams, async (userErr, userResults) => {
                     if (userErr) {
@@ -1304,6 +1538,9 @@ const EmployeeModel = {
     create_employee: async (req, res) => {
         try {
             const {
+                father_service, mother_service,
+                blood_group_id,
+                NID,
                 mother_name,
                 father_name,
                 full_name,
@@ -1317,7 +1554,7 @@ const EmployeeModel = {
                 education,
                 institute,
                 result,
-                
+                unique_id,
                 same_as,
                 passing_year,
                 division_id_living,
@@ -1335,7 +1572,8 @@ const EmployeeModel = {
                 photo,
                 created_by,
                 designation_id,
-                branch_id
+                branch_id,
+                father_mobile, mother_mobile
             } = req.body;
 
             const educationalQualifications = req.body.fields; // Assuming this is an array of qualifications
@@ -1345,9 +1583,9 @@ const EmployeeModel = {
             // Assuming you have a connection object already defined
             connection.beginTransaction();
 
-            const userQuery = `INSERT INTO users (full_name, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-            const userParams = [full_name, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
+            const userQuery = `INSERT INTO users (full_name,NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            const userParams = [full_name, NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
 
             connection.query(userQuery, userParams, async (err, results) => {
                 if (err) {
@@ -1374,6 +1612,15 @@ const EmployeeModel = {
                                                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     const employeJoiningParams = [user_id, join_date, payroll_id, school_shift_id, branch_id, created_by, designation_id];
 
+                    const employEuserParentQuery = `INSERT INTO user_parent (user_id, father_name, mother_name, father_service, mother_service) 
+                                                VALUES (?, ?, ?, ?, ?)`;
+                    const employeParentParams = [user_id, father_name, mother_name, father_service, mother_service];
+
+                    const employEuserParentContactQueryF = `INSERT INTO parent_contact (user_id, father_phone, mother_phone) 
+                                                VALUES (?, ?, ?)`;
+                    const employeParentContactParamsF = [user_id, father_mobile, mother_mobile];
+
+
                     // Insert into employe_info table
                     await connection.query(employeInfoQuery, employeInfoParams);
                     // Insert into living_address table
@@ -1382,6 +1629,11 @@ const EmployeeModel = {
                     await connection.query(permanentAddressQuery, permanentAddressParams);
                     // Insert into employe_joining table
                     await connection.query(employeJoiningQuery, employeJoiningParams);
+
+                    await connection.query(employEuserParentQuery, employeParentParams);
+
+                    await connection.query(employEuserParentContactQueryF, employeParentContactParamsF);
+
 
                     // Insert into educational_qualification table
                     for (const qualification of educationalQualifications) {
@@ -1563,15 +1815,15 @@ const EmployeeModel = {
     //         promotion_month,
     //         fields
     //     } = req.body;
-    
+
     //     try {
     //         const connection = await getConnection(); // Replace with your database connection method
-    
+
     //         await connection.beginTransaction();
-    
+
     //         // Update basic user info
-           
-    
+
+
     //         // Update employe_info
     //         const employeInfoUpdateQuery = `
     //             UPDATE employe_info
@@ -1579,7 +1831,7 @@ const EmployeeModel = {
     //             WHERE user_id = ?`;
     //         const employeInfoParams = [experience, updated_by, user_id];
     //         await connection.query(employeInfoUpdateQuery, employeInfoParams);
-    
+
     //         // Update educational qualifications
     //         for (const qualification of fields) {
     //             const { education, institute, result, passing_year } = qualification;
@@ -1590,7 +1842,7 @@ const EmployeeModel = {
     //             const eduQualificationParams = [education, institute, result, passing_year, updated_by, user_id];
     //             await connection.query(eduQualificationUpdateQuery, eduQualificationParams);
     //         }
-    
+
     //         // Update living address
     //         const livingAddressUpdateQuery = `
     //             UPDATE living_address
@@ -1598,7 +1850,7 @@ const EmployeeModel = {
     //             WHERE user_id = ?`;
     //         const livingAddressParams = [division_id_living, district_id_living, upazila_id_living, address_id_living, updated_by, user_id];
     //         await connection.query(livingAddressUpdateQuery, livingAddressParams);
-    
+
     //         // Update permanent address
     //         const permanentAddressUpdateQuery = `
     //             UPDATE permanent_address
@@ -1606,7 +1858,7 @@ const EmployeeModel = {
     //             WHERE user_id = ?`;
     //         const permanentAddressParams = [division_id_permanent, district_id_permanent, upazila_id_permanent, address_id_permanent, updated_by, user_id];
     //         await connection.query(permanentAddressUpdateQuery, permanentAddressParams);
-    
+
     //         // Update employee joining details
     //         const employeJoiningUpdateQuery = `
     //             UPDATE employe_joining
@@ -1614,14 +1866,14 @@ const EmployeeModel = {
     //             WHERE user_id = ?`;
     //         const employeJoiningParams = [join_date, payroll_id, school_shift_id, updated_by, user_id];
     //         await connection.query(employeJoiningUpdateQuery, employeJoiningParams);
-    
+
     //         // Insert employee promotion data
     //         const employeePromotionInsertQuery = `
     //             INSERT INTO employee_promotion (user_id, join_date, payroll_id, created_by, designation_id, school_shift_id, promotion_id, promotion_month)
     //             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
     //         const employeePromotionParams = [user_id, join_date, payroll_id, updated_by, designation_id, school_shift_id, designation_id, promotion_month];
     //         await connection.query(employeePromotionInsertQuery, employeePromotionParams);
-    
+
     //         await connection.commit();
     //         res.status(200).json({ message: 'User updated and promotion data inserted successfully' });
     //     } catch (error) {
@@ -1632,7 +1884,7 @@ const EmployeeModel = {
     //         connection.release(); // Release the connection back to the pool
     //     }
     // },
-    
+
 
 
     // update_employee: async (req, res) => {
@@ -1808,7 +2060,7 @@ const EmployeeModel = {
     //             promotion_month
     //         } = req.body;
 
-        
+
 
     //         let hashedPassword = null;
     //         if (password) {
@@ -1850,7 +2102,7 @@ const EmployeeModel = {
 
     //                     const eduQualificationParams = [education, institute, result, passing_year, updated_by, user_id];
 
-                  
+
 
     //                 const livingAddressUpdateQuery = `
     //             UPDATE living_address
@@ -2196,49 +2448,49 @@ const EmployeeModel = {
     //             designation_id,
     //             branch_id,
     //         } = req.body;
-    
+
     //         // Query to update employee info
     //         const updateEmployeeInfoQuery = `
     //             UPDATE employe_info 
     //             SET experience = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Query to update educational qualification
     //         const updateEducationQuery = `
     //             UPDATE educational_qualification 
     //             SET education = ?, institute = ?, result = ?, passing_year = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Query to update living address
     //         const updateLivingAddressQuery = `
     //             UPDATE living_address 
     //             SET division_id = ?, district_id = ?, upazila_id = ?, address = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Query to update permanent address
     //         const updatePermanentAddressQuery = `
     //             UPDATE parmanent_address 
     //             SET division_id = ?, district_id = ?, upazila_id = ?, address = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Query to update employee joining details
     //         const updateEmployeeJoiningQuery = `
     //             UPDATE employe_joining 
     //             SET branch_id = ?, join_date = ?, payroll_id = ?, school_shift_id = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Query to update employee promotion details
     //         const updateEmployeePromotionQuery = `
     //             UPDATE employee_promotion 
     //             SET designation_id = ?
     //             WHERE user_id = ?;
     //         `;
-    
+
     //         // Begin transaction
     //         connection.beginTransaction(async (err) => {
     //             if (err) {
@@ -2246,30 +2498,30 @@ const EmployeeModel = {
     //                 res.status(500).json({ message: 'Failed to start transaction' });
     //                 return;
     //             }
-    
+
     //             try {
     //                 // Update employee info
     //                 await connection.query(updateEmployeeInfoQuery, [experience, employeeId]);
-    
+
     //                 // Update educational qualifications
     //                 for (const qualification of fields) {
     //                     const { education, institute, result, passing_year } = qualification;
     //                     const updateEducationParams = [education, institute, result, passing_year, employeeId];
     //                     await connection.query(updateEducationQuery, updateEducationParams);
     //                 }
-    
+
     //                 // Update living address
     //                 await connection.query(updateLivingAddressQuery, [living_division_id, living_district_id, living_upazila_id, living_address, employeeId]);
-    
+
     //                 // Update permanent address
     //                 await connection.query(updatePermanentAddressQuery, [permanent_division_id, permanent_district_id, permanent_upazila_id, permanent_address, employeeId]);
-    
+
     //                 // Update employee joining details
     //                 await connection.query(updateEmployeeJoiningQuery, [branch_id, join_date, payroll_id, school_shift_id, employeeId]);
-    
+
     //                 // Update employee promotion details
     //                 await connection.query(updateEmployeePromotionQuery, [designation_id, employeeId]);
-    
+
     //                 // Commit the transaction
     //                 connection.commit((err) => {
     //                     if (err) {
@@ -2292,8 +2544,11 @@ const EmployeeModel = {
     //         res.status(500).json({ message: 'Error updating employee data' });
     //     }
     // },
+
     employee_update: async (req, res) => {
         try {
+
+
             const employeeId = req.params.id; // Assuming the ID is passed as a parameter
             const {
                 experience,
@@ -2311,12 +2566,19 @@ const EmployeeModel = {
                 school_shift_id,
                 designation_id,
                 branch_id,
-              
+                mother_phone,
+                mother_name,
+                father_phone,
+                father_name,
+                mother_service,
+                father_service,
+                same_as,
+
             } = req.body;
 
 
-           
-    
+
+
             // Begin transaction
             connection.beginTransaction(async (err) => {
                 if (err) {
@@ -2324,7 +2586,7 @@ const EmployeeModel = {
                     res.status(500).json({ message: 'Failed to start transaction' });
                     return;
                 }
-    
+
                 try {
                     // Query to delete existing educational qualifications
                     const deleteEducationQuery = `
@@ -2332,20 +2594,20 @@ const EmployeeModel = {
                         WHERE user_id = ?
                     `;
                     await connection.query(deleteEducationQuery, [employeeId]);
-    
+
                     // Query to insert new educational qualifications
                     const insertEducationQuery = `
                         INSERT INTO educational_qualification (user_id, education, institute, result, passing_year)
                         VALUES (?, ?, ?, ?, ?)
                     `;
-                    
+
                     // Insert new qualifications
                     for (const qualification of fields) {
                         const { education, institute, result, passing_year } = qualification;
                         const insertEducationParams = [employeeId, education, institute, result, passing_year];
                         await connection.query(insertEducationQuery, insertEducationParams);
                     }
-    
+
                     // Update other employee information (experience, addresses, joining details, promotion)
                     const updateEmployeeInfoQuery = `
                         UPDATE employe_info 
@@ -2353,35 +2615,49 @@ const EmployeeModel = {
                         WHERE user_id = ?;
                     `;
                     await connection.query(updateEmployeeInfoQuery, [experience, employeeId]);
-    
+
                     const updateLivingAddressQuery = `
                         UPDATE living_address 
-                        SET division_id = ?, district_id = ?, upazila_id = ?, address = ?
+                        SET division_id = ?, district_id = ?, upazila_id = ?, address = ?, same_as = ?
                         WHERE user_id = ?;
                     `;
-                    await connection.query(updateLivingAddressQuery, [living_division_id, living_district_id, living_upazila_id, living_address, employeeId]);
-    
+                    await connection.query(updateLivingAddressQuery, [living_division_id, living_district_id, living_upazila_id, living_address, same_as, employeeId]);
+
                     const updatePermanentAddressQuery = `
                         UPDATE parmanent_address 
                         SET division_id = ?, district_id = ?, upazila_id = ?, address = ?
                         WHERE user_id = ?;
                     `;
                     await connection.query(updatePermanentAddressQuery, [permanent_division_id, permanent_district_id, permanent_upazila_id, permanent_address, employeeId]);
-    
+
                     const updateEmployeeJoiningQuery = `
                         UPDATE employe_joining 
                         SET branch_id = ?, join_date = ?, payroll_id = ?, school_shift_id = ?
                         WHERE user_id = ?;
                     `;
                     await connection.query(updateEmployeeJoiningQuery, [branch_id, join_date, payroll_id, school_shift_id, employeeId]);
-    
+
                     const updateEmployeePromotionQuery = `
                         UPDATE employee_promotion 
                         SET designation_id = ?
                         WHERE user_id = ?;
                     `;
                     await connection.query(updateEmployeePromotionQuery, [designation_id, employeeId]);
-    
+
+                    const updatePCQuery = `
+                        UPDATE parent_contact 
+                        SET father_phone = ?, mother_phone = ? 
+                        WHERE user_id = ?;
+                    `;
+                    await connection.query(updatePCQuery, [father_phone, mother_phone, employeeId]);
+
+                    const updateUPQuery = `
+                        UPDATE user_parent 
+                        SET father_name = ?, mother_name = ?, father_service = ?, mother_service = ?
+                        WHERE user_id = ?;
+                    `;
+                    await connection.query(updateUPQuery, [father_name, mother_name, father_service, mother_service, employeeId]);
+
                     // Commit the transaction
                     connection.commit((err) => {
                         if (err) {
@@ -2404,10 +2680,11 @@ const EmployeeModel = {
             res.status(500).json({ message: 'Error updating employee data' });
         }
     },
-    
-    
-    
+
+
+
     user_update: async (req, res) => {
+
         try {
             const {
                 full_name,
@@ -2421,11 +2698,17 @@ const EmployeeModel = {
                 password,
                 signature_image,
                 photo,
-                modified_by
+                modified_by,
+                unique_id,
+                blood_group_id,
+                NID,
             } = req.body;
 
             const query = `UPDATE users 
               SET full_name = ?,
+               unique_id = ?,
+                blood_group_id = ?,
+                NID = ?,
                   mother_name = ?,
                   father_name = ?,
                   dob = ?,
@@ -2440,6 +2723,9 @@ const EmployeeModel = {
 
             connection.query(query, [
                 full_name,
+                unique_id,
+                blood_group_id,
+                NID,
                 mother_name,
                 father_name,
                 dob,

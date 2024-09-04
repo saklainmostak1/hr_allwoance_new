@@ -80,16 +80,29 @@ const AdminHeader = ({ toggleSidebar }) => {
 
 
     // console.log(toggleHeader)
+
+    const [templateSettings, setTemplateSettings] = useState([])
+
+    useEffect(() => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/admin/admin_panel_settings`)
+            .then(Response => Response.json())
+            .then(data => setTemplateSettings(data))
+    }, [])
+
+    console.log(templateSettings)
+    const filteredCategories = templateSettings.filter(category => category.status === 1);
+    console.log(filteredCategories[0]?.id)
+
     return (
-        
+
         <nav className="navbar navbar-expand-lg header_background_color">
             <div className="container-fluid ">
-            <button type="button" onClick={toggleSidebar} id="sidebarCollapse" className="btn btn-info d-lg-none mr-lg-5">
+                <button type="button" onClick={toggleSidebar} id="sidebarCollapse" className="btn btn-info d-lg-none mr-lg-5">
                     {/* <FaBars></FaBars> */}
 
                     <FaTasks></FaTasks>
                 </button>
-                <div className='d-flex gap-3 mt-3'>
+                {/* <div className='d-flex gap-3 mt-3'>
                     <div >
                         <img src="https://atik.urbanitsolution.com/files/logo/thumbnail/7632b474c6d5b78e3f6233a87461bf623f453c67.jpeg" className="img-fluid ${3|rounded-top,rounded-right,rounded-bottom,rounded-left,rounded-circle,|}" alt=""
                             width='40'
@@ -99,6 +112,15 @@ const AdminHeader = ({ toggleSidebar }) => {
                         <h4 className='header-tag header_color'>Pathshala School & College
                         </h4>
                         <p style={{ marginTop: '-5px' }} className='project_name_color'><strong>College Management System</strong></p>
+                    </div>
+                </div> */}
+                <div class="media">
+                    <img onClick={toggleSidebar} class="align-self-center mr-3" src="https://atik.urbanitsolution.com/files/logo/thumbnail/7632b474c6d5b78e3f6233a87461bf623f453c67.jpeg" alt="Generic placeholder image" width={40} />
+                    <div class="media-body">
+                        <h4 className='mt-0 header-tag header_color'>Pathshala School & College
+                        </h4>
+                        <p className='mb-0'><strong>College Management System</strong></p>
+
                     </div>
                 </div>
                 <div>
@@ -111,15 +133,15 @@ const AdminHeader = ({ toggleSidebar }) => {
                 </div>
 
 
-                <div className="collapse navbar-collapse d-lg-flex justify-content-end navbar-upper" id="navbarSupportedContent">
+                <div className="collapse navbar-collapse  navbar-upper" id="navbarSupportedContent">
 
 
-                    <div className='header-right mb-lg-0 mb-3 w-full'>
-                        <ul className="nav justify-content-center">
+                    <div className=' mb-lg-0  w-100 '>
+                        <ul className="nav float-md-right">
                             <li className="nav-item py-1 bg-light border rounded-circle mr-2"></li>
                             <li className="nav-item py-1 bg-light border rounded-circle mr-2 mx-2"></li>
                             <li className="nav-item py-1 bg-light border rounded-circle mr-2 ">
-                                <Link href="/Admin/admin_template/admin_template_all" className="nav-link text-success">
+                                <Link href={`/Admin/admin_template/admin_template_edit/${filteredCategories[0]?.id}`} className="nav-link text-success">
                                     <FontAwesomeIcon icon={faCog} className="zt-1" />
                                 </Link>
                             </li>

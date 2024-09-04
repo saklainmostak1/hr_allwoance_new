@@ -30,7 +30,7 @@ const DesignationModel = {
       const data = `SELECT bg.*, u.full_name AS author_name
                    FROM designation bg
                    JOIN users u ON bg.created_by = u.id
-                   ORDER BY bg.id DESC;`;
+                   ORDER BY bg.serial_number DESC;`;
 
       connection.query(data, function (error, result) {
         if (!error) {
@@ -247,7 +247,7 @@ const DesignationModel = {
   FROM designation 
   LEFT JOIN users AS users_created ON designation.created_by = users_created.id 
   LEFT JOIN users AS users_modified ON designation.modified_by = users_modified.id 
-  ORDER BY designation.id DESC
+  ORDER BY designation.serial_number ASC
   LIMIT ?, ?
 `;
 

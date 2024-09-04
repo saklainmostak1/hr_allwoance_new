@@ -108,36 +108,67 @@ const GenderList = ({ searchParams }) => {
 
   // Paigination end
 
-  const genderAll_delete = (id) => {
-    const procced = window.confirm(`Are you sure to delete this item.`);
-    if (!procced) return;
-    // const proceed = window.confirm(`Are You Sure delete${id}`)
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_delete/${id}`,
-      {
-        method: "POST",
-      }
-    )
-      .then((response) => {
-        console.log(response);
-        response.json();
-        if (response.ok === true) {
+  // const genderAll_delete = (id) => {
+  //   const procced = window.confirm(`Are you sure to delete this item.`);
+  //   if (!procced) return;
+  //   // const proceed = window.confirm(`Are You Sure delete${id}`)
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_delete/${id}`,
+  //     {
+  //       method: "POST",
+  //     }
+  //   )
+  //     .then((response) => {
+  //       console.log(response);
+  //       response.json();
+  //       if (response.ok === true) {
+  //         refetch();
+  //         caregory_list();
+  //       } else {
+  //         alert("Data already running. You cant Delete this item.");
+  //       }
+  //     })
+  //     .then((data) => {
+  //       if (data) {
+  //         refetch();
+  //         console.log(data);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // alert("An error occurred while deleting the data. Please try again.");
+  //     });
+  // };
+
+  const genderAll_delete = async (id) => {
+    console.log(id);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/gender/gender_delete/${id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        const proceed = window.confirm(
+          "Are you sure you want to delete this item?"
+        );
+        if (proceed) {
           refetch();
           caregory_list();
+          console.log("Item deleted successfully.");
         } else {
-          alert("Data already running. You cant Delete this item.");
+          console.log("Delete action canceled.");
         }
-      })
-      .then((data) => {
-        if (data) {
-          refetch();
-          console.log(data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        // alert("An error occurred while deleting the data. Please try again.");
-      });
+      } else {
+        alert("Data already running. You can't delete this item.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while deleting the data. Please try again.");
+    }
   };
 
   const [message, setMessage] = useState();
@@ -170,7 +201,7 @@ const GenderList = ({ searchParams }) => {
                       className="btn btn-sm btn-info"
                     >
                       {" "}
-                      Gender Create
+                      Back to Gender Create
                     </Link>
                   </div>
                 </div>

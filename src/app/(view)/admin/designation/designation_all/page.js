@@ -60,7 +60,8 @@ const DesignationList = ({ searchParams }) => {
   //   console.log(filteredModuleInfo);
 
   const filteredBtnIconEdit = brandList.filter((btn) => btn.method_sort === 3);
-  const filteredBtnIconCopy = brandList.filter((btn) => btn.method_sort === 4);
+  const filteredBtnIconCopy = brandList.filter((btn) => btn.method_sort === 1);
+  const filteredBtnIconList = brandList.filter((btn) => btn.method_sort === 2);
 
   const filteredBtnIconDelete = brandList.filter(
     (btn) => btn.method_sort === 5
@@ -106,39 +107,72 @@ const DesignationList = ({ searchParams }) => {
   const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
 
   // Paigination end
-  const noticeCategoryAll_delete = (id) => {
-    console.log(id);
-    const procced = window.confirm(`Are you sure to delete this item.`);
-    if (!procced) return;
+  // const noticeCategoryAll_delete = (id) => {
+  //   console.log(id);
+  //   const procced = window.confirm(`Are you sure to delete this item.`);
+  //   if (!procced) return;
 
-    // const proceed = window.confirm(`Are You Sure delete${id}`)
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_delete/${id}`,
-      {
+  //   // const proceed = window.confirm(`Are You Sure delete${id}`)
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_delete/${id}`,
+  //     {
+  //       method: "POST",
+  //     }
+  //   )
+  //     .then((response) => {
+  //       console.log(response);
+  //       response.json();
+  //       if (response.ok === true) {
+  //         refetch();
+  //         caregory_list();
+  //       } else {
+  //         alert("Data already running. You cant Delete this item.");
+  //       }
+  //     })
+  //     .then((data) => {
+  //       if (data) {
+  //         refetch();
+  //         console.log(data);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // alert("An error occurred while deleting the data. Please try again.");
+  //     });
+  // };
+
+  const designation_delete = id => {
+
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_delete/${id}`, {
         method: "POST",
-      }
-    )
-      .then((response) => {
-        console.log(response);
-        response.json();
-        if (response.ok === true) {
-          refetch();
-          caregory_list();
-        } else {
-          alert("Data already running. You cant Delete this item.");
-        }
-      })
-      .then((data) => {
-        if (data) {
-          refetch();
-          console.log(data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        // alert("An error occurred while deleting the data. Please try again.");
-      });
-  };
+    })
+        .then(response => {
+            console.log(response)
+            response.json()
+            if (response.ok === true) {
+                const procced = window.confirm(`Are You Sure delete`)
+                if (procced) {
+                    refetch();
+                    caregory_list()
+                }
+            }
+            else {
+                alert('Data already running. You cant Delete this item');
+            }
+        })
+        .then(data => {
+            if (data) {
+
+                console.log(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the data. Please try again.');
+        });
+
+}
 
   const [message, setMessage] = useState();
   useEffect(() => {
@@ -147,6 +181,9 @@ const DesignationList = ({ searchParams }) => {
       sessionStorage.removeItem("message");
     }
   }, []);
+
+  console.log(filteredBtnIconList[0]?.display_name)
+  console.log(brandList)
 
   return (
     <div className="container-fluid">
@@ -162,14 +199,14 @@ const DesignationList = ({ searchParams }) => {
               <div className="border-primary shadow-sm border-0">
                 <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
                   <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">
-                    Designation List
+                    {filteredBtnIconList[0]?.display_name}
                   </h5>
                   <div className="card-title font-weight-bold mb-0 card-header-color float-right">
                     <Link
                       href={`/Admin/designation/designation_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Designation List
+                     Back to {filteredBtnIconCreate[0]?.display_name}
                     </Link>
                   </div>
                 </div>
@@ -307,7 +344,7 @@ const DesignationList = ({ searchParams }) => {
                                         key={filteredBtnIconDelete.id}
                                         title="Delete"
                                         onClick={() =>
-                                          noticeCategoryAll_delete(
+                                          designation_delete(
                                             noticeCategoryAll.id
                                           )
                                         }

@@ -284,7 +284,7 @@ const AccountHeadCreate = () => {
             .then((data) => {
                 if (data[0]?.affectedRows > 0) {
                     sessionStorage.setItem("message", "Data saved successfully!");
-                    // router.push('/Admin/branch/branch_all');
+                    router.push('/Admin/account_head/account_head_all');
                 }
                 console.log(data)
 

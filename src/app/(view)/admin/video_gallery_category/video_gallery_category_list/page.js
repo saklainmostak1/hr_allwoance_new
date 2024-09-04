@@ -516,7 +516,7 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                       href={`/Admin/video_gallery_category/video_gallery_category_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Video Gallery Category
+                    Back to  Create Video Gallery Category
                     </Link>
                   </div>
                 </div>

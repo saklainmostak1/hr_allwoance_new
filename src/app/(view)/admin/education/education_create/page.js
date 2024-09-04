@@ -299,10 +299,19 @@ const EducationCreate = () => {
     { education_name: "", created_by: created },
   ]);
   const [errorMessages, setErrorMessages] = useState([]);
+  const [error, setError] = useState([]);
 
   const barnd_change = (index, event) => {
     const newFields = [...bloodGroups];
     newFields[index][event.target.name] = event.target.value;
+
+    const brandName = newFields[index]['education_name'];
+    if (brandName) {
+      setError(""); // Clear the error message
+
+    }
+
+
     setBloodGroups(newFields);
   };
 
@@ -381,6 +390,22 @@ const EducationCreate = () => {
     if (newErrorMessages.some((msg) => msg !== "")) {
       return;
     }
+
+
+    const newError = new Array(bloodGroups.length).fill('');
+    const isValids = bloodGroups.every((inputValue, index) => {
+      if (!inputValue.education_name.trim()) {
+        newError[index] = 'This must be filled.';
+        return false;
+      }
+      return true;
+    });
+
+    if (!isValids) {
+      setError(newError);
+      return;
+    }
+    setError(new Array(bloodGroups.length).fill(''));
 
     fetch(
       `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/education/education_create`,
@@ -504,7 +529,7 @@ const EducationCreate = () => {
                                           <td>
                                             <input
                                               type="text"
-                                              required
+                                     
                                               name="education_name"
                                               className="form-control form-control-sm required row_unique_education_name"
                                               placeholder="Enter Education Name"
@@ -518,6 +543,10 @@ const EducationCreate = () => {
                                                 {errorMessages[index]}
                                               </div>
                                             )}
+
+                                            {
+                                              error[index] && <p className="text-danger">{error}</p>
+                                            }
                                           </td>
 
                                           <td>

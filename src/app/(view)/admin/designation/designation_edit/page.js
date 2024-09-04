@@ -32,6 +32,7 @@ const EditDesignation = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_all/${id}`
       );
       const data = await res.json();
+
       return data;
     },
   });
@@ -70,22 +71,51 @@ const EditDesignation = ({ id }) => {
           `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_all`
         );
         const data = await res.json();
+        const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+        // return filteredBrands;
         setDesignations(data);
-        setExistingDesignations(data); // existingDesignations স্টেট আপডেট করা হচ্ছে
+        setExistingDesignations(filteredBrands); // existingDesignations স্টেট আপডেট করা হচ্ছে
       } catch (error) {
         console.error("Error fetching designations:", error);
       }
     };
 
     fetchDesignations();
-  }, []);
+  }, [id]);
 
+  const {
+    data: noticeCategoryAll = [],
+
+  } = useQuery({
+    queryKey: ["noticeCategoryAll"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_all`
+      );
+
+      const data = await res.json();
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
+    },
+  });
+  const [sameBrandName, setSameBrandName] = useState([])
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    const existingBrand = existingDesignations.find((brand) => brand?.designation_name?.toLowerCase() === formData?.designation_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setSameBrandName("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+
     setErrorMessages((prevErrors) => ({
       ...prevErrors,
       [name]: "", // Clear specific error message when the user starts typing
@@ -132,6 +162,20 @@ const EditDesignation = ({ id }) => {
       return;
     }
 
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = existingDesignations.find((brand) => normalizebrandName(brand.designation_name.toLowerCase()) === normalizebrandName(formData.designation_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setSameBrandName("Designation name already exists. Please choose a different Designation name.");
+      return
+
+    }
+
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_edit/${id}`,
@@ -156,6 +200,8 @@ const EditDesignation = ({ id }) => {
       });
     }
   };
+
+  
 
   return (
     <div className="container-fluid">
@@ -228,6 +274,10 @@ const EditDesignation = ({ id }) => {
                           {errorMessages.designation_name}
                         </div>
                       )}
+
+                      {
+                        sameBrandName && <p className="text-danger">{sameBrandName}</p>
+                      }
                     </div>
                   </div>
 
@@ -243,7 +293,21 @@ const EditDesignation = ({ id }) => {
                       </small>
                     </label>
                     <div className="col-md-6">
-                      <input
+                      <select
+                        name="serial_number"
+                        className="form-control form-control-sm trim integer_no_zero serial_number"
+                        id="serial_number"
+                        value={formData.serial_number}
+                        onChange={handleChange}
+                      >
+                        {Array.from({ length: 200 }, (_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {i + 1}
+                          </option>
+                        ))}
+
+                      </select>
+                      {/* <input
                         required
                         value={formData.serial_number}
                         onChange={handleChange}
@@ -252,7 +316,7 @@ const EditDesignation = ({ id }) => {
                         placeholder="Enter Serial Number"
                         type="number"
                         name="serial_number"
-                      />
+                      /> */}
                       {errorMessages.serial_number && (
                         <div className="text-danger mt-2">
                           {errorMessages.serial_number}

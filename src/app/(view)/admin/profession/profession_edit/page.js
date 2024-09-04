@@ -198,7 +198,9 @@ const EditProfession = ({ id }) => {
     profession_name: "",
     modified_by: localStorage.getItem("userId"),
   });
+
   const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState([])
 
   const { data: noticeCategorySingle, isLoading } = useQuery({
     queryKey: ["noticeCategorySingle", id],
@@ -218,9 +220,14 @@ const EditProfession = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/profession/profession_all`
       );
       const data = await res.json();
-      return data;
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands;
+      // return data;
     },
   });
+
+
+
 
   useEffect(() => {
     if (noticeCategorySingle && noticeCategorySingle[0]) {
@@ -234,6 +241,18 @@ const EditProfession = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'profession_name') {
+      setName('')
+    }
+
+    const existingBrand = professions.find((brand) => brand?.profession_name?.toLowerCase() === formData?.profession_name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -243,22 +262,42 @@ const EditProfession = ({ id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Check for duplicate professions
-    const duplicate = professions.some(
-      (existingProfession) =>
-        existingProfession.profession_name
-          .trim()
-          .replace(/\s+/g, "")
-          .toLowerCase() ===
-          formData.profession_name.trim().replace(/\s+/g, "").toLowerCase() &&
-        existingProfession.id !== id // Ensure it's not the same profession being edited
-    );
+    // const duplicate = professions.some(
+    //   (existingProfession) =>
+    //     existingProfession.profession_name
+    //       .trim()
+    //       .replace(/\s+/g, "")
+    //       .toLowerCase() ===
+    //       formData.profession_name.trim().replace(/\s+/g, "").toLowerCase() &&
+    //     existingProfession.id !== id // Ensure it's not the same profession being edited
+    // );
 
-    if (duplicate) {
-      setErrorMessage(
-        "Profession name already exists. Please choose a different name."
-      );
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(
+    //     "Profession name already exists. Please choose a different name."
+    //   );
+    //   return;
+    // }
+
+
+    if (!formData.profession_name) {
+      setName('Profession name  is required')
+      return
     }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = professions.find((brand) => normalizebrandName(brand.profession_name.toLowerCase()) === normalizebrandName(formData.profession_name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Profession name already exists. Please choose a different Profession name.");
+      return
+
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/profession/profession_edit/${id}`,
@@ -344,8 +383,11 @@ const EditProfession = ({ id }) => {
                         name="profession_name"
                       />
                       {errorMessage && (
-                        <div className="text-danger mt-1">{errorMessage}</div>
+                        <div className="text-danger m-0">{errorMessage}</div>
                       )}
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 

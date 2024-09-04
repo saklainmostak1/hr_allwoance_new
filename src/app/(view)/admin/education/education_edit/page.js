@@ -232,7 +232,10 @@ const EditEducation = ({ id }) => {
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/education/education_all`
       );
       const data = await res.json();
-      return data;
+      // return data;
+      // const data = await res.json();
+      const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+      return filteredBrands
     },
   });
 
@@ -427,6 +430,11 @@ const EditEducation = ({ id }) => {
                       {errorMessages.education_name && (
                         <div className="text-danger mt-1">
                           {errorMessages.education_name}
+                        </div>
+                      )}
+                      {errors.education_name && (
+                        <div className="text-danger mt-1">
+                          {errors.education_name}
                         </div>
                       )}
                     </div>

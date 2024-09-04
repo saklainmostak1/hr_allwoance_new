@@ -1,6 +1,7 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const AccountHeadTypeUpdate = ({ id }) => {
@@ -65,6 +66,9 @@ const AccountHeadTypeUpdate = ({ id }) => {
         }));
     }, [formData.basic]);
     const [company, setCompany] = useState([])
+
+    const router = useRouter()
+
     const handleChange = (event) => {
         const name = event.target.name
         const value = event.target.value
@@ -94,7 +98,7 @@ const AccountHeadTypeUpdate = ({ id }) => {
         e.preventDefault();
 
         if (!formData.account_head_type_name || formData.account_head_type_name.trim() === '') {
-            setCompany('Company name is required');
+            setCompany('Account Head Type name is required');
             // You can show this error message to the user in the UI as needed
             return;
         }
@@ -121,7 +125,16 @@ const AccountHeadTypeUpdate = ({ id }) => {
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
-            console.log(data); // Handle response data or success message
+            console.log(data); 
+            if(data){
+
+                if (typeof window !== 'undefined') {
+    
+                    sessionStorage.setItem("message", "Data Update successfully!");
+                }
+                router.push('/Admin/account_head_type/account_head_type_all');
+            }
+            // Handle response data or success message
         } catch (error) {
             console.error('Error updating school shift:', error);
             // Handle error or show an error message to the user

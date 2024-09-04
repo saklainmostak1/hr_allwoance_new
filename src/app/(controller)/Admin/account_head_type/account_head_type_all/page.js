@@ -1,10 +1,12 @@
 import AccountHeadTypeList from '@/app/(view)/admin/account_head_type/account_head_type_list/page';
 import React from 'react';
 
-const ListAccountHeadType = () => {
+const ListAccountHeadType = ({ searchParams }) => {
     return (
         <div>
-            <AccountHeadTypeList></AccountHeadTypeList>
+            <AccountHeadTypeList
+                searchParams={searchParams}
+            ></AccountHeadTypeList>
         </div>
     );
 };

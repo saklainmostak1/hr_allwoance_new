@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const CopynoticeCategory = ({ id }) => {
@@ -11,6 +12,27 @@ const CopynoticeCategory = ({ id }) => {
     created_by: localStorage.getItem("userId"),
   });
 
+  const { data: noticeCategoryAll = [] } = useQuery({
+    queryKey: ["noticeCategoryAll"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_all`
+      );
+      const data = await res.json();
+      return data;
+    },
+  });
+  const [status, setStatus] = useState([])
+
+  const [name, setName] = useState([])
+  const [statuss, setstatus] = useState([])
+
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
+      .then(res => res.json())
+      .then(data => setStatus(data))
+  }, [])
   const {
     data: noticeSingle,
     isLoading,
@@ -41,42 +63,75 @@ const CopynoticeCategory = ({ id }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+
+    if (name === 'name') {
+      setName('')
+    }
+    if (name === 'status') {
+      setstatus('')
+    }
+
+    const existingBrand = noticeCategoryAll.find((brand) => brand?.name?.toLowerCase() === formData?.name?.toLowerCase());
+    if (!existingBrand) {
+      // Show error message
+      setErrorMessage("");
+    }
+
+
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const { data: noticeCategoryAll = [] } = useQuery({
-    queryKey: ["noticeCategoryAll"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_all`
-      );
-      const data = await res.json();
-      return data;
-    },
-  });
+ 
+
+  const router =  useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const normalizedInputName = formData.name
-      .trim()
+    // const normalizedInputName = formData.name
+    //   .trim()
 
-      .toLowerCase();
+    //   .toLowerCase();
 
-    const duplicate = noticeCategoryAll.some(
-      (existingCategory) =>
-        existingCategory.name.trim().toLowerCase() === normalizedInputName
-    )
-      ? "Notice category name already exists. Please choose a different name."
-      : "";
+    // const duplicate = noticeCategoryAll.some(
+    //   (existingCategory) =>
+    //     existingCategory.name.trim().toLowerCase() === normalizedInputName
+    // )
+    //   ? "Notice category name already exists. Please choose a different name."
+    //   : "";
 
-    if (duplicate) {
-      setErrorMessage(duplicate);
-      return;
+    // if (duplicate) {
+    //   setErrorMessage(duplicate);
+    //   return;
+    // }
+
+    if (!formData.name) {
+      setName('Notice Category name  is required')
+      return
     }
+    if (!formData.status) {
+      setstatus('Status  is required')
+      return
+    }
+
+    const normalizebrandName = (name) => {
+      return name?.trim().replace(/\s+/g, '');
+    };
+
+
+    const existingBrand = noticeCategoryAll.find((brand) => normalizebrandName(brand.name.toLowerCase()) === normalizebrandName(formData.name.toLowerCase()));
+    if (existingBrand) {
+      // Show error message
+      setErrorMessage("Notice Category name already exists. Please choose a different Notice Category name.");
+      return
+
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_create`,
@@ -164,9 +219,12 @@ const CopynoticeCategory = ({ id }) => {
                         type="text"
                         name="name"
                       />
-                      {errorMessage && (
-                        <div className="invalid-feedback">{errorMessage}</div>
-                      )}
+                      {
+                        errorMessage && <p className="text-danger m-0">{errorMessage}</p>
+                      }
+                      {
+                        name && <p className="text-danger m-0">{name}</p>
+                      }
                     </div>
                   </div>
 
@@ -191,9 +249,17 @@ const CopynoticeCategory = ({ id }) => {
                         placeholder="Enter Status"
                       >
                         <option>Select Status</option>
-                        <option value="1">Active</option>
-                        <option value="2">Inactive</option>
+                      {
+                        status.map(sta => 
+                          <>
+                          <option value={sta.id}>{sta.status_name}</option>
+                          </>
+                        )
+                      }
                       </select>
+                      {
+                        statuss && <p className="text-danger m-0">{statuss}</p>
+                      }
                     </div>
                   </div>
 

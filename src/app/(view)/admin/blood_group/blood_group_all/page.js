@@ -106,30 +106,64 @@ const BloodGroupList = ({ searchParams }) => {
 
   // // Paigination end
 
-  const photogalleryCategoryAll_delete = (id) => {
-    const procced = window.confirm(`Are you sure to delete this item.`);
-    if (!procced) return; // If user cancels, exit the function
+  // const photogalleryCategoryAll_delete = (id) => {
+  //   const procced = window.confirm(`Are you sure to delete this item.`);
+  //   if (!procced) return; // If user cancels, exit the function
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_delete/${id}`,
-      {
+  //   fetch(
+  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_delete/${id}`,
+  //     {
+  //       method: "POST",
+  //     }
+  //   )
+  //     .then((response) => {
+  //       console.log(response);
+  //       if (response.ok) {
+  //         refetch();
+  //         caregory_list();
+  //       } else {
+  //         alert("Data already running. You can't delete this item.");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       // alert("An error occurred while deleting the data. Please try again.");
+  //     });
+  // };
+
+
+  const blood_group_delete = id => {
+
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_delete/${id}`, {
         method: "POST",
-      }
-    )
-      .then((response) => {
-        console.log(response);
-        if (response.ok) {
-          refetch();
-          caregory_list();
-        } else {
-          alert("Data already running. You can't delete this item.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        // alert("An error occurred while deleting the data. Please try again.");
-      });
-  };
+    })
+        .then(response => {
+            console.log(response)
+            response.json()
+            if (response.ok === true) {
+                const procced = window.confirm(`Are You Sure delete`)
+                if (procced) {
+                    refetch();
+                    caregory_list()
+                }
+            }
+            else {
+                alert('Data already running. You cant Delete this item');
+            }
+        })
+        .then(data => {
+            if (data) {
+
+                console.log(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the data. Please try again.');
+        });
+
+}
 
   const [message, setMessage] = useState();
   useEffect(() => {
@@ -160,7 +194,7 @@ const BloodGroupList = ({ searchParams }) => {
                       href={`/Admin/blood_group/blood_group_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                      Create Blood Group List
+                      Back to Create Blood Group
                     </Link>
                   </div>
                 </div>
@@ -301,7 +335,7 @@ const BloodGroupList = ({ searchParams }) => {
                                         key={filteredBtnIconDelete.id}
                                         title="Delete"
                                         onClick={() =>
-                                          photogalleryCategoryAll_delete(
+                                          blood_group_delete(
                                             photogalleryCategoryAll.id
                                           )
                                         }

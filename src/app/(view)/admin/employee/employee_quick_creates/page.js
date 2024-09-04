@@ -46,7 +46,7 @@ const EmployeeExcelCreate = () => {
 
 
     let [fields, setFields] = useState([{
-        school_shift_id: '', employe_id: '',
+        school_shift_id: '', unique_id: '',
         full_name: '', gender: '', religion: '', mobile: '', dob: '', created_by: created
     }]);
 
@@ -59,7 +59,7 @@ const EmployeeExcelCreate = () => {
             const newInputValues = [...fields];
             for (let i = 0; i < numToAddInt; i++) {
                 newInputValues.push({
-                    school_shift_id: '', employe_id: '',
+                    school_shift_id: '', unique_id: '',
                     full_name: '', gender: '', religion: '', mobile: '', dob: '', created_by: created
                 });
             }
@@ -91,8 +91,8 @@ const EmployeeExcelCreate = () => {
             setSchoolShift('')
         }
 
-        const employe_id = newFields[index]['employe_id']; 
-        if(employe_id){
+        const unique_id = newFields[index]['unique_id']; 
+        if(unique_id){
             setEmployeeId('')
         }
 
@@ -211,7 +211,7 @@ const EmployeeExcelCreate = () => {
             { header: "Religion*", key: "religion", width: 25 },
             { header: "shift*", key: "school_shift_id", width: 25 },
             { header: "Gender*", key: "gender", width: 25 },
-            { header: "Employe Id*", key: "employe_id", width: 25 },
+            { header: "Employe Id*", key: "unique_id", width: 25 },
             { header: "Name*", key: "full_name", width: 25 },
             { header: "Mobile*", key: "mobile", width: 25 },
             { header: "Date Of Bath(dd-mm-yyyy)*", key: "dob", width: 25 }
@@ -380,7 +380,7 @@ const EmployeeExcelCreate = () => {
                 religion: religionData,
                 school_shift_id: brandData,
                 gender: genderData,
-                employe_id: element.D,
+                unique_id: element.D,
                 full_name: element.E,
                 mobile: element.F,
                 dob: element.G,
@@ -431,7 +431,7 @@ const EmployeeExcelCreate = () => {
     
         // const full_name = form.name.value
         // const school_shift_id = form.school_shift_id.value
-        // const employe_id = form.employe_id.value
+        // const unique_id = form.unique_id.value
         // const gender = form.gender.value
         // const religion = form.religion.value
         // const mobile = form.mobile.value
@@ -439,7 +439,7 @@ const EmployeeExcelCreate = () => {
         // // const dob = form.dob.value
 
         // const addValue = {
-        //     full_name,  created_by: created, school_shift_id, employe_id, gender, religion, mobile, 
+        //     full_name,  created_by: created, school_shift_id, unique_id, gender, religion, mobile, 
         //     dob: currentDates ? currentDates : fields.dob, password
         // }
 
@@ -462,7 +462,7 @@ const EmployeeExcelCreate = () => {
 
         const newError = new Array(fields.length).fill('');
         const isValids = fields.every((inputValue, index) => {
-            if (!inputValue?.employe_id) {
+            if (!inputValue?.unique_id) {
                 newError[index] = 'This must be filled.';
                 return false;
             }
@@ -718,9 +718,9 @@ const EmployeeExcelCreate = () => {
                                                                             </td>
                                                                             <td>
                                                                                 <input
-                                                                                    value={field.employe_id}
+                                                                                    value={field.unique_id}
                                                                                     onChange={(e) => handleChange(index, e)}
-                                                                                    type="text" required="" name="employe_id" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
+                                                                                    type="text" required="" name="unique_id" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Employee Id" />
                                                                             </td>
                                                                             {
                                                                                     employeeId[index] && <p className='text-danger'>{employeeId[index] }</p>
@@ -729,7 +729,7 @@ const EmployeeExcelCreate = () => {
                                                                                 <input
                                                                                     value={field.full_name}
                                                                                     onChange={(e) => handleChange(index, e)}
-                                                                                    type="text" required="" name="full_name" class="form-control form-control-sm  required row_unique_result" id="result" placeholder="Enter Result" />
+                                                                                    type="text" required="" name="full_name" class="form-control form-control-sm  required row_unique_result" id="result" placeholder="Enter Full Name" />
                                                                             </td>
                                                                             {
                                                                                     fullName[index] && <p className='text-danger'>{fullName[index] }</p>
@@ -901,7 +901,7 @@ export default EmployeeExcelCreate;
 
 
 //     let [fields, setFields] = useState([{
-//         school_shift_id: '', employe_id: '',
+//         school_shift_id: '', unique_id: '',
 //         full_name: '', gender: '', religion: '', mobile: '', dob: '', created_by: created
 //     }]);
 
@@ -914,7 +914,7 @@ export default EmployeeExcelCreate;
 //             const newInputValues = [...fields];
 //             for (let i = 0; i < numToAddInt; i++) {
 //                 newInputValues.push({
-//                     school_shift_id: '', employe_id: '',
+//                     school_shift_id: '', unique_id: '',
 //                     full_name: '', gender: '', religion: '', mobile: '', dob: '', created_by: created
 //                 });
 //             }
@@ -946,8 +946,8 @@ export default EmployeeExcelCreate;
 //             setSchoolShift('')
 //         }
 
-//         const employe_id = newFields[index]['employe_id']; 
-//         if(employe_id){
+//         const unique_id = newFields[index]['unique_id']; 
+//         if(unique_id){
 //             setEmployeeId('')
 //         }
 
@@ -1075,7 +1075,7 @@ export default EmployeeExcelCreate;
 
 //         const newError = new Array(fields.length).fill('');
 //         const isValids = fields.every((inputValue, index) => {
-//             if (!inputValue?.employe_id) {
+//             if (!inputValue?.unique_id) {
 //                 newError[index] = 'This must be filled.';
 //                 return false;
 //             }
@@ -1307,9 +1307,9 @@ export default EmployeeExcelCreate;
 //                                                                             </td>
 //                                                                             <td>
 //                                                                                 <input
-//                                                                                     value={field.employe_id}
+//                                                                                     value={field.unique_id}
 //                                                                                     onChange={(e) => handleChange(index, e)}
-//                                                                                     type="text" required="" name="employe_id" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
+//                                                                                     type="text" required="" name="unique_id" class="form-control form-control-sm  required row_unique_institute" id="institute" placeholder="Enter Institute" />
 //                                                                                      {
 //                                                                                     employeeId[index] && <p className='text-danger'>{employeeId[index] }</p>
 //                                                                                 }

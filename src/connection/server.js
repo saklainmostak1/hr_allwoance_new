@@ -214,6 +214,7 @@ app.post('/Admin/employee/employee_delete/:id', EmployeeModel.employee_delete)
 app.post('/Admin/employee/employee_edit/:id', EmployeeModel.employee_update)
 app.get('/Admin/employee/employee_list', EmployeeModel.employee_all)
 app.get('/Admin/employee/employee_list/:id', EmployeeModel.employee_all_single)
+app.get('/Admin/employee/employee_list_for_attendance', EmployeeModel.employee_all_for_attendance)
 app.post('/Admin/employee_user/employee_user_update/:id', EmployeeModel.user_update)
 app.get('/Admin/designation/designation_list', EmployeeModel.designation_list)
 app.get('/Admin/gender/gender_list', EmployeeModel.gender_list)
@@ -274,6 +275,8 @@ app.get('/Admin/office_visit/office_visit_all', OfficeVisitModel.office_visit_li
 app.post('/Admin/office_visit/office_visit_remarks_create', OfficeVisitModel.office_visit_remarks_create)
 app.post('/Admin/office_visit/office_visit_person_create', OfficeVisitModel.office_visit_person_create)
 app.post('/Admin/office_visit/office_visit_delete/:id', OfficeVisitModel.office_visit_delete)
+app.get('/Admin/office_visit/office_visit_list_single/:id', OfficeVisitModel.office_visit_list_single)
+app.post('/Admin/office_visit/office_visit_edit/:id', OfficeVisitModel.office_visit_list_single_update)
 app.get('/Admin/office_visit/office_visit_list/:pageNo/:perPage', OfficeVisitModel.office_visit_list_paigination)
 app.get('/Admin/office_visit/office_visit_remarks_list/:id', OfficeVisitModel.office_visit_remarks_single)
 app.get('/Admin/office_visit/office_visit_person_list/:id', OfficeVisitModel.office_visit_person_single)
@@ -299,6 +302,7 @@ app.get('/Admin/expence_category/expence_category_all', expenceCategoryModel.exp
 app.get('/Admin/expence_category/expence_category_all/:id', expenceCategoryModel.expense_category_single);
 app.post('/Admin/expence_category/expence_category_edit/:id', expenceCategoryModel.expense_category_update);
 app.post('/Admin/expence_category/expence_category_delete/:id', expenceCategoryModel.expense_category_delete);
+app.get('/Admin/expence_category/expence_category_list_paigination/:pageNo/:perPage', expenceCategoryModel.expense_category_list_paigination);
 
 
 const expenceModel = require(`../app/model/Admin/expense_model/expense_model`)
@@ -321,6 +325,7 @@ app.get('/Admin/income_category/income_category_all', income_category_model.inco
 app.get('/Admin/income_category/income_category_all/:id', income_category_model.income_category_single);
 app.post('/Admin/income_category/income_category_edit/:id', income_category_model.income_category_update);
 app.post('/Admin/income_category/income_category_delete/:id', income_category_model.income_category_delete);
+app.get('/Admin/income_category/income_category_list_paigination/:pageNo/:perPage', income_category_model.income_category_list_paigination);
 
 
 const incomeModel = require(`../app/model/Admin/income_model/income_model`);
@@ -392,6 +397,7 @@ app.get('/Admin/account_head_type/account_head_type_all', AccountHeadTypeModel.a
 app.get('/Admin/account_head_type/account_head_type_all/:id', AccountHeadTypeModel.account_head_type_single)
 app.post('/Admin/account_head_type/account_head_type_delete/:id', AccountHeadTypeModel.account_head_type_delete)
 app.post('/Admin/account_head_type/account_head_type_edit/:id', AccountHeadTypeModel.account_head_type_update)
+app.get('/Admin/account_head_type/account_head_type_all_paigination/:pageNo/:perPage', AccountHeadTypeModel.account_head_type_list_paigination)
 
 
 const AccountHeadModel = require(`../app/model/Admin/account_head/account_head_model`)
@@ -401,6 +407,7 @@ app.post('/Admin/account_head/account_head_delete/:id', AccountHeadModel.account
 app.get('/Admin/account_head/account_head_all/:id', AccountHeadModel.account_head_single)
 app.post('/Admin/account_head/account_head_edit/:id', AccountHeadModel.account_head_update)
 app.get('/Admin/account_head/account_head_list', AccountHeadModel.account_head_list_show)
+app.get('/Admin/account_head/account_head_list_paigination/:pageNo/:perPage', AccountHeadModel.account_head_list_paigination)
 
 //  Jewel Vai
 const GenderModel = require("../app/model/Admin/gender_model/gender_model");
@@ -433,6 +440,10 @@ app.post(
 app.get(
   "/Admin/leave_category/leave_category_all/:id",
   LeaveCategoryModel.leave_category_single
+);
+app.get(
+  "/Admin/leave_category/leave_category_all_paigination/:pageNo/:perPage",
+  LeaveCategoryModel.leave_category_list_paigination
 );
 app.post(
   "/Admin/leave_category/leave_category_delete/:id",
@@ -703,6 +714,110 @@ app.get(
   "/Admin/video_gallery_category/video_category_list_paigination/:pageNo/:perPage",
   VideoGalleryCategoryModel.video_gallery_category_list_paigination
 );
+
+
+// newsmodel
+const NewsModel = require("../app/model/Admin/news_model/news_model.js");
+
+app.post("/Admin/news/news_create", NewsModel.news_create);
+app.get("/Admin/news/news_all", NewsModel.news_list);
+app.post("/Admin/news/news_delete/:id", NewsModel.news_delete);
+app.post("/Admin/news/news_edit/:id", NewsModel.news_update);
+app.get("/Admin/news/news_all/:id", NewsModel.news_single);
+app.post("/Admin/news/news_search", NewsModel.news_list_search);
+app.post("/Admin/news/news_pdf", NewsModel.news_list_pdf);
+app.post("/Admin/news/news_print", NewsModel.news_list_print);
+// list pagenation
+app.get(
+  "/Admin/news/news_list_paigination/:pageNo/:perPage",
+  NewsModel.news_list_paigination
+);
+// NoticeModel
+
+const NoticeModel = require("../app/model/Admin/notice_model/notice_model.js");
+
+app.post("/Admin/notice/notice_create", NoticeModel.notice_create);
+app.get("/Admin/notice/notice_all", NoticeModel.notice_list);
+app.post("/Admin/notice/notice_delete/:id", NoticeModel.notice_delete);
+app.post("/Admin/notice/notice_edit/:id", NoticeModel.notice_update);
+app.get("/Admin/notice/notice_all/:id", NoticeModel.notice_single);
+app.post("/Admin/notice/notice_search", NoticeModel.notice_list_search);
+app.post("/Admin/notice/notice_print", NoticeModel.notice_list_print);
+app.post("/Admin/notice/notice_pdf", NoticeModel.notice_list_pdf);
+
+// list Pagination
+app.get(
+  "/Admin/notice/notice_list_paigination/:pageNo/:perPage",
+  NoticeModel.notice_list_paigination
+);
+
+
+// VideoGalleryModel
+
+const VideoGalleryModel = require("../app/model/Admin/video_gallery_model/video_gallery.js");
+
+app.post(
+  "/Admin/video_gallery/video_gallery_create",
+  VideoGalleryModel.video_gallery_create
+);
+app.get(
+  "/Admin/video_gallery/video_gallery_all",
+  VideoGalleryModel.video_gallery_list
+);
+app.post(
+  "/Admin/video_gallery/video_gallery_delete/:id",
+  VideoGalleryModel.video_gallery_delete
+);
+app.post(
+  "/Admin/video_gallery/video_gallery_edit/:id",
+  VideoGalleryModel.video_gallery_update
+);
+app.get(
+  "/Admin/video_gallery/video_gallery_all/:id",
+  VideoGalleryModel.video_gallery_single
+);
+
+app.get(
+  "/Admin/video_gallery/video_gallery_list_paigination/:pageNo/:perPage",
+  VideoGalleryModel.video_gallery_list_paigination
+);
+
+
+
+const AttendanceModel = require('../app/model/Admin/attendance_model/attendance_model')
+app.post( "/Admin/attendance/attendance_search", AttendanceModel.attendance_search
+);
+app.post( "/Admin/attendance/attendance_create", AttendanceModel.attendance_create
+);
+
+app.post( "/Admin/attendance/attendance_otp", AttendanceModel.send_attendance_otp
+);
+app.get( "/Admin/attendance/attendance_all", AttendanceModel.attendance_list
+);
+app.get( "/Admin/attendance/attendance_all_list", AttendanceModel.attendance_list_all_data
+);
+app.post( "/Admin/attendance/attendance_list_search", AttendanceModel.attendance_list_search
+);
+app.post( "/Admin/attendance/attendance_list_pdf", AttendanceModel.attendance_list_pdf
+);
+app.post( "/Admin/attendance/attendance_list_print", AttendanceModel.attendance_list_print
+);
+app.post( "/Admin/attendance/attendance_log_search", AttendanceModel.attendance_log_search
+);
+app.post( "/Admin/attendance/attendance_log_prtint", AttendanceModel.attendance_log_print
+);
+app.post( "/Admin/attendance/attendance_log_pdf", AttendanceModel.attendance_log_pdf
+);
+app.post( "/Admin/attendance/attendance_summary_search", AttendanceModel.attendance_summary_search
+);
+app.post( "/Admin/attendance/attendance_summary_print", AttendanceModel.attendance_summary_print
+);
+app.post( "/Admin/attendance/attendance_summary_pdf", AttendanceModel.attendance_summary_pdf
+);
+app.get( "/Admin/attendance/attendance_details_list", AttendanceModel.attendance_details_list
+);
+
+
 
 
 const path = require('path');
