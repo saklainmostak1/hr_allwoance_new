@@ -485,56 +485,28 @@ const AttendanceModel = {
     },
 
 
-    // attendance_list: async (req, res) => {
-    //     try {
-    //         // Subquery to get the min and max checktime for each user_id
-    //         const subquery = `
-    //             SELECT 
-    //                 user_id,
-    //                 MIN(checktime) AS min_checktime,
-    //                 MAX(checktime) AS max_checktime
-    //             FROM 
-    //                 attendance
-    //             GROUP BY 
-    //                 user_id
-    //         `;
+    absent_list: async (req, res) => {
+        try {
+           
+           
 
-    //         // Main query to join the subquery with other tables
-    //         const query = `
-    //             SELECT 
+            // Main query to join the subquery with other tables
+            const query = `
+                SELECT * from absent`;
 
-    //                 fa.user_id,
-    //                 fa.min_checktime,
-    //                 fa.max_checktime,
-    //                 users.full_name,
-    //                 users.unique_id,
-    //                 users.photo,
-    //                 employee_promotion.designation_id,
-    //                 employee_promotion.branch_id,
-    //                 designation.designation_name
-    //             FROM 
-    //                 (${subquery}) AS fa
-    //             JOIN 
-    //                 users ON fa.user_id = users.id
-    //             LEFT JOIN 
-    //                 employee_promotion ON fa.user_id = employee_promotion.user_id
-    //             LEFT JOIN 
-    //                 designation ON employee_promotion.designation_id = designation.id
-    //         `;
-
-    //         connection.query(query, function (error, result) {
-    //             if (!error) {
-    //                 res.send(result);
-    //             } else {
-    //                 console.error('Database query error:', error);
-    //                 res.status(500).send('Database query error');
-    //             }
-    //         });
-    //     } catch (error) {
-    //         console.error('Internal server error:', error);
-    //         res.status(500).send('Internal server error');
-    //     }
-    // },
+            connection.query(query, function (error, result) {
+                if (!error) {
+                    res.send(result);
+                } else {
+                    console.error('Database query error:', error);
+                    res.status(500).send('Database query error');
+                }
+            });
+        } catch (error) {
+            console.error('Internal server error:', error);
+            res.status(500).send('Internal server error');
+        }
+    },
 
 
     // attendance_list: async (req, res) => {

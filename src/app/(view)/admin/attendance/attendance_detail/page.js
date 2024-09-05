@@ -247,6 +247,25 @@ const AttendanceDetail = () => {
 
 
 
+    const { data: absents = [] } = useQuery({
+        queryKey: ['absents'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_all`)
+            const data = await res.json()
+            return data
+        }
+    });
+
+    const absentLookup = absents.reduce((acc, item) => {
+        const date = item.checktime.slice(0, 10); // Format YYYY-MM-DD
+        const key = `${item.user_id}-${date}`;
+        acc[key] = true; // Mark presence
+        return acc;
+    }, {});
+
+    console.log(absentLookup)
+
+
     return (
         <div className="container-fluid">
             <div className="row">
@@ -354,113 +373,81 @@ const AttendanceDetail = () => {
                                                             <th>Employee ID</th>
                                                             <th>Name</th>
                                                             <th>Designation</th>
+                                                            
                                                             {daysInMonth.map((date) => (
                                                                 <th key={date} value={date}>{date.slice(8, 10)}</th>
                                                             ))}
+                                                            <th>Present</th>
+                                                            <th>Absent</th>
+                                                            <th>Holiday</th>
+                                                            <th>Leave</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {searchResults.map((attendances, i) => (
-                                                            <tr key={i}>
-                                                                <td>{attendances.unique_id}</td>
-                                                                <td>{attendances.full_name}</td>
-                                                                <td>{attendances.designation_name}</td>
+                                                        {searchResults.map((attendances, i) => {
+                                                            let presentCount = 0;
+                                                            let absentCount = 0;
+                                                            let holidayCount = 0;
+                                                            let leaveCount = 0;
 
-                                                                {daysInMonth.map(date => {
-                                                                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
-                                                                    const isHoliday = filteredAttendances.some(holiday => {
-                                                                        const holidayDate = new Date(holiday.start_date);
-                                                                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
-                                                                    });
-                                                                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+                                                            return (
+                                                                <tr key={i}>
+                                                                    <td>{attendances.unique_id}</td>
+                                                                    <td>{attendances.full_name}</td>
+                                                                    <td>{attendances.designation_name}</td>
+                                                                    {daysInMonth.map(date => {
+                                                                        const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
+                                                                        const isHoliday = filteredAttendances.some(holiday => {
+                                                                            const holidayDate = new Date(holiday.start_date);
+                                                                            return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
+                                                                        });
+                                                                        const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
 
-                                                                    let cellContent = '';
-                                                                    let cellClass = '';
+                                                                        const presentKey = `${attendances.user_id}-${day}`;
+                                                                        const isPresent = attendanceLookup[presentKey];
 
-                                                                    if (hasLeave) {
-                                                                        cellContent = 'L';
-                                                                        cellClass = 'text-success font-weight-bold'; // Green color for leave
-                                                                    } else if (isHoliday) {
-                                                                        cellContent = 'H';
-                                                                        cellClass = 'text-primary font-weight-bold'; // Blue color for holiday
-                                                                    }
+                                                                        const absentKey = `${attendances.user_id}-${day}`;
+                                                                        const isAbsent = absentLookup[absentKey];
 
-                                                                    return (
-                                                                        <td key={date} className={cellClass}>
-                                                                            {cellContent}
-                                                                        </td>
-                                                                    );
-                                                                })}
-                                                                {/* {daysInMonth.map(date => {
-                                                                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
-                                                                    const isHoliday = filteredAttendances.some(holiday => {
-                                                                        const holidayDate = new Date(holiday.start_date);
-                                                                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
-                                                                    });
-                                                                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+                                                                        let cellContent = '';
+                                                                        let cellClass = '';
 
-                                                                    const key = `${attendances.user_id}-${day}`;
-                                                                    const isPresent = attendanceLookup[key];
+                                                                        if (isPresent) {
+                                                                            cellContent = 'P';
+                                                                            cellClass = ''; // Blue color for Present
+                                                                            presentCount++;
+                                                                        } else if (isAbsent) {
+                                                                            cellContent = 'A';
+                                                                            cellClass = 'text-danger'; // Red color for Absent
+                                                                            absentCount++;
+                                                                        } else if (hasLeave) {
+                                                                            cellContent = 'L';
+                                                                            cellClass = 'text-success '; // Green color for leave
+                                                                            leaveCount++;
+                                                                        } else if (isHoliday) {
+                                                                            cellContent = 'H';
+                                                                            cellClass = 'text-primary '; // Blue color for holiday
+                                                                            holidayCount++;
+                                                                        }
 
-                                                                    let cellContent = '';
-                                                                    let cellClass = '';
-
-                                                                    if (isPresent) {
-                                                                        cellContent = 'P';
-                                                                        cellClass = ' font-weight-bold'; // Blue color for Present
-                                                                    } else if (hasLeave) {
-                                                                        cellContent = 'L';
-                                                                        cellClass = 'text-success font-weight-bold'; // Green color for leave
-                                                                    } else if (isHoliday) {
-                                                                        cellContent = 'H';
-                                                                        cellClass = 'text-primary font-weight-bold'; // Blue color for holiday
-                                                                    }
-
-                                                                    return (
-                                                                        <td key={date} className={cellClass}>
-                                                                            {cellContent}
-                                                                        </td>
-                                                                    );
-                                                                })} */}
-                                                                {/* {daysInMonth.map(date => {
-                                                                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
-                                                                    const isHoliday = filteredAttendances.some(holiday => {
-                                                                        const holidayDate = new Date(holiday.start_date);
-                                                                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
-                                                                    });
-                                                                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
-
-                                                                    const key = `${attendances.user_id}-${day}`;
-                                                                    const isPresent = attendanceLookup[key];
-
-                                                                    let cellContent = '';
-                                                                    let cellClass = '';
-
-                                                                    if (isPresent) {
-                                                                        cellContent = 'P';
-                                                                        cellClass = 'font-weight-bold'; // Blue color for Present
-                                                                    } else if (hasLeave) {
-                                                                        cellContent = 'L';
-                                                                        cellClass = 'text-success font-weight-bold'; // Green color for leave
-                                                                    } else if (isHoliday) {
-                                                                        cellContent = 'H';
-                                                                        cellClass = 'text-primary font-weight-bold'; // Blue color for holiday
-                                                                    } else {
-                                                                        cellContent = 'A';
-                                                                        cellClass = 'text-danger font-weight-bold'; // Grey color for absent
-                                                                    }
-
-                                                                    return (
-                                                                        <td key={date} className={cellClass}>
-                                                                            {cellContent}
-                                                                        </td>
-                                                                    );
-                                                                })} */}
-                                                            </tr>
-                                                        ))}
+                                                                        return (
+                                                                            <td key={date} className={cellClass}>
+                                                                                {cellContent}
+                                                                            </td>
+                                                                        );
+                                                                    })}
+                                                                    {/* Display total counts */}
+                                                                    <td>{presentCount}</td>
+                                                                    <td>{absentCount}</td>
+                                                                    <td>{holidayCount}</td>
+                                                                    <td>{leaveCount}</td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                     </tbody>
                                                 </table>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -502,6 +489,67 @@ export default AttendanceDetail;
                                                                     return (
                                                                         <td key={date} className='text-danger'>
                                                                             {hasLeave ? 'L' : isHoliday ? 'H' : ''}
+                                                                        </td>
+                                                                    );
+                                                                })} */}
+{/* {daysInMonth.map(date => {
+                                                                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
+                                                                    const isHoliday = filteredAttendances.some(holiday => {
+                                                                        const holidayDate = new Date(holiday.start_date);
+                                                                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
+                                                                    });
+                                                                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+
+                                                                    let cellContent = '';
+                                                                    let cellClass = '';
+
+                                                                    if (hasLeave) {
+                                                                        cellContent = 'L';
+                                                                        cellClass = 'text-success font-weight-bold'; // Green color for leave
+                                                                    } else if (isHoliday) {
+                                                                        cellContent = 'H';
+                                                                        cellClass = 'text-primary font-weight-bold'; // Blue color for holiday
+                                                                    }
+
+                                                                    return (
+                                                                        <td key={date} className={cellClass}>
+                                                                            {cellContent}
+                                                                        </td>
+                                                                    );
+                                                                })} */}
+
+
+{/* {daysInMonth.map(date => {
+                                                                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
+                                                                    const isHoliday = filteredAttendances.some(holiday => {
+                                                                        const holidayDate = new Date(holiday.start_date);
+                                                                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
+                                                                    });
+                                                                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+
+                                                                    const key = `${attendances.user_id}-${day}`;
+                                                                    const isPresent = attendanceLookup[key];
+
+                                                                    let cellContent = '';
+                                                                    let cellClass = '';
+
+                                                                    if (isPresent) {
+                                                                        cellContent = 'P';
+                                                                        cellClass = 'font-weight-bold'; // Blue color for Present
+                                                                    } else if (hasLeave) {
+                                                                        cellContent = 'L';
+                                                                        cellClass = 'text-success font-weight-bold'; // Green color for leave
+                                                                    } else if (isHoliday) {
+                                                                        cellContent = 'H';
+                                                                        cellClass = 'text-primary font-weight-bold'; // Blue color for holiday
+                                                                    } else {
+                                                                        cellContent = 'A';
+                                                                        cellClass = 'text-danger font-weight-bold'; // Grey color for absent
+                                                                    }
+
+                                                                    return (
+                                                                        <td key={date} className={cellClass}>
+                                                                            {cellContent}
                                                                         </td>
                                                                     );
                                                                 })} */}

@@ -357,6 +357,8 @@ app.get('/Admin/holiday_category/holiday_category_list/:pageNo/:perPage', holida
 const yearlyHolidayModel = require(`../app/model/Admin/yearly_holiday_modal/yearly_holiday_modal`)
 app.post('/Admin/yearly_holiday/yearly_holiday_create', yearlyHolidayModel.yearly_holiday_create)
 app.get('/Admin/yearly_holiday/yearly_holiday_all', yearlyHolidayModel.yearly_holiday_list)
+app.get('/Admin/yearly_holiday/yearly_holiday_all_list', yearlyHolidayModel.yearly_holiday_list_all)
+app.get('/Admin/yearly_holiday/yearly_holiday_all_list_id_table', yearlyHolidayModel.yearly_holiday_list_id_table)
 app.get('/Admin/yearly_holiday/yearly_holiday_all/:id', yearlyHolidayModel.yearly_holiday_list_single)
 app.post('/Admin/yearly_holiday/yearly_holiday_delete/:id', yearlyHolidayModel.yearly_holiday_delete)
 app.get('/Admin/yearly_holiday/yearly_holiday_list/:pageNo/:perPage', yearlyHolidayModel.yearly_holiday_list_paigination)
@@ -796,6 +798,8 @@ app.get( "/Admin/attendance/attendance_all", AttendanceModel.attendance_list
 );
 app.get( "/Admin/attendance/attendance_all_list", AttendanceModel.attendance_list_all_data
 );
+app.get( "/Admin/absent/absent_all", AttendanceModel.absent_list);
+
 app.post( "/Admin/attendance/attendance_list_search", AttendanceModel.attendance_list_search
 );
 app.post( "/Admin/attendance/attendance_list_pdf", AttendanceModel.attendance_list_pdf

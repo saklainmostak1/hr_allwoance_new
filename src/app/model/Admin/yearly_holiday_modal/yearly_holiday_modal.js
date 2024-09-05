@@ -76,7 +76,7 @@ const yearlyHolidayModel = {
     },
 
 
-   
+
     yearly_holiday_list: async (req, res) => {
         try {
             const data = `
@@ -105,6 +105,33 @@ const yearlyHolidayModel = {
             console.log(error)
         }
     },
+
+    yearly_holiday_list_all: async (req, res) => {
+        try {
+            const data = `
+            SELECT 
+                yearly_holiday.*,
+                holiday_category.name AS holiday_category_name,
+                users.full_name AS created_by_name
+            FROM yearly_holiday
+            LEFT JOIN holiday_category ON yearly_holiday.holiday_category = holiday_category.id
+            LEFT JOIN users ON yearly_holiday.created_by = users.id
+            GROUP BY yearly_holiday.start_date
+            `;
+    
+            connection.query(data, function (error, result) {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                } else {
+                    console.log(error)
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    },
+    
 
     yearly_holiday_update: async (req, res) => {
         try {
@@ -199,6 +226,33 @@ const yearlyHolidayModel = {
             console.log(error)
         }
     },
+
+
+
+    yearly_holiday_list_id_table: async (req, res) => {
+        try {
+            const data = `
+            SELECT 
+                id, 
+                'yearly_holiday' AS table_name
+            FROM 
+                yearly_holiday
+            `;
+    
+            connection.query(data, function (error, result) {
+                console.log(result);
+                if (!error) {
+                    res.send(result);
+                } else {
+                    console.log(error);
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    
+    
 
 
 

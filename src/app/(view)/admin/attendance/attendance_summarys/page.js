@@ -175,7 +175,7 @@ const AttendanceSummarys = () => {
     const { data: holidays = [] } = useQuery({
         queryKey: ['holidays'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/yearly_holiday/yearly_holiday_all`)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/yearly_holiday/yearly_holiday_all_list`)
             const data = await res.json()
             return data
         }
@@ -495,8 +495,6 @@ const AttendanceSummarys = () => {
         }
     };
 
-
-
     const attendance_summary_print_download = async () => {
         try {
             // const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_remarks_list_visit/${id}`);
@@ -568,7 +566,7 @@ const AttendanceSummarys = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    searchResults, transformedDatas, sumOfTotalDays, filteredAttendances, matchLength, result, orientation, selectedPrintSize, fontSize, extraColumnValue
+                    searchResults, transformedDatas, sumOfTotalDays, filteredAttendances, matchLength, result, orientation, selectedPrintSize, fontSize, extraColumnValue, data
                 }),
             });
 
@@ -664,6 +662,63 @@ const AttendanceSummarys = () => {
             // setLoading(false);
         }
     };
+
+
+    const { data: absents = [] } = useQuery({
+        queryKey: ['absents'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_all`)
+            const data = await res.json()
+            return data
+        }
+    });
+
+
+    const filteredAbsents = absents.filter(att => {
+        const checktimeMonthYear = att.checktime.substring(0, 7);
+        return transformedData.some(month => month.value === checktimeMonthYear);
+    });
+
+    console.log(filteredAbsents)
+    const groupedByUserAndMonths = {};
+
+    // Group the filtered attendance by user_id and month value
+    filteredAbsents.forEach(att => {
+        const checktimeMonthYear = att.checktime.substring(0, 7);
+        const userId = att.user_id;
+
+        if (!groupedByUserAndMonths[userId]) {
+            groupedByUserAndMonths[userId] = { match_length_total: 0, match_length: [] };
+        }
+
+        // Increment the total count
+        groupedByUserAndMonths[userId].match_length_total++;
+
+        // Find or create the month entry
+        let monthEntry = groupedByUserAndMonths[userId].match_length.find(month => Object.keys(month)[0] === checktimeMonthYear);
+        if (!monthEntry) {
+            monthEntry = { [checktimeMonthYear]: 0 };
+            groupedByUserAndMonths[userId].match_length.push(monthEntry);
+        }
+
+        // Increment the month count
+        monthEntry[checktimeMonthYear]++;
+    });
+
+    // Convert the grouped data to the desired format
+    const results = Object.entries(groupedByUserAndMonths).map(([user_id, { match_length_total, match_length }]) => ({
+        user_id: parseInt(user_id, 10),
+        match_length_total,
+        match_length
+    }));
+
+    // Ensure that the length of match_length equals match_length_total
+    results.forEach(user => {
+        user.match_length_total = user.match_length.reduce((total, monthEntry) => total + Object.values(monthEntry)[0], 0);
+    });
+
+    console.log(results);
+
 
 
     return (
@@ -850,12 +905,13 @@ const AttendanceSummarys = () => {
                                                             <th>Name</th>
                                                             <th>Designation</th>
 
-                                                            <th>Total Working Day</th>
-                                                            <th>Total Present</th>
-                                                            <th>Total Absent</th>
+
                                                             {transformedDatas.map((month) => (
                                                                 <th key={month.value}>{month.label}</th>
                                                             ))}
+                                                            <th>Total Working Day</th>
+                                                            <th>Total Present</th>
+                                                            <th>Total Absent</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -865,11 +921,8 @@ const AttendanceSummarys = () => {
                                                                 <td>{attendances.full_name}</td>
                                                                 <td>{attendances.designation_name}</td>
 
-                                                                <td>{(parseFloat(sumOfTotalDays) - (parseFloat(filteredAttendances.length) + parseFloat(matchLength.find(item => item.user_id === attendances.user_id)?.match_length || 0)))}</td>
 
-                                                                <td>{result.find(item => item.user_id === attendances.user_id)?.match_length_total || 0}</td>
-
-                                                                <td>{(((parseFloat(sumOfTotalDays) - (parseFloat(filteredAttendances.length) + parseFloat(matchLength.find(item => item.user_id === attendances.user_id)?.match_length || 0)))) - (result.find(item => item.user_id === attendances.user_id)?.match_length_total || 0))}</td>
+                                                                {/* <td>{(((parseFloat(sumOfTotalDays) - (parseFloat(filteredAttendances.length) + parseFloat(matchLength.find(item => item.user_id === attendances.user_id)?.match_length || 0)))) - (result.find(item => item.user_id === attendances.user_id)?.match_length_total || 0))}</td> */}
 
 
                                                                 {transformedDatas.map((month) => {
@@ -884,6 +937,10 @@ const AttendanceSummarys = () => {
                                                                     );
                                                                 })}
 
+                                                                <td>{(parseFloat(sumOfTotalDays) - (parseFloat(filteredAttendances.length) + parseFloat(matchLength.find(item => item.user_id === attendances.user_id)?.match_length || 0)))}</td>
+
+                                                                <td>{result.find(item => item.user_id === attendances.user_id)?.match_length_total || 0}</td>
+                                                                <td>{results.find(item => item.user_id === attendances.user_id)?.match_length_total || 0}</td>
 
                                                             </tr>
                                                         ))}

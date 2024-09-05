@@ -258,59 +258,118 @@ const AttendanceCreates = () => {
     // console.log('checkedItemsData', checkedItemsData)
 
     const router = useRouter()
+    // const user_create = (event) => {
+    //     event.preventDefault();
+    //     const dataToSend = checkedItemsData.flatMap((item) => {
+    //         return [
+    //             {
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: startDatetime.datetime,  // Entry Time
+    //                 unique_id: item.unique_id
+    //             },
+    //             {
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: lateDatetime.datetime,  // Exit Time
+    //                 unique_id: item.unique_id
+    //             }
+    //         ];
+    //     });
+
+    //     console.log(dataToSend)
+
+    //     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'content-type': 'application/json',
+    //         },
+    //         body: JSON.stringify(dataToSend),
+    //     })
+    //         .then((Response) => {
+    //             refetch()
+    //             Response.json();
+    //             console.log(Response);
+    //             if (Response.ok === true) {
+    //                 // caregory_list()
+    //                 if (typeof window !== '') {
+
+    //                     sessionStorage.setItem("message", "Data saved successfully!");
+    //                 }
+    //                 router.push('/Admin/attendance/attendance_all');
+    //             }
+    //         })
+    //         .then((data) => {
+    //             console.log(data);
+    //             refetch()
+    //         })
+    //         .catch((error) => console.error(error));
+    // };
+
     const user_create = (event) => {
         event.preventDefault();
+        
         const dataToSend = checkedItemsData.flatMap((item) => {
-            return [
-                {
+            const entries = [];
+            
+            // Add entry time record only if startDatetime.datetime is not empty
+            if (startDatetime.datetime !== undefined) {
+                entries.push({
                     user_id: item.user_id,
                     created_by: userId,
                     attendance_date: fromDate,
                     device_id: 'Online',
                     checktime: startDatetime.datetime,  // Entry Time
                     unique_id: item.unique_id
-                },
-                {
+                });
+            }
+    
+            // Add exit time record only if lateDatetime.datetime is not empty
+            if (lateDatetime.datetime !== undefined) {
+                entries.push({
                     user_id: item.user_id,
                     created_by: userId,
                     attendance_date: fromDate,
                     device_id: 'Online',
                     checktime: lateDatetime.datetime,  // Exit Time
                     unique_id: item.unique_id
-                }
-            ];
+                });
+            }
+    console.log(entries)
+            return entries;
         });
-
-        console.log(dataToSend)
-
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+    
+        console.log(dataToSend);
+        // ${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create
+    
+        fetch(``, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
             },
             body: JSON.stringify(dataToSend),
         })
-            .then((Response) => {
-                refetch()
-                Response.json();
-                console.log(Response);
-                if (Response.ok === true) {
-                    // caregory_list()
-                    if (typeof window !== '') {
-
-                        sessionStorage.setItem("message", "Data saved successfully!");
-                    }
-                    router.push('/Admin/attendance/attendance_all');
+        .then((response) => {
+            refetch();
+            return response.json();  // Ensure you return the parsed JSON
+        })
+        .then((data) => {
+            console.log(data);
+            if (data && data.ok === true) {
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem("message", "Data saved successfully!");
                 }
-            })
-            .then((data) => {
-                console.log(data);
-                refetch()
-            })
-            .catch((error) => console.error(error));
+                router.push('/Admin/attendance/attendance_all');
+            }
+            refetch(); // Refetch data if needed
+        })
+        .catch((error) => console.error(error));
     };
-
-
+    
 
     const [fromDate, setFromDate] = useState('');
     const formatDate = (date) => {
