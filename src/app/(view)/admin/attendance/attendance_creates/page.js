@@ -94,6 +94,7 @@ const AttendanceCreates = () => {
                 setStartDatetime('')
                 setWithAbsent('')
                 setWithPresent('')
+                setFromDate('')
                 setError(null);
                 setLoading(false);
                 if (response.data.results == '') {
@@ -291,6 +292,7 @@ const { data: absentList = [] } = useQuery({
         event.preventDefault();
       
         if (foundHoliday.length > 0) {
+            console.log('This is holiday No Attendance')
           return;
         }
       
@@ -722,7 +724,7 @@ const { data: absentList = [] } = useQuery({
 
     const sendOtpToAllEmployees = () => {
         if (!withPresent && !withAbsent) {
-            console.log('No OTPs will be sent.');
+            console.log('No SMS will be sent.');
             return;
         }
         if( foundHoliday.length > 0){
@@ -866,8 +868,9 @@ const { data: absentList = [] } = useQuery({
                                         {
                         foundHoliday.length > 0 ?
 
-                        <div className="alert alert-danger font-weight-bold mt-2">
-                            Today {data} {foundHoliday[0]?.holiday_category_name}. You Cannot Take Attendance Today
+                        <div className="alert alert-danger  mt-2">
+                            Today {data}, {foundHoliday[0]?.holiday_category_name} . You Can't Take Attendance Today
+                           
                         </div>
                         :
                         ''
