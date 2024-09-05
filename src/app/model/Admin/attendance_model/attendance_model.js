@@ -122,6 +122,43 @@ const AttendanceModel = {
         }
     },
 
+
+    absent_create: async (req, res) => {
+        try {
+            const models = req.body;
+
+
+            const results = [];
+
+            console.log(models)
+
+            for (const model of models) {
+                const { user_id, checktime, created_by, attendance_date, device_id, unique_id } = model;
+
+                // Check if all required fields are present
+                const insertQuery = 'INSERT INTO absent (user_id, checktime, created_by, absent_date, device_id, unique_id) VALUES (?, ?, ?, ?, ?, ?)';
+                const insertedModel = await new Promise((resolve, reject) => {
+                    connection.query(insertQuery, [user_id, checktime, created_by, attendance_date, device_id, unique_id], (error, result) => {
+                        if (error) {
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(result);
+                        }
+                    });
+                });
+
+                console.log(insertedModel);
+                results.push(insertedModel);
+            }
+
+            res.json(results);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
+
     // attendance_search: async (req, res) => {
     //     try {
     //         console.log("Search button clicked.");

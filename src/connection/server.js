@@ -791,6 +791,8 @@ app.post( "/Admin/attendance/attendance_search", AttendanceModel.attendance_sear
 );
 app.post( "/Admin/attendance/attendance_create", AttendanceModel.attendance_create
 );
+app.post( "/Admin/absent/absent_create", AttendanceModel.absent_create
+);
 
 app.post( "/Admin/attendance/attendance_otp", AttendanceModel.send_attendance_otp
 );

@@ -13,6 +13,7 @@ const AttendanceCreates = () => {
     const [employee, setEmployee] = useState([]);
     const [filteredDesignations, setFilteredDesignations] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
+    const [fromDate, setFromDate] = useState('');
 
     const { data: branchAll = [], isLoading, refetch } = useQuery({
         queryKey: ['branchAll'],
@@ -218,71 +219,448 @@ const AttendanceCreates = () => {
     console.log('checkedItemsData', checkedItemsData);
     console.log('unCheckedItemsData', unCheckedItemsData);
 
-    // const [checkedItems, setCheckedItems] = useState({});
-    // const [isCheckedAll, setIsCheckedAll] = useState(false);
-    // const [checkedItemsData, setCheckedItemsData] = useState([]);
+
+    
+    const { data: yearlyHolidays = [] } = useQuery({
+        queryKey: ['yearlyHolidays'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/yearly_holiday/yearly_holiday_all`);
+            const data = await res.json();
+            return data;
+        }
+    });
+    
+    const formatDates = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear());
+        return `${year}-${month}-${day}`;
+    };
+    
+    const data = fromDate ? formatDates(fromDate) : '';
+    
+    const foundHoliday = yearlyHolidays.filter(yearlyHoliday => 
+        yearlyHoliday.start_date.slice(0, 10) === data
+    );
+    
+    if (foundHoliday) {
+        console.log('Holiday found:', foundHoliday);
+    } else {
+        console.log('Holiday not found.');
+    }
+    
+    console.log(foundHoliday[0]?.holiday_category_name)
+
+    const { data: leaveAllApproved = [] } = useQuery({
+        queryKey: ['leaveAllApproved'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_details_list`)
+            const data = await res.json()
+            return data
+        }
+    });
+
+console.log(leaveAllApproved)
 
 
-    // const handleCheckChange = (uniqueId) => {
-    //     const updatedCheckedItems = {
-    //         ...checkedItems,
-    //         [uniqueId]: !checkedItems[uniqueId]
-    //     };
 
-    //     setCheckedItems(updatedCheckedItems);
+const matchedLeave = leaveAllApproved.filter(leave => 
+    leave.leave_application_ids.some(application => 
+      application.leave_date.slice(0, 10) === data
+    )
+  );
+  
 
-    //     // Update the selected data array
-    //     const selectedData = searchResults.filter(item => updatedCheckedItems[item.user_id]);
-    //     setCheckedItemsData(selectedData);
-    // };
-    // const handleCheckAllChange = () => {
-    //     const newCheckedStatus = !isCheckedAll;
-    //     const newCheckedItems = {};
-    //     const newCheckedItemsData = [];
+console.log(matchedLeave?.whose_leave); // true or false
+console.log(matchedLeave); // true or false
 
-    //     if (newCheckedStatus) {
-    //         searchResults.forEach((attendance) => {
-    //             newCheckedItems[attendance.user_id] = true;
-    //             newCheckedItemsData.push(attendance);
-    //         });
-    //     }
-
-    //     setCheckedItems(newCheckedItems);
-    //     setCheckedItemsData(newCheckedItemsData);
-    //     setIsCheckedAll(newCheckedStatus);
-    // };
-
-
-
-    // console.log('checkedItems', checkedItems)
-    // console.log('checkedItemsData', checkedItemsData)
+const { data: absentList = [] } = useQuery({
+    queryKey: ['absentList'],
+    queryFn: async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_all`)
+        const data = await res.json()
+        return data
+    }
+});
 
     const router = useRouter()
+
+    
+      
+      const user_create = (event) => {
+        event.preventDefault();
+      
+        if (foundHoliday.length > 0) {
+          return;
+        }
+      
+        // Prepare data for checked items
+        const dataToSend = checkedItemsData.flatMap((item) => {
+          const entries = [];
+      
+          // Add entry time record only if startDatetime.datetime is not empty
+          if (startDatetime.datetime !== undefined) {
+            entries.push({
+              user_id: item.user_id,
+              created_by: userId,
+              attendance_date: fromDate,
+              device_id: 'Online',
+              checktime: startDatetime.datetime,  // Entry Time
+              unique_id: item.unique_id
+            });
+          }
+      
+          // Add exit time record only if lateDatetime.datetime is not empty
+          if (lateDatetime.datetime !== undefined) {
+            entries.push({
+              user_id: item.user_id,
+              created_by: userId,
+              attendance_date: fromDate,
+              device_id: 'Online',
+              checktime: lateDatetime.datetime,  // Exit Time
+              unique_id: item.unique_id
+            });
+          }
+      
+          return entries;
+        });
+      
+        console.log(dataToSend);
+      
+        // Send dataToSend to the attendance API
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSend),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Failed to save attendance data');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            if (data && data.ok === true) {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem("message", "Data saved successfully!");
+              }
+              // router.push('/Admin/attendance/attendance_all');
+            }
+            refetch();
+          })
+          .catch((error) => console.error(error));
+      
+        // Extract `whose_leave` IDs
+        const leaveUserIds = matchedLeave.map((leave) => leave.whose_leave);
+      
+        // Prepare and send data for unchecked items
+        const absentDataToSend = unCheckedItemsData
+          .filter((item) => {
+            const isOnLeave = leaveUserIds.includes(item.user_id);
+            const isAlreadyAbsent = absentList.some(absent => 
+              absent.user_id === item.user_id && absent.absent_date.slice(0, 10) === data
+            );
+            return !isOnLeave && !isAlreadyAbsent; // Exclude users on leave and already marked as absent
+          })
+          .map((item) => ({
+            user_id: item.user_id,
+            created_by: userId,
+            attendance_date: fromDate,
+            device_id: 'Online',
+            checktime: null,  // Assuming no specific checktime for absents
+            unique_id: item.unique_id,
+          }));
+      
+        console.log(absentDataToSend);
+      
+        if (absentDataToSend.length > 0) {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(absentDataToSend),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('Failed to save absent data');
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+              if (data && data.ok === true) {
+                // Handle success if needed
+              }
+              refetch(); // Refetch data if needed
+            })
+            .catch((error) => console.error(error));
+        }
+      };
+      
+
+
+
     // const user_create = (event) => {
     //     event.preventDefault();
+        
+    //     if (foundHoliday.length > 0) {
+    //         return;
+    //     }
+    
+    //     // Prepare data for checked items
     //     const dataToSend = checkedItemsData.flatMap((item) => {
-    //         return [
-    //             {
+    //         const entries = [];
+            
+    //         // Add entry time record only if startDatetime.datetime is not empty
+    //         if (startDatetime.datetime !== undefined) {
+    //             entries.push({
     //                 user_id: item.user_id,
     //                 created_by: userId,
     //                 attendance_date: fromDate,
     //                 device_id: 'Online',
     //                 checktime: startDatetime.datetime,  // Entry Time
     //                 unique_id: item.unique_id
-    //             },
-    //             {
+    //             });
+    //         }
+    
+    //         // Add exit time record only if lateDatetime.datetime is not empty
+    //         if (lateDatetime.datetime !== undefined) {
+    //             entries.push({
     //                 user_id: item.user_id,
     //                 created_by: userId,
     //                 attendance_date: fromDate,
     //                 device_id: 'Online',
     //                 checktime: lateDatetime.datetime,  // Exit Time
     //                 unique_id: item.unique_id
-    //             }
-    //         ];
+    //             });
+    //         }
+    
+    //         return entries;
     //     });
+    
+    //     console.log(dataToSend);
+        
+    //     // Send dataToSend to the attendance API
+    //     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify(dataToSend),
+    //     })
+    //     .then((response) => {
+    //         if (!response.ok) {
+    //             throw new Error('Failed to save attendance data');
+    //         }
+    //         return response.json();  // Ensure you return the parsed JSON
+    //     })
+    //     .then((data) => {
+    //         console.log(data);
+    //         if (data && data.ok === true) {
+    //             if (typeof window !== 'undefined') {
+    //                 sessionStorage.setItem("message", "Data saved successfully!");
+    //             }
+    //             // router.push('/Admin/attendance/attendance_all');
+    //         }
+    //         refetch(); // Refetch data if needed
+    //     })
+    //     .catch((error) => console.error(error));
+    
+    //     // Extract `whose_leave` IDs
+    //     const leaveUserIds = matchedLeave.map((leave) => leave.whose_leave);
+    
+    //     // Prepare and send data for unchecked items
+    //     const absentDataToSend = unCheckedItemsData
+    //         .filter((item) => !leaveUserIds.includes(item.user_id)) // Exclude users on leave
+    //         .map((item) => ({
+    //             user_id: item.user_id,
+    //             created_by: userId,
+    //             attendance_date: fromDate,
+    //             device_id: 'Online',
+    //             checktime: null,  // Assuming no specific checktime for absents
+    //             unique_id: item.unique_id,
+    //         }));
+    
+    //     console.log(absentDataToSend);
+        
+    //     if (absentDataToSend.length > 0) {
+    //         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_create`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(absentDataToSend),
+    //         })
+    //         .then((response) => {
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to save absent data');
+    //             }
+    //             return response.json();  // Ensure you return the parsed JSON
+    //         })
+    //         .then((data) => {
+    //             console.log(data);
+    //             if (data && data.ok === true) {
+    //                 // Handle success if needed
+    //             }
+    //             refetch(); // Refetch data if needed
+    //         })
+    //         .catch((error) => console.error(error));
+    //     }
+    // };
+    
+    // const user_create = (event) => {
+    //     event.preventDefault();
+        
+    //     if (foundHoliday.length > 0) {
+    //         return;
+    //     }
+    
+    //     // Prepare data for checked items
+    //     const dataToSend = checkedItemsData.flatMap((item) => {
+    //         const entries = [];
+            
+    //         // Add entry time record only if startDatetime.datetime is not empty
+    //         if (startDatetime.datetime !== undefined) {
+    //             entries.push({
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: startDatetime.datetime,  // Entry Time
+    //                 unique_id: item.unique_id
+    //             });
+    //         }
+    
+    //         // Add exit time record only if lateDatetime.datetime is not empty
+    //         if (lateDatetime.datetime !== undefined) {
+    //             entries.push({
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: lateDatetime.datetime,  // Exit Time
+    //                 unique_id: item.unique_id
+    //             });
+    //         }
+    
+    //         return entries;
+    //     });
+    
+    //     console.log(dataToSend);
+        
+    //     // Send dataToSend to the attendance API
+    //     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify(dataToSend),
+    //     })
+    //     .then((response) => {
+    //         if (!response.ok) {
+    //             throw new Error('Failed to save attendance data');
+    //         }
+    //         return response.json();  // Ensure you return the parsed JSON
+    //     })
+    //     .then((data) => {
+    //         console.log(data);
+    //         if (data && data.ok === true) {
+    //             if (typeof window !== 'undefined') {
+    //                 sessionStorage.setItem("message", "Data saved successfully!");
+    //             }
+    //             // router.push('/Admin/attendance/attendance_all');
+    //         }
+    //         refetch(); // Refetch data if needed
+    //     })
+    //     .catch((error) => console.error(error));
+    
+    //     // Prepare and send data for unchecked items
+    //     const absentDataToSend = unCheckedItemsData.map((item) => ({
+    //         user_id: item.user_id,
+    //         created_by: userId,
+    //         attendance_date: fromDate,
+    //         device_id: 'Online',
+    //         checktime: null,  // Assuming no specific checktime for absents
+    //         unique_id: item.unique_id,
+        
+    //     }));
+    
+    //     console.log(absentDataToSend);
+        
+    //     if (unCheckedItemsData.length > 0) {
+    //         fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_create`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(absentDataToSend),
+    //         })
+    //         .then((response) => {
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to save absent data');
+    //             }
+    //             return response.json();  // Ensure you return the parsed JSON
+    //         })
+    //         .then((data) => {
+    //             console.log(data);
+    //             if (data && data.ok === true) {
+    //                 // Handle success if needed
+    //             }
+    //             refetch(); // Refetch data if needed
+    //         })
+    //         .catch((error) => console.error(error));
+    //     }
+    // };
+    
+    // const user_create = (event) => {
+    //     event.preventDefault();
+        
+    //     if( foundHoliday.length > 0){
+            
+    //         return
+    //     }
 
-    //     console.log(dataToSend)
+    //     const uncehckData = unCheckedItemsData
 
+
+
+    //     const dataToSend = checkedItemsData.flatMap((item) => {
+    //         const entries = [];
+            
+    //         // Add entry time record only if startDatetime.datetime is not empty
+    //         if (startDatetime.datetime !== undefined) {
+    //             entries.push({
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: startDatetime.datetime,  // Entry Time
+    //                 unique_id: item.unique_id
+    //             });
+    //         }
+    
+    //         // Add exit time record only if lateDatetime.datetime is not empty
+    //         if (lateDatetime.datetime !== undefined) {
+    //             entries.push({
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: lateDatetime.datetime,  // Exit Time
+    //                 unique_id: item.unique_id
+    //             });
+    //         }
+    // console.log(entries)
+    //         return entries;
+    //     });
+    
+    //     console.log(dataToSend);
+    //     // ${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create
+    
     //     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
     //         method: 'POST',
     //         headers: {
@@ -290,88 +668,24 @@ const AttendanceCreates = () => {
     //         },
     //         body: JSON.stringify(dataToSend),
     //     })
-    //         .then((Response) => {
-    //             refetch()
-    //             Response.json();
-    //             console.log(Response);
-    //             if (Response.ok === true) {
-    //                 // caregory_list()
-    //                 if (typeof window !== '') {
-
-    //                     sessionStorage.setItem("message", "Data saved successfully!");
-    //                 }
-    //                 router.push('/Admin/attendance/attendance_all');
+    //     .then((response) => {
+    //         refetch();
+    //         return response.json();  // Ensure you return the parsed JSON
+    //     })
+    //     .then((data) => {
+    //         console.log(data);
+    //         if (data && data.ok === true) {
+    //             if (typeof window !== 'undefined') {
+    //                 sessionStorage.setItem("message", "Data saved successfully!");
     //             }
-    //         })
-    //         .then((data) => {
-    //             console.log(data);
-    //             refetch()
-    //         })
-    //         .catch((error) => console.error(error));
+    //             router.push('/Admin/attendance/attendance_all');
+    //         }
+    //         refetch(); // Refetch data if needed
+    //     })
+    //     .catch((error) => console.error(error));
     // };
-
-    const user_create = (event) => {
-        event.preventDefault();
-        
-        const dataToSend = checkedItemsData.flatMap((item) => {
-            const entries = [];
-            
-            // Add entry time record only if startDatetime.datetime is not empty
-            if (startDatetime.datetime !== undefined) {
-                entries.push({
-                    user_id: item.user_id,
-                    created_by: userId,
-                    attendance_date: fromDate,
-                    device_id: 'Online',
-                    checktime: startDatetime.datetime,  // Entry Time
-                    unique_id: item.unique_id
-                });
-            }
-    
-            // Add exit time record only if lateDatetime.datetime is not empty
-            if (lateDatetime.datetime !== undefined) {
-                entries.push({
-                    user_id: item.user_id,
-                    created_by: userId,
-                    attendance_date: fromDate,
-                    device_id: 'Online',
-                    checktime: lateDatetime.datetime,  // Exit Time
-                    unique_id: item.unique_id
-                });
-            }
-    console.log(entries)
-            return entries;
-        });
-    
-        console.log(dataToSend);
-        // ${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create
-    
-        fetch(``, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify(dataToSend),
-        })
-        .then((response) => {
-            refetch();
-            return response.json();  // Ensure you return the parsed JSON
-        })
-        .then((data) => {
-            console.log(data);
-            if (data && data.ok === true) {
-                if (typeof window !== 'undefined') {
-                    sessionStorage.setItem("message", "Data saved successfully!");
-                }
-                router.push('/Admin/attendance/attendance_all');
-            }
-            refetch(); // Refetch data if needed
-        })
-        .catch((error) => console.error(error));
-    };
     
 
-    const [fromDate, setFromDate] = useState('');
     const formatDate = (date) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -386,11 +700,13 @@ const AttendanceCreates = () => {
         const selectedDate = new Date(event.target.value);
         setFromDate(selectedDate);
     };
-    useEffect(() => {
-        const currentDate = new Date();
-        setFromDate(currentDate);
 
-    }, []);
+
+    // useEffect(() => {
+    //     const currentDate = new Date();
+    //     setFromDate(currentDate);
+
+    // }, []);
 
     const generateOTP = () => {
         const otp = Math.floor(100000 + Math.random() * 900000);
@@ -409,7 +725,10 @@ const AttendanceCreates = () => {
             console.log('No OTPs will be sent.');
             return;
         }
-
+        if( foundHoliday.length > 0){
+            
+            return
+        }
         checkedItemsData.forEach((employee) => {
             if (withPresent && checkedItems[employee.user_id]) {
                 // Send OTP to checked employees if 'With Present' is checked
@@ -449,6 +768,9 @@ const AttendanceCreates = () => {
 
         });
     };
+
+
+
 
 
 
@@ -539,6 +861,18 @@ const AttendanceCreates = () => {
                                             <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Online Employee Attendance</h5>
 
                                         </div>
+<div className='px-4'>
+
+                                        {
+                        foundHoliday.length > 0 ?
+
+                        <div className="alert alert-danger font-weight-bold mt-2">
+                            Today {data} {foundHoliday[0]?.holiday_category_name}. You Cannot Take Attendance Today
+                        </div>
+                        :
+                        ''
+                    }
+</div>
 
                                         <div class="card-body" >
 
@@ -552,6 +886,7 @@ const AttendanceCreates = () => {
                                                                 className="form-control form-control-sm"
                                                                 type="text"
                                                                 id="fromDate"
+                                                                 placeholder='dd--mm--yyyy'
                                                                 value={fromDate ? formatDate(fromDate) : ''}
                                                                 onClick={handleTextInputClick}
                                                                 readOnly
@@ -559,6 +894,7 @@ const AttendanceCreates = () => {
                                                             <input
                                                                 type="date"
                                                                 id="dateInputFrom"
+                                                               
                                                                 value={fromDate ? fromDate.toString().split('T')[0] : ''}
                                                                 onChange={handleDateChangeFrom}
                                                                 style={{ position: 'absolute', bottom: '-20px', left: '0', visibility: 'hidden' }}
@@ -705,3 +1041,99 @@ const AttendanceCreates = () => {
 };
 
 export default AttendanceCreates;
+
+
+
+
+
+    // const [checkedItems, setCheckedItems] = useState({});
+    // const [isCheckedAll, setIsCheckedAll] = useState(false);
+    // const [checkedItemsData, setCheckedItemsData] = useState([]);
+
+
+    // const handleCheckChange = (uniqueId) => {
+    //     const updatedCheckedItems = {
+    //         ...checkedItems,
+    //         [uniqueId]: !checkedItems[uniqueId]
+    //     };
+
+    //     setCheckedItems(updatedCheckedItems);
+
+    //     // Update the selected data array
+    //     const selectedData = searchResults.filter(item => updatedCheckedItems[item.user_id]);
+    //     setCheckedItemsData(selectedData);
+    // };
+    // const handleCheckAllChange = () => {
+    //     const newCheckedStatus = !isCheckedAll;
+    //     const newCheckedItems = {};
+    //     const newCheckedItemsData = [];
+
+    //     if (newCheckedStatus) {
+    //         searchResults.forEach((attendance) => {
+    //             newCheckedItems[attendance.user_id] = true;
+    //             newCheckedItemsData.push(attendance);
+    //         });
+    //     }
+
+    //     setCheckedItems(newCheckedItems);
+    //     setCheckedItemsData(newCheckedItemsData);
+    //     setIsCheckedAll(newCheckedStatus);
+    // };
+
+
+
+    // console.log('checkedItems', checkedItems)
+    // console.log('checkedItemsData', checkedItemsData)
+
+ 
+    // const user_create = (event) => {
+    //     event.preventDefault();
+    //     const dataToSend = checkedItemsData.flatMap((item) => {
+    //         return [
+    //             {
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: startDatetime.datetime,  // Entry Time
+    //                 unique_id: item.unique_id
+    //             },
+    //             {
+    //                 user_id: item.user_id,
+    //                 created_by: userId,
+    //                 attendance_date: fromDate,
+    //                 device_id: 'Online',
+    //                 checktime: lateDatetime.datetime,  // Exit Time
+    //                 unique_id: item.unique_id
+    //             }
+    //         ];
+    //     });
+
+    //     console.log(dataToSend)
+
+    //     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_create`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'content-type': 'application/json',
+    //         },
+    //         body: JSON.stringify(dataToSend),
+    //     })
+    //         .then((Response) => {
+    //             refetch()
+    //             Response.json();
+    //             console.log(Response);
+    //             if (Response.ok === true) {
+    //                 // caregory_list()
+    //                 if (typeof window !== '') {
+
+    //                     sessionStorage.setItem("message", "Data saved successfully!");
+    //                 }
+    //                 router.push('/Admin/attendance/attendance_all');
+    //             }
+    //         })
+    //         .then((data) => {
+    //             console.log(data);
+    //             refetch()
+    //         })
+    //         .catch((error) => console.error(error));
+    // };
