@@ -347,7 +347,7 @@ const { data: absentList = [] } = useQuery({
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem("message", "Data saved successfully!");
               }
-              // router.push('/Admin/attendance/attendance_all');
+              router.push('/Admin/attendance/attendance_all');
             }
             refetch();
           })
