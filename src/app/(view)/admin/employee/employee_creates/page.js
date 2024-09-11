@@ -561,271 +561,7 @@ const EmployeeCreate = () => {
     };
 
 
-    const employee_create = (event) => {
-
-        event.preventDefault();
-        const form = event.target;
-
-        const full_name = form.full_name.value;
-        const confirm_password = form.confirm_password.value;
-        const dob = form.dob.value;
-        const gender = form.gender.value;
-        const religion = form.religion.value;
-        const mobile = form.mobile.value;
-        const email = form.email.value;
-        const password = form.password.value;
-        const experience = form.experience.value;
-        const education = form.education.value;
-        const institute = form.institute.value;
-        const result = form.result.value;
-        const passing_year = form.passing_year.value;
-        const same_as = sameAsLiving;
-        const division_id_living = selectedDivision;
-        const district_id_living = selectedDistrict;
-        const upazila_id_living = selectedUpazila;
-        const address_id_living = livingAddress;
-        const division_id_permanent = selectedDivisions;
-        const district_id_permanent = selectedDistricts;
-        const upazila_id_permanent = selectedUpazilas;
-        const address_id_permanent = livingAddresss;
-        const join_date = form.join_date.value;
-        const payroll_id = form.payroll_id.value;
-        const school_shift_id = form.school_shift_id.value;
-        const signature_image = form.signature_image.value;
-        const photo = form.photo.value;
-        const designation_id = form.designation_id.value;
-        const father_name = form.father_name.value;
-        const mother_name = form.mother_name.value;
-        const unique_id = form.employee_id.value;
-        const branch_id = form.branch_id.value;
-        const blood_group_id = form.blood_group_id.value;
-        const NID = form.NID.value;
-        const father_service = form.father_service.value;
-        const mother_service = form.mother_service.value;
-        const father_mobile = form.father_mobile.value;
-        const mother_mobile = form.mother_mobile.value;
-
-
-        if(!full_name){
-            setFullName('Name Must Be filled')
-            return
-        }
-        if(!father_name){
-            setFatherName('Father Name Must Be filled')
-            return
-        }
-
-        if(!mother_name){
-            setMotherName('Mother Name Must Be filled')
-            return
-        }
-
-        if(!gender){
-            setGender('Gender Name Must Be filled')
-            return
-        }
-
-        if(!dob){
-            setDob('Date Of Birth Day  Must Be filled')
-            return
-        }
-        if(!religion){
-            setReligion('Religion  Must Be filled')
-            return
-        }
-        if(!mobile){
-            setMobile('Mobile Number  Must Be filled')
-            return
-        }
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!email) {
-            setEmail("email Is required"); // Clear the error message if valid
-           
-            return
-        } else if ( !emailRegex.test(fieldes.email)) {
-            setEmail("Please enter a valid email in the format abcd@abcd.com");
-            return
-        }
-
-        if(!email){
-            setEmail('Email  Must Be filled')
-            return
-        }
-
-        if(!experience){
-            setExperience('experience  Must Be filled')
-            return
-        }
-        if(!password){
-            setPassword('Password  Must Be filled')
-            return
-        }
-        if(!fieldes.confirm_password){
-            setConfirmPassword('Confirm Password  Must Be filled')
-            return
-        }
-
-        if(!division_id_living){
-            setLDivision('Division Must Be filled')
-            return
-        }
-        if(!join_date){
-            setJoinDate('Join Date Must Be filled')
-            return
-        }
-        if(!designation_id){
-            setDesignation('Designation Must Be filled')
-            return
-        }
-
-        if(!unique_id){
-            setEmployeeId('employee Id Must Be filled')
-            return
-        }
-
-        if(!school_shift_id){
-            setShift('School Shift Must Be filled')
-            return
-        }
-        if(!payroll_id){
-            setPayroll('Payroll  Must Be filled')
-            return
-        }
-        if(password !== confirm_password ){
-            setconfirm_password('Password and confrim password does not match')
-            return
-        }
-
-        
-
-
-        
-
-        const newErrors = new Array(fields.length).fill('');
-        const isValid = fields.every((inputValue, index) => {
-            if (!inputValue.education) {
-                newErrors[index] = 'Education Name must be filled.';
-                return false;
-            }
-            return true;
-        });
-
-        if (!isValid) {
-            setEducation(newErrors);
-            return;
-        }
-        setEducation(new Array(fields.length).fill(''));
-
-        const newError = new Array(fields.length).fill('');
-        const isValids = fields.every((inputValue, index) => {
-            if (!inputValue?.institute) {
-                newError[index] = 'Institute Name must be filled.';
-                return false;
-            }
-            return true;
-        });
-
-        if (!isValids) {
-            setSchool(newError);
-            return;
-        }
-        setSchool(new Array(fields.length).fill(''));
-
-
-        const newErrorName = new Array(fields.length).fill('');
-        const isValidsName = fields.every((inputValue, index) => {
-            if (!inputValue?.result) {
-                newErrorName[index] = 'Result must be filled.';
-                return false;
-            }
-            return true;
-        });
-
-        if (!isValidsName) {
-            setResult(newErrorName);
-            return;
-        }
-        setResult(new Array(fields.length).fill(''));
-
-
-        const newErrorGender = new Array(fields.length).fill('');
-        const isValidsGender = fields.every((inputValue, index) => {
-            if (!inputValue?.passing_year) {
-                newErrorGender[index] = 'Passing Year must be filled.';
-                return false;
-            }
-            return true;
-        });
-
-        if (!isValidsGender) {
-            setPassingYear(newErrorGender);
-            return;
-        }
-        setPassingYear(new Array(fields.length).fill(''));
-      
-       
-
-        const uniqueFields = {
-            NID,
-            blood_group_id,
-            father_name,
-            mother_name,
-            full_name,
-            dob,
-            gender,
-            religion,
-            mobile,
-            email,
-            password,
-            experience,
-            same_as,
-            division_id_living,
-            district_id_living,
-            upazila_id_living,
-            address_id_living,
-            division_id_permanent,
-            district_id_permanent,
-            upazila_id_permanent,
-            address_id_permanent,
-            join_date,
-            payroll_id,
-            school_shift_id,
-            signature_image,
-            photo,
-            created_by,
-            designation_id,
-            unique_id,
-            branch_id,
-             fields,
-             father_service, mother_service,
-             father_mobile, mother_mobile
-        }
-        console.log(uniqueFields)
-        // 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_create`, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify(uniqueFields),
-        })
-            .then((Response) =>
-                Response.json()
-            )
-            .then((data) => {
-                console.log(data[0])
-                if (data[0]?.affectedRows > 0) {
-                    if(typeof window !== 'undefined'){
-
-                        sessionStorage.setItem("message", "Data saved successfully!");
-                    }
-                    // router.push('/Admin/brand/brand_all');
-                }
-                console.log(data)
-
-            })
-            .catch((error) => console.error(error));
-    }
+  
 
 
 
@@ -1007,6 +743,382 @@ const EmployeeCreate = () => {
 
 
 console.log(sameAsLiving)
+
+
+const { data: smsSettings = [],  } = useQuery({
+    queryKey: ['smsSettings'],
+    queryFn: async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/smsSettings`);
+        const data = await res.json();
+        return data;
+    }
+});
+
+console.log(smsSettings.find(sms => sms.sms_system === 1))
+const attendanceSms = smsSettings.find(sms => sms.sms_system === 1)
+const formatDateAmPm = (inputDate) => {
+    const date = new Date(inputDate);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let hours = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? String(hours).padStart(2, '0') : '12'; // the hour '0' should be '12'
+
+    return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+};
+const quickApi = '7ae89887eac6055a2b9adc494ca3b902';
+console.log(fieldes.join_date)
+const formatDate = (dateString) => {
+    return dateString.split('-').join('/');
+};
+
+const [sendSmsChecked, setSendSmsChecked] = useState(false);
+
+const designation_name = designationList.find(desig => desig.id === parseFloat(fieldes.designation_id))
+const payroll_name = payRoll.find(desig => desig.id === parseFloat(fieldes.payroll_id))
+console.log(designationList)
+console.log(payroll_name)
+
+const employeeAttendanceSmsTemplate = attendanceSms?.oe_join
+const employeeSalarySmsTemplate = attendanceSms?.auto_oe_join
+
+const sendOtpToEmployees = () => {
+  
+
+    if (!sendSmsChecked) {
+        console.log('SMS sending is disabled');
+        return;
+    }
+    
+    if (employeeSalarySmsTemplate !== 1) {
+        console.log('Auto is not active');
+        return;
+    }
+    
+
+            const currentDate = new Date();
+
+            const smsTime = currentDate.toLocaleTimeString();
+ 
+            // Replace placeholders with actual data
+            let msg = employeeAttendanceSmsTemplate
+                .replace('[[company_name]]', fieldes?.company_name || 'No Company')
+                .replace('[[full_name]]', fieldes.full_name)
+                .replace('[[employee_id]]', fieldes.employee_id)
+                .replace('[[employee_designation]]', designation_name.designation_name)
+                .replace('[[payroll_name]]', payroll_name.title)
+                .replace('[[payroll_total]]', payroll_name.basic)
+                .replace('[[joining_date]]', formatDate(formattedDisplayDate))
+                .replace('[[sms_time]]', smsTime);
+
+            axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_otp`, {
+                quick_api: quickApi,
+                mobile: fieldes.mobile,
+                msg: msg,
+            })
+                .then(response => {
+                    console.log(`OTP sent to ${fieldes.full_name} (${fieldes.mobile}):`, response.data);
+                })
+                .catch(error => {
+                    console.error(`Failed to send OTP to ${fieldes.full_name} (${fieldes.mobile}):`, error);
+                });
+    
+};
+
+console.log(formattedDisplayDate)
+
+
+const { data: attendance_sms_campaign_categorys = [] } = useQuery({
+    queryKey: ['attendance_sms_campaign_categorys'],
+    queryFn: async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance_sms/attendance_sms_campaign_category`)
+        const data = await res.json()
+        return data
+    }
+});
+
+const employeeAttendance = attendance_sms_campaign_categorys.find(attendance_sms_campaign_category => attendance_sms_campaign_category.id === 11)
+
+const employee_create = (event) => {
+
+    event.preventDefault();
+    const form = event.target;
+
+    const full_name = form.full_name.value;
+    const confirm_password = form.confirm_password.value;
+    const dob = form.dob.value;
+    const gender = form.gender.value;
+    const religion = form.religion.value;
+    const mobile = form.mobile.value;
+    const email = form.email.value;
+    const password = form.password.value;
+    const experience = form.experience.value;
+    const education = form.education.value;
+    const institute = form.institute.value;
+    const result = form.result.value;
+    const passing_year = form.passing_year.value;
+    const same_as = sameAsLiving;
+    const division_id_living = selectedDivision;
+    const district_id_living = selectedDistrict;
+    const upazila_id_living = selectedUpazila;
+    const address_id_living = livingAddress;
+    const division_id_permanent = selectedDivisions;
+    const district_id_permanent = selectedDistricts;
+    const upazila_id_permanent = selectedUpazilas;
+    const address_id_permanent = livingAddresss;
+    const join_date = form.join_date.value;
+    const payroll_id = form.payroll_id.value;
+    const school_shift_id = form.school_shift_id.value;
+    const signature_image = form.signature_image.value;
+    const photo = form.photo.value;
+    const designation_id = form.designation_id.value;
+    const father_name = form.father_name.value;
+    const mother_name = form.mother_name.value;
+    const unique_id = form.employee_id.value;
+    const branch_id = form.branch_id.value;
+    const blood_group_id = form.blood_group_id.value;
+    const NID = form.NID.value;
+    const father_service = form.father_service.value;
+    const mother_service = form.mother_service.value;
+    const father_mobile = form.father_mobile.value;
+    const mother_mobile = form.mother_mobile.value;
+
+
+    if(!full_name){
+        setFullName('Name Must Be filled')
+        return
+    }
+    if(!father_name){
+        setFatherName('Father Name Must Be filled')
+        return
+    }
+
+    if(!mother_name){
+        setMotherName('Mother Name Must Be filled')
+        return
+    }
+
+    if(!gender){
+        setGender('Gender Name Must Be filled')
+        return
+    }
+
+    if(!dob){
+        setDob('Date Of Birth Day  Must Be filled')
+        return
+    }
+    if(!religion){
+        setReligion('Religion  Must Be filled')
+        return
+    }
+    if(!mobile){
+        setMobile('Mobile Number  Must Be filled')
+        return
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) {
+        setEmail("email Is required"); // Clear the error message if valid
+       
+        return
+    } else if ( !emailRegex.test(fieldes.email)) {
+        setEmail("Please enter a valid email in the format abcd@abcd.com");
+        return
+    }
+
+    if(!email){
+        setEmail('Email  Must Be filled')
+        return
+    }
+
+    if(!experience){
+        setExperience('experience  Must Be filled')
+        return
+    }
+    if(!password){
+        setPassword('Password  Must Be filled')
+        return
+    }
+    if(!fieldes.confirm_password){
+        setConfirmPassword('Confirm Password  Must Be filled')
+        return
+    }
+
+    if(!division_id_living){
+        setLDivision('Division Must Be filled')
+        return
+    }
+    if(!join_date){
+        setJoinDate('Join Date Must Be filled')
+        return
+    }
+    if(!designation_id){
+        setDesignation('Designation Must Be filled')
+        return
+    }
+
+    if(!unique_id){
+        setEmployeeId('employee Id Must Be filled')
+        return
+    }
+
+    if(!school_shift_id){
+        setShift('School Shift Must Be filled')
+        return
+    }
+    if(!payroll_id){
+        setPayroll('Payroll  Must Be filled')
+        return
+    }
+    if(password !== confirm_password ){
+        setconfirm_password('Password and confrim password does not match')
+        return
+    }
+
+    
+
+
+    
+
+    const newErrors = new Array(fields.length).fill('');
+    const isValid = fields.every((inputValue, index) => {
+        if (!inputValue.education) {
+            newErrors[index] = 'Education Name must be filled.';
+            return false;
+        }
+        return true;
+    });
+
+    if (!isValid) {
+        setEducation(newErrors);
+        return;
+    }
+    setEducation(new Array(fields.length).fill(''));
+
+    const newError = new Array(fields.length).fill('');
+    const isValids = fields.every((inputValue, index) => {
+        if (!inputValue?.institute) {
+            newError[index] = 'Institute Name must be filled.';
+            return false;
+        }
+        return true;
+    });
+
+    if (!isValids) {
+        setSchool(newError);
+        return;
+    }
+    setSchool(new Array(fields.length).fill(''));
+
+
+    const newErrorName = new Array(fields.length).fill('');
+    const isValidsName = fields.every((inputValue, index) => {
+        if (!inputValue?.result) {
+            newErrorName[index] = 'Result must be filled.';
+            return false;
+        }
+        return true;
+    });
+
+    if (!isValidsName) {
+        setResult(newErrorName);
+        return;
+    }
+    setResult(new Array(fields.length).fill(''));
+
+
+    const newErrorGender = new Array(fields.length).fill('');
+    const isValidsGender = fields.every((inputValue, index) => {
+        if (!inputValue?.passing_year) {
+            newErrorGender[index] = 'Passing Year must be filled.';
+            return false;
+        }
+        return true;
+    });
+
+    if (!isValidsGender) {
+        setPassingYear(newErrorGender);
+        return;
+    }
+    setPassingYear(new Array(fields.length).fill(''));
+  
+   
+
+    const uniqueFields = {
+        NID,
+        blood_group_id,
+        father_name,
+        mother_name,
+        full_name,
+        dob,
+        gender,
+        religion,
+        mobile,
+        email,
+        password,
+        experience,
+        same_as,
+        division_id_living,
+        district_id_living,
+        upazila_id_living,
+        address_id_living,
+        division_id_permanent,
+        district_id_permanent,
+        upazila_id_permanent,
+        address_id_permanent,
+        join_date,
+        payroll_id,
+        school_shift_id,
+        signature_image,
+        photo,
+        created_by,
+        designation_id,
+        unique_id,
+        branch_id,
+        fields,
+        father_service, 
+        mother_service,
+        father_mobile, 
+        mother_mobile,
+        name: employeeAttendance.category_name,
+        sms_campaign_category_id: employeeAttendance.id,
+        formattedDisplayDate,
+        employeeAttendanceSmsTemplate,
+        sendSmsChecked
+
+    }
+    console.log(uniqueFields)
+    // 
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_create`, {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+        },
+        body: JSON.stringify(uniqueFields),
+    })
+        .then((Response) =>
+            Response.json()
+        )
+        .then((data) => {
+            console.log(data[0])
+            if (data[0]?.affectedRows > 0) {
+                if(typeof window !== 'undefined'){
+
+                    sessionStorage.setItem("message", "Data saved successfully!");
+                }
+                // router.push('/Admin/brand/brand_all');
+            }
+            console.log(data)
+
+        })
+        .catch((error) => console.error(error));
+}
+
 
     return (
         <div className="container-fluid">
@@ -1502,7 +1614,7 @@ onChange={employee_input_change}
 
 
                         
-<div className="card-body">
+
                                     <form method="post" autoComplete="off">
                                         <div className="row">
                                             <div className="col-md-6">
@@ -1629,7 +1741,7 @@ onChange={employee_input_change}
                                             </div>
                                         </div>
                                     </form>
-                                </div>
+                          
 
                                         <div class="card bg-white mb-3 shadow-sm ">
                                             <div class="card-header p-2   bg-gradient-primary text-white ">
@@ -1843,9 +1955,23 @@ onChange={employee_input_change}
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div>
+                                               <div className='mt-4'>
+                                               <label className='font-weight-bold'>
+                <input 
+                    type="checkbox" 
+                    checked={sendSmsChecked} 
+                    onChange={(e) => setSendSmsChecked(e.target.checked)} 
+                />
+               <span> Send SMS</span>
+            </label>
+                                               </div>
+                                                </div>
                                                 <div class="row no-gutters">
-                                                    <div class="col-md-12 offset-md-3">
-                                                        <input type="submit" name="create" class="btn btn-sm btn-success" value="Submit" />
+                                                    <div class="col-md-6 offset-md-3">
+                                                        <input
+                                                        onClick={sendOtpToEmployees}
+                                                        type="submit" name="create" class="btn btn-sm btn-success" value="Submit" />
                                                     </div>
                                                 </div>
                                             </div>

@@ -163,14 +163,16 @@ const AttendanceLists = () => {
 
     const news_search = () => {
         setLoading(true);
-        if (itemName === '' ) {
+        if (itemName === '') {
             alert('select a branch')
+            setLoading(false);
             return
         }
-        if ( month === ''  ) {
-            alert('select a  month')
-            return
-        }
+        // if ( month === ''  ) {
+        //     alert('select a  month')
+        //     setLoading(false);
+        //     return
+        // }
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_list_search`, {
             searchQuery, itemName, employee, month, fromDate, toDate
         })
@@ -369,7 +371,7 @@ const AttendanceLists = () => {
         return formattedWords?.join(' ');
     };
 
-    
+
     const attendance_excel_download = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_list_search`, {
@@ -562,53 +564,65 @@ const AttendanceLists = () => {
 
 
 
-      const getDayName = dateString => {
+    const getDayName = dateString => {
         // Create a Date object from the date string
         const date = new Date(dateString);
-      
+
         // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
         const dayIndex = date.getUTCDay(); // Use getUTCDay() for UTC date
-      
+
         // Array of day names
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-      
+
         // Return the name of the day
         return dayNames[dayIndex];
-      };
+    };
 
 
-      const formatTo12Hour = dateString => {
+    const formatTo12Hour = dateString => {
         // Create a Date object from the date string
         const date = new Date(dateString);
-      
+
         // Get hours and minutes
         let hours = date.getUTCHours();
         const minutes = date.getUTCMinutes();
-      
+
         // Determine AM/PM
         const amPm = hours >= 12 ? 'PM' : 'AM';
-      
+
         // Convert hours from 24-hour format to 12-hour format
         hours = hours % 12;
         hours = hours ? hours : 12; // Hour '0' should be '12'
-      
+
         // Format minutes with leading zero if needed
         const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-      
+
         // Return formatted time
         return `${hours}:${formattedMinutes} ${amPm}`;
-      };
+    };
 
-      const [message, setMessage] = useState();
-      useEffect(() => {
-          if (typeof window !== 'undefined') {
-  
-              if (sessionStorage.getItem("message")) {
-                  setMessage(sessionStorage.getItem("message"));
-                  sessionStorage.removeItem("message");
-              }
-          }
-      }, [])
+    const [message, setMessage] = useState();
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+
+            if (sessionStorage.getItem("message")) {
+                setMessage(sessionStorage.getItem("message"));
+                sessionStorage.removeItem("message");
+            }
+        }
+    }, [])
+
+
+    //       const createdDate = "2024-09-05T16:44:22.000Z";
+    // const date = new Date(createdDate);
+    // const monthNames = date.toLocaleString('en-US', { month: 'long' });
+
+    // console.log(monthNames); // Output: "September"
+
+    const getMonthNames = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', { month: 'long' });
+    }
 
     return (
         <div className="container-fluid">
@@ -734,56 +748,56 @@ handleDateChanges
 
                                             <div class="form-group row student">
 
-<label class="col-form-label font-weight-bold col-md-2">Print Properties:</label>
-<div class="col-md-10">
-    <div class="input-group ">
-        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
-            <option value="legal">legal </option>
-            <option value="A4">A4 </option>
-            <option value="A3">A3 </option>
-            <option value="">Browser </option>
-        </select>
-        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
+                                                <label class="col-form-label font-weight-bold col-md-2">Print/PDF Properties:</label>
+                                                <div class="col-md-10">
+                                                    <div class="input-group ">
+                                                        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
+                                                            <option value="legal">legal </option>
+                                                            <option value="A4">A4 </option>
+                                                            <option value="A3">A3 </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
 
-            <option value="landscape">Landscape</option>
-            <option value="portrait">Portrait</option>
-            <option value="">Browser </option>
-        </select>
-        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
-            <option value="font-12">Font Standard</option>
-            <option value="font-10">Font Small</option>
+                                                            <option value="landscape">Landscape</option>
+                                                            <option value="portrait">Portrait</option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
+                                                            <option value="font-12">Font Standard</option>
+                                                            <option value="font-10">Font Small</option>
 
-        </select>
-        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
-            <option value="120%">Browser Zoom</option>
-            <option value="5%">5% Zoom</option>
-            <option value="10%">10% Zoom</option>
-            <option value="15%">15% Zoom</option>
-            <option value="20%">20% Zoom</option>
-            <option value="25%">25% Zoom</option>
-            <option value="30%">30% Zoom</option>
-            <option value="35%">35% Zoom</option>
-            <option value="40%">40% Zoom</option>
-            <option value="45%">45% Zoom</option>
-            <option value="50%">50% Zoom</option>
-            <option value="55%">55% Zoom</option>
-            <option value="60%">60% Zoom</option>
-            <option value="65%">65% Zoom</option>
-            <option value="70%">70% Zoom</option>
-            <option value="75%">75% Zoom</option>
-            <option value="80%">80% Zoom</option>
-            <option value="85%">85% Zoom</option>
-            <option value="90%">90% Zoom</option>
-            <option value="95%">95% Zoom</option>
-            <option value="100%" selected="">100% Zoom</option>
+                                                        </select>
+                                                        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
+                                                            <option value="120%">Browser Zoom</option>
+                                                            <option value="5%">5% Zoom</option>
+                                                            <option value="10%">10% Zoom</option>
+                                                            <option value="15%">15% Zoom</option>
+                                                            <option value="20%">20% Zoom</option>
+                                                            <option value="25%">25% Zoom</option>
+                                                            <option value="30%">30% Zoom</option>
+                                                            <option value="35%">35% Zoom</option>
+                                                            <option value="40%">40% Zoom</option>
+                                                            <option value="45%">45% Zoom</option>
+                                                            <option value="50%">50% Zoom</option>
+                                                            <option value="55%">55% Zoom</option>
+                                                            <option value="60%">60% Zoom</option>
+                                                            <option value="65%">65% Zoom</option>
+                                                            <option value="70%">70% Zoom</option>
+                                                            <option value="75%">75% Zoom</option>
+                                                            <option value="80%">80% Zoom</option>
+                                                            <option value="85%">85% Zoom</option>
+                                                            <option value="90%">90% Zoom</option>
+                                                            <option value="95%">95% Zoom</option>
+                                                            <option value="100%" selected="">100% Zoom</option>
 
-        </select>
-    </div>
+                                                        </select>
+                                                    </div>
 
-</div>
+                                                </div>
 
 
-</div>
+                                            </div>
                                             <div className="form-group row">
                                                 <div className="offset-md-2 col-md-10 float-left">
                                                     <input
@@ -791,18 +805,18 @@ handleDateChanges
                                                         type="button" name="search" className="btn btn-sm btn-info search_btn mr-2" value="Search" />
                                                     <input
                                                         onClick={attendance_word_download}
-                                                        type="button"  name="search"
+                                                        type="button" name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Doc" />
                                                     <input
-                                                    type='button'
+                                                        type='button'
                                                         onClick={attendance_excel_download}
                                                         name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Excel" />
                                                     <input
                                                         onClick={attendance_pdf_download}
-                                                        type="button" name="search"  class="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
+                                                        type="button" name="search" class="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
                                                     <input
                                                         onClick={attendance_print_download}
                                                         type="button" name="search" class="btn btn-sm btn-success print_btn mr-2" value="Print" />
@@ -841,7 +855,11 @@ handleDateChanges
                                                             <th>Name</th>
                                                             <th>Photo</th>
                                                             <th>Designation</th>
-                                                            <th>Month</th>
+                                                            {
+                                                                month ?
+                                                                    <th>Month</th>
+                                                                    : ''
+                                                            }
                                                             <th>Date</th>
                                                             <th>Day</th>
                                                             <th>Entry Time</th>
@@ -853,23 +871,31 @@ handleDateChanges
                                                             <tr key={i}>
                                                                 <td>{attendances.unique_id}</td>
                                                                 <td>{attendances.full_name}</td>
+                                                                {/* <td>{searchResults.length}</td> */}
                                                                 <td>
                                                                     <img src={`${process.env.NEXT_PUBLIC_API_URL}:5003/${attendances.photo}`} alt="No image found" className="img-fluid" />
                                                                 </td>
                                                                 <td>{attendances.designation_name}</td>
-                                                                <td>{monthName ? monthName : ''}</td>
+                                                                {/* {
+                                                                month ?  <td>{monthName ? monthName : ''}</td>
+                                                                : ''
+                                                               } */}
+                                                                {
+                                                                    getMonthNames(attendances.created_date)
+                                                                }
                                                                 <td>
                                                                     {/* {showFromDate && showToDate ?
                                                                         `${showFromDate} to ${showToDate}` :
                                                                         ''
                                                                     } */}
                                                                     {
-                                                                        attendances.attendance_date.slice(0,10)
+                                                                        attendances?.check_date?.slice(0, 10)
                                                                     }
+
                                                                 </td>
                                                                 <td>
-                                                                {
-                                                                       getDayName( attendances.attendance_date)
+                                                                    {
+                                                                        getDayName(attendances.check_date)
                                                                     }
                                                                 </td>
                                                                 <td>{formatTo12Hour(attendances.entry_checktime)}</td>

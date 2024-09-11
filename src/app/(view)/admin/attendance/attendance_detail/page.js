@@ -96,6 +96,7 @@ const AttendanceDetail = () => {
 
         const filteredEmployees = employees.filter(employee => employee.branch_id === parseFloat(branchId));
         setFilteredEmployees(filteredEmployees);
+        setSearchResults([])
     };
 
     const [error, setError] = useState([]);
@@ -105,14 +106,17 @@ const AttendanceDetail = () => {
         setLoading(true);
         if (itemName === '') {
             alert('select a branch')
+            setLoading(false);
             return
         }
         if (searchQuery === '') {
             alert('select a Year')
+            setLoading(false);
             return
         }
         if (month === '') {
             alert('select a months')
+            setLoading(false);
             return
         }
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
@@ -234,7 +238,7 @@ const AttendanceDetail = () => {
         });
         return acc;
     }, {});
-
+    console.log(leaveMap)
 
     const attendanceLookup = attendances.reduce((acc, item) => {
         const date = item.first_checkin.slice(0, 10); // Format YYYY-MM-DD
@@ -257,7 +261,7 @@ const AttendanceDetail = () => {
     });
 
     const absentLookup = absents.reduce((acc, item) => {
-        const date = item.checktime.slice(0, 10); // Format YYYY-MM-DD
+        const date = item.absent_date.slice(0, 10); // Format YYYY-MM-DD
         const key = `${item.user_id}-${date}`;
         acc[key] = true; // Mark presence
         return acc;
@@ -265,6 +269,388 @@ const AttendanceDetail = () => {
 
     console.log(absentLookup)
 
+    const attendance_details_excel_download = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
+                itemName,
+            });
+            const searchResults = response.data;
+
+            // Define the columns including dynamic day columns
+            const columns = [
+                'Employee ID',
+                'Name',
+                'Designation',
+                ...daysInMonth.map(date => date.slice(8, 10)), // Dynamic day columns
+                'Total Present',
+                'Total Absent',
+                'Total Holiday',
+                'Total Leave'
+            ];
+
+            // Filter the data
+            const filteredColumns = searchResults.map((attendances) => {
+                let presentCount = 0;
+                let absentCount = 0;
+                let holidayCount = 0;
+                let leaveCount = 0;
+
+                const filteredData = {
+                    'Employee ID': attendances.unique_id,
+                    'Name': attendances.full_name,
+                    'Designation': attendances.designation_name,
+                };
+
+                daysInMonth.forEach(date => {
+                    const day = date.slice(0, 10); // Extract date in YYYY-MM-DD format
+                    const isHoliday = filteredAttendances.some(holiday => {
+                        const holidayDate = new Date(holiday.start_date);
+                        return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
+                    });
+                    const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+
+                    const presentKey = `${attendances.user_id}-${day}`;
+                    const isPresent = attendanceLookup[presentKey];
+
+                    const absentKey = `${attendances.user_id}-${day}`;
+                    const isAbsent = absentLookup[absentKey];
+
+                    let cellContent = '';
+
+                    if (isPresent) {
+                        cellContent = 'P';
+                        presentCount++;
+                    } else if (isAbsent) {
+                        cellContent = 'A';
+                        absentCount++;
+                    } else if (hasLeave) {
+                        cellContent = 'L';
+                        leaveCount++;
+                    } else if (isHoliday) {
+                        cellContent = 'H';
+                        holidayCount++;
+                    }
+
+                    filteredData[date.slice(8, 10)] = cellContent;
+                });
+
+                filteredData['Total Present'] = presentCount;
+                filteredData['Total Absent'] = absentCount;
+                filteredData['Total Holiday'] = holidayCount;
+                filteredData['Total Leave'] = leaveCount;
+
+                return filteredData;
+            });
+
+            // Create worksheet with filtered data
+            const worksheet = XLSX.utils.json_to_sheet(filteredColumns);
+
+            // Make the header cells bold
+            const headerCells = Object.keys(worksheet).filter(cell => cell.match(/^[A-Z]+1$/));
+            headerCells.forEach(cell => {
+                worksheet[cell].s = {
+                    font: {
+                        bold: true,
+                        sz: 14 // Larger font size for more emphasis
+                    }
+                };
+            });
+
+            // Calculate and set column widths
+            const columnWidths = columns.map(column => ({ wpx: Math.max(10, column.length * 8) }));
+            worksheet['!cols'] = columnWidths;
+
+            // Create workbook and write to file
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+            XLSX.writeFile(workbook, 'attendance_results.xlsx');
+        } catch (error) {
+            console.error("An error occurred during printing.", error);
+            setError("An error occurred during printing.", error);
+        }
+    };
+
+
+    const attendance_details_word_download = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
+                itemName
+            });
+            const searchResults = response.data;
+
+            // Define columns
+            const columns = ['Employee ID', 'Name', 'Designation', ...daysInMonth.map(date => date.slice(8, 10)), 'Present', 'Absent', 'Holiday', 'Leave'];
+
+            // Create header row with bold text
+            const headerRow = new TableRow({
+                children: columns.map(column => new TableCell({
+                    children: [new Paragraph({
+                        text: column,
+                        bold: true,
+                        size: 32,
+                        color: '000000'
+                    })],
+                    borders: {},
+                })),
+            });
+
+            // Create data rows
+            const dataRows = searchResults.map((attendances, i) => {
+                let presentCount = 0;
+                let absentCount = 0;
+                let holidayCount = 0;
+                let leaveCount = 0;
+
+                const dataCells = [
+                    new TableCell({ children: [new Paragraph({ text: `${attendances.unique_id}` })], borders: {} }),
+                    new TableCell({ children: [new Paragraph({ text: attendances.full_name })], borders: {} }),
+                    new TableCell({ children: [new Paragraph({ text: attendances.designation_name })], borders: {} }),
+                    ...daysInMonth.map(date => {
+                        const day = date.slice(0, 10);
+                        const isHoliday = filteredAttendances.some(holiday => {
+                            const holidayDate = new Date(holiday.start_date);
+                            return holidayDate.getDate() === parseInt(date.slice(8, 10), 10);
+                        });
+                        const hasLeave = leaveMap[attendances.user_id] && leaveMap[attendances.user_id].has(day);
+                        const presentKey = `${attendances.user_id}-${day}`;
+                        const isPresent = attendanceLookup[presentKey];
+                        const absentKey = `${attendances.user_id}-${day}`;
+                        const isAbsent = absentLookup[absentKey];
+
+                        let cellContent = '';
+                        let textColor = '';
+
+                        if (isPresent) {
+                            cellContent = 'P';
+                            presentCount++;
+                        } else if (isAbsent) {
+                            cellContent = 'A';
+                            textColor = 'FF0000'; // Red for Absent
+                            absentCount++;
+                        } else if (hasLeave) {
+                            cellContent = 'L';
+                            textColor = '00FF00'; // Green for Leave
+                            leaveCount++;
+                        } else if (isHoliday) {
+                            cellContent = 'H';
+                            textColor = '0000FF'; // Blue for Holiday
+                            holidayCount++;
+                        }
+
+                        return new TableCell({
+                            children: [new Paragraph({ text: cellContent, color: textColor })],
+                            borders: {},
+                        });
+                    }),
+                    new TableCell({ children: [new Paragraph({ text: `${presentCount}` })], borders: {} }),
+                    new TableCell({ children: [new Paragraph({ text: `${absentCount}` })], borders: {} }),
+                    new TableCell({ children: [new Paragraph({ text: `${holidayCount}` })], borders: {} }),
+                    new TableCell({ children: [new Paragraph({ text: `${leaveCount}` })], borders: {} }),
+                ];
+
+                return new TableRow({ children: dataCells });
+            });
+
+            // Create table
+            const table = new Table({
+                rows: [headerRow, ...dataRows],
+                width: {
+                    size: 100,
+                    type: WidthType.PERCENTAGE,
+                },
+                columnWidths: columns.map(() => 100 / columns.length),
+            });
+
+            // Create the document
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new Paragraph({
+                            children: [new TextRun("Attendance Summary")],
+                            alignment: 'center',
+                        }),
+                        table,
+                    ],
+                }],
+            });
+
+            // Generate and download the Word document
+            const buffer = await Packer.toBuffer(doc);
+            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'attendance_summary.docx';
+            link.click();
+        } catch (error) {
+            console.error("An error occurred during printing.", error);
+            setError("An error occurred during printing.", error);
+        }
+    };
+
+
+    const attendance_details_print_download = async () => {
+        try {
+            // const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_remarks_list_visit/${id}`);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
+                itemName
+            });
+
+            const searchResults = response.data
+                ;
+
+            console.log(searchResults);
+
+
+            const selectedLayout = document.getElementById('print_layout').value;
+            const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+
+            const selectedPrintSize = document.getElementById('print_size').value;
+            const selectedZoom = document.querySelector('.zoom_size').value;
+
+            // Convert zoom value to a numeric multiplier
+            let zoomMultiplier = 100; // Default zoom multiplier
+            if (selectedZoom !== '') {
+                zoomMultiplier = parseFloat(selectedZoom) / 100;
+            }
+            // Set the page dimensions based on the selected print size
+            let pageWidth, pageHeight;
+            switch (selectedPrintSize) {
+                case 'A4':
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+                case 'A3':
+                    pageWidth = 297 * zoomMultiplier;
+                    pageHeight = 420 * zoomMultiplier;
+                    break;
+                case 'legal':
+                    pageWidth = 216 * zoomMultiplier; // Width for Legal size
+                    pageHeight = 356 * zoomMultiplier; // Height for Legal size
+                    break;
+                default:
+                    // Default to A4 size
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+            }
+
+
+
+            // Get the selected font size value
+            const selectedFontSize = document.querySelector('.font_size').value;
+
+            // Get the numeric part of the selected font size value
+            const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+
+            // Get the value of the extra column input field
+            const extraColumnValue = parseInt(document.getElementById('extra_column').value);
+
+
+            console.log(searchResults);
+
+            console.log(leaveMap)
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.open();
+
+            const html = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_details_print`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    daysInMonth, searchResults, filteredAttendances, orientation, selectedPrintSize, fontSize, extraColumnValue, leaveMap, absentLookup, attendanceLookup, leaveAllApproved
+                }),
+            });
+
+            const htmlText = await html.text();
+
+            printWindow.document.write(htmlText);
+            printWindow.document.close(); // Ensure the document is completely loaded before printing
+            printWindow.focus();
+        } catch (error) {
+            console.error('Error generating print view:', error.message);
+        }
+    };
+
+    const attendance_details_pdf_download = async () => {
+        try {
+            // Fetch search results
+            const searchResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
+                itemName
+            });
+    
+            const searchResults = searchResponse.data;
+            const selectedLayout = document.getElementById('print_layout').value;
+            const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+    
+            const selectedPrintSize = document.getElementById('print_size').value;
+            const selectedZoom = document.querySelector('.zoom_size').value;
+    
+            // Convert zoom value to a numeric multiplier
+            let zoomMultiplier = 100; // Default zoom multiplier
+            if (selectedZoom !== '') {
+                zoomMultiplier = parseFloat(selectedZoom) / 100;
+            }
+    
+            // Set the page dimensions based on the selected print size
+            let pageWidth, pageHeight;
+            switch (selectedPrintSize) {
+                case 'A4':
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+                case 'A3':
+                    pageWidth = 297 * zoomMultiplier;
+                    pageHeight = 420 * zoomMultiplier;
+                    break;
+                case 'legal':
+                    pageWidth = 216 * zoomMultiplier; // Width for Legal size
+                    pageHeight = 356 * zoomMultiplier; // Height for Legal size
+                    break;
+                default:
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+            }
+    
+            const selectedFontSize = document.querySelector('.font_size').value;
+            const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+    
+            console.log(searchResults);
+    
+            // Fetch PDF
+            const pdfResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_details_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    daysInMonth, searchResults, filteredAttendances, orientation, selectedPrintSize, fontSize, leaveMap, absentLookup, attendanceLookup, leaveAllApproved
+                }),
+            });
+    
+            if (!pdfResponse.ok) {
+                throw new Error(`Error generating PDF: ${pdfResponse.statusText}`);
+            }
+    
+            // Download the PDF
+            const blob = await pdfResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'period_pdf.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error('Error occurred:', error);
+        } finally {
+            // setLoading(false); // Uncomment if you have a loading state to reset
+        }
+    };
+    
 
     return (
         <div className="container-fluid">
@@ -298,7 +684,11 @@ const AttendanceDetail = () => {
                                                     <select
                                                         required
                                                         value={searchQuery}
-                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                        // onChange={(e) => setSearchQuery(e.target.value)}
+                                                        onChange={(e) => {
+                                                            setSearchQuery(e.target.value);
+                                                            setSearchResults([]); // Clear search results when year changes
+                                                        }}
                                                         name="year"
                                                         className="form-control form-control-sm mb-2"
                                                         id="year"
@@ -313,7 +703,14 @@ const AttendanceDetail = () => {
                                             <div className="form-group row student">
                                                 <label className="col-form-label col-md-2 font-weight-bold">Month:</label>
                                                 <div className="col-md-4">
-                                                    <select required="" value={month} onChange={(e) => setMonth(e.target.value)} name="month" className="form-control form-control-sm mb-2" id="month">
+                                                    <select required="" value={month}
+                                                        // onChange={(e) => setMonth(e.target.value)} 
+                                                        onChange={(e) => {
+                                                            setMonth(e.target.value)
+                                                            setSearchResults([]); // Clear search results when year changes
+                                                        }}
+
+                                                        name="month" className="form-control form-control-sm mb-2" id="month">
                                                         <option value=''>Select Month</option>
                                                         {months.map((month) => (
                                                             <option key={month.value} value={month.value}>{month.label}</option>
@@ -321,23 +718,97 @@ const AttendanceDetail = () => {
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label col-md-2"><strong>Extra Column:</strong></label>
+                                                <div className="col-md-10">
+                                                    <select name="extra_column" className="form-control form-control-sm alpha_space extra_column" id="extra_column" placeholder="Extra Column">
+                                                        {(() => {
+                                                            const options = [];
+                                                            for (let i = 0; i <= 100; i++) {
+                                                                options.push(<option key={i} value={i}>{i}</option>);
+                                                            }
+                                                            return options;
+                                                        })()}
+                                                    </select>
+                                                </div>
+
+
+                                            </div>
+
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label font-weight-bold col-md-2">Print/PDF Properties:</label>
+                                                <div class="col-md-10">
+                                                    <div class="input-group ">
+                                                        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
+                                                            <option value="legal">legal </option>
+                                                            <option value="A4">A4 </option>
+                                                            <option value="A3">A3 </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
+
+                                                            <option value="landscape">Landscape</option>
+                                                            <option value="portrait">Portrait</option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
+                                                            <option value="font-12">Font Standard</option>
+                                                            <option value="font-10">Font Small</option>
+
+                                                        </select>
+                                                        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
+                                                            <option value="120%">Browser Zoom</option>
+                                                            <option value="5%">5% Zoom</option>
+                                                            <option value="10%">10% Zoom</option>
+                                                            <option value="15%">15% Zoom</option>
+                                                            <option value="20%">20% Zoom</option>
+                                                            <option value="25%">25% Zoom</option>
+                                                            <option value="30%">30% Zoom</option>
+                                                            <option value="35%">35% Zoom</option>
+                                                            <option value="40%">40% Zoom</option>
+                                                            <option value="45%">45% Zoom</option>
+                                                            <option value="50%">50% Zoom</option>
+                                                            <option value="55%">55% Zoom</option>
+                                                            <option value="60%">60% Zoom</option>
+                                                            <option value="65%">65% Zoom</option>
+                                                            <option value="70%">70% Zoom</option>
+                                                            <option value="75%">75% Zoom</option>
+                                                            <option value="80%">80% Zoom</option>
+                                                            <option value="85%">85% Zoom</option>
+                                                            <option value="90%">90% Zoom</option>
+                                                            <option value="95%">95% Zoom</option>
+                                                            <option value="100%" selected="">100% Zoom</option>
+
+                                                        </select>
+                                                    </div>
+
+                                                </div>
+
+
+                                            </div>
 
                                             <div className="form-group row">
                                                 <div className="offset-md-2 col-md-10 float-left">
                                                     <input
                                                         type="button" name="search" className="btn btn-sm btn-info search_btn mr-2" value="Search" onClick={news_search} />
                                                     <input
+                                                        onClick={attendance_details_word_download}
                                                         type="button" name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Doc" />
                                                     <input
+                                                        onClick={attendance_details_excel_download}
                                                         type='button'
                                                         name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Excel" />
                                                     <input
+                                                        onClick={attendance_details_pdf_download}
                                                         type="button" name="search" className="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
                                                     <input
+                                                        onClick={attendance_details_print_download}
                                                         type="button" name="search" className="btn btn-sm btn-success print_btn mr-2" value="Print" />
                                                 </div>
                                             </div>
@@ -373,7 +844,7 @@ const AttendanceDetail = () => {
                                                             <th>Employee ID</th>
                                                             <th>Name</th>
                                                             <th>Designation</th>
-                                                            
+
                                                             {daysInMonth.map((date) => (
                                                                 <th key={date} value={date}>{date.slice(8, 10)}</th>
                                                             ))}
@@ -453,7 +924,9 @@ const AttendanceDetail = () => {
                                 </div>
                             </div>
                         ) : (
-                            <></>
+                            <>
+
+                            </>
                         )
                     )}
                 </div>

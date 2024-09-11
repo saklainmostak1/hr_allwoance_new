@@ -78,14 +78,17 @@ const AttendanceSummarys = () => {
         setLoading(true);
         if (itemName === '') {
             alert('select a branch')
+            setLoading(false);
             return
         }
         if (searchQuery === '') {
             alert('select a Year')
+            setLoading(false);
             return
         }
         if (selectedMonths.length === 0) {
             alert('select a months')
+            setLoading(false);
             return
         }
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
@@ -385,9 +388,6 @@ const AttendanceSummarys = () => {
         }
     };
 
-
-
-
     const attendance_summary_word_download = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_summary_search`, {
@@ -635,7 +635,7 @@ const AttendanceSummarys = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    searchResults, transformedDatas, sumOfTotalDays, filteredAttendances, matchLength, result, orientation, selectedPrintSize, fontSize
+                    searchResults, transformedDatas, sumOfTotalDays, filteredAttendances, matchLength, result, orientation, selectedPrintSize, fontSize, data
                 }),
 
                 // If you need to send any data with the request, you can include it here
@@ -752,7 +752,11 @@ const AttendanceSummarys = () => {
                                                     <select
                                                         required
                                                         value={searchQuery}
-                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                        // onChange={(e) => setSearchQuery(e.target.value)}
+                                                        onChange={(e) => {
+                                                            setSearchQuery(e.target.value);
+                                                            setSearchResults([]); // Clear search results when year changes
+                                                        }}
                                                         name="year"
                                                         className="form-control form-control-sm mb-2"
                                                         id="year"
@@ -772,7 +776,11 @@ const AttendanceSummarys = () => {
                                                         options={[
                                                             ...months
                                                         ]}
-                                                        onChange={handleChange}
+                                                        // onChange={handleChange}
+                                                        onChange={(e) => {
+                                                            handleChange(e);
+                                                            setSearchResults([]); // Clear search results when year changes
+                                                        }}
                                                     />
                                                 </div>
 
@@ -797,20 +805,20 @@ const AttendanceSummarys = () => {
 
                                             <div class="form-group row student">
 
-                                                <label class="col-form-label font-weight-bold col-md-2">Print Properties:</label>
+                                                <label class="col-form-label font-weight-bold col-md-2">Print/PDF Properties:</label>
                                                 <div class="col-md-10">
                                                     <div class="input-group ">
                                                         <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
                                                             <option value="legal">legal </option>
                                                             <option value="A4">A4 </option>
                                                             <option value="A3">A3 </option>
-                                                            <option value="">Browser </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
                                                         </select>
                                                         <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
 
                                                             <option value="landscape">Landscape</option>
                                                             <option value="portrait">Portrait</option>
-                                                            <option value="">Browser </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
                                                         </select>
                                                         <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
                                                             <option value="font-12">Font Standard</option>

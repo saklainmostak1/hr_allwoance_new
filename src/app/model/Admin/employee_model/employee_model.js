@@ -1534,6 +1534,141 @@ const EmployeeModel = {
             });
         }
     },
+    // original
+    // create_employee: async (req, res) => {
+    //     try {
+    //         const {
+    //             father_service, mother_service,
+    //             blood_group_id,
+    //             NID,
+    //             mother_name,
+    //             father_name,
+    //             full_name,
+    //             dob,
+    //             gender,
+    //             religion,
+    //             mobile,
+    //             email,
+    //             password,
+    //             experience,
+    //             education,
+    //             institute,
+    //             result,
+    //             unique_id,
+    //             same_as,
+    //             passing_year,
+    //             division_id_living,
+    //             district_id_living,
+    //             upazila_id_living,
+    //             address_id_living,
+    //             division_id_permanent,
+    //             district_id_permanent,
+    //             upazila_id_permanent,
+    //             address_id_permanent,
+    //             join_date,
+    //             payroll_id,
+    //             school_shift_id,
+    //             signature_image,
+    //             photo,
+    //             created_by,
+    //             designation_id,
+    //             branch_id,
+    //             father_mobile, mother_mobile
+    //         } = req.body;
+
+    //         const educationalQualifications = req.body.fields; // Assuming this is an array of qualifications
+
+    //         const hashedPassword = crypto.createHash('sha1').update(password).digest('hex');
+
+    //         // Assuming you have a connection object already defined
+    //         connection.beginTransaction();
+
+    //         const userQuery = `INSERT INTO users (full_name,NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
+    //                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    //         const userParams = [full_name, NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
+
+    //         connection.query(userQuery, userParams, async (err, results) => {
+    //             if (err) {
+    //                 console.error(err);
+    //                 await connection.rollback();
+    //                 res.status(500).json({ message: 'User creation failed' });
+    //                 return;
+    //             }
+
+    //             try {
+    //                 const user_id = results.insertId;
+    //                 const employeInfoQuery = `INSERT INTO employe_info (experience, user_id) VALUES (?, ?)`;
+    //                 const employeInfoParams = [experience, user_id];
+
+    //                 const livingAddressQuery = `INSERT INTO living_address (division_id, same_as, district_id, upazila_id, address, user_id, created_by) 
+    //                                             VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    //                 const livingAddressParams = [division_id_living, same_as, district_id_living, upazila_id_living, address_id_living, user_id, created_by];
+
+    //                 const permanentAddressQuery = `INSERT INTO parmanent_address (division_id, district_id, upazila_id, address, user_id, created_by) 
+    //                                                 VALUES (?, ?, ?, ?, ?, ?)`;
+    //                 const permanentAddressParams = [division_id_permanent, district_id_permanent, upazila_id_permanent, address_id_permanent, user_id, created_by];
+
+    //                 const employeJoiningQuery = `INSERT INTO employe_joining (user_id, join_date, payroll_id, school_shift_id, branch_id, created_by, designation_id) 
+    //                                             VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    //                 const employeJoiningParams = [user_id, join_date, payroll_id, school_shift_id, branch_id, created_by, designation_id];
+
+    //                 const employEuserParentQuery = `INSERT INTO user_parent (user_id, father_name, mother_name, father_service, mother_service) 
+    //                                             VALUES (?, ?, ?, ?, ?)`;
+    //                 const employeParentParams = [user_id, father_name, mother_name, father_service, mother_service];
+
+    //                 const employEuserParentContactQueryF = `INSERT INTO parent_contact (user_id, father_phone, mother_phone) 
+    //                                             VALUES (?, ?, ?)`;
+    //                 const employeParentContactParamsF = [user_id, father_mobile, mother_mobile];
+
+
+    //                 // Insert into employe_info table
+    //                 await connection.query(employeInfoQuery, employeInfoParams);
+    //                 // Insert into living_address table
+    //                 await connection.query(livingAddressQuery, livingAddressParams);
+    //                 // Insert into parmanent_address table
+    //                 await connection.query(permanentAddressQuery, permanentAddressParams);
+    //                 // Insert into employe_joining table
+    //                 await connection.query(employeJoiningQuery, employeJoiningParams);
+
+    //                 await connection.query(employEuserParentQuery, employeParentParams);
+
+    //                 await connection.query(employEuserParentContactQueryF, employeParentContactParamsF);
+
+
+    //                 // Insert into educational_qualification table
+    //                 for (const qualification of educationalQualifications) {
+    //                     const { education, institute, result, passing_year } = qualification;
+    //                     const eduQualificationQuery = `INSERT INTO educational_qualification (education, institute, result, passing_year, user_id) 
+    //                                                     VALUES (?, ?, ?, ?, ?)`;
+    //                     const eduQualificationParams = [education, institute, result, passing_year, user_id];
+    //                     await connection.query(eduQualificationQuery, eduQualificationParams);
+    //                 }
+
+    //                 // New addition: Insert into employee_promotion table
+    //                 const promotionQuery = `INSERT INTO employee_promotion (user_id, join_date, payroll_id, created_by, designation_id, school_shift_id, promotion_id, promotion_month, branch_id) 
+    //                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    //                 const promotionParams = [user_id, join_date, payroll_id, created_by, designation_id, school_shift_id, designation_id, join_date, branch_id];
+
+    //                 await connection.query(promotionQuery, promotionParams);
+
+    //                 await connection.commit();
+
+    //                 res.status(200).json({ message: 'User created successfully' });
+    //             } catch (error) {
+    //                 console.error("Error inserting additional data:", error);
+    //                 await connection.rollback();
+    //                 res.status(500).json({ message: "Error inserting additional data." });
+    //             }
+    //         });
+
+    //     } catch (error) {
+    //         console.error("Error inserting data:", error);
+    //         await connection.rollback();
+    //         res.status(500).json({ message: "Error inserting data." });
+    //     }
+    // },
+
+    //  original end
 
     create_employee: async (req, res) => {
         try {
@@ -1573,9 +1708,21 @@ const EmployeeModel = {
                 created_by,
                 designation_id,
                 branch_id,
-                father_mobile, mother_mobile
+                father_mobile,
+                mother_mobile,
+                name,
+                sms_campaign_category_id,
+                formattedDisplayDate,
+                employeeAttendanceSmsTemplate,
+                sendSmsChecked
+
             } = req.body;
 
+            const formatDate = (dateString) => {
+                return dateString.split('-').join('/');
+            };
+            let campaignResult; // Initialize campaignResult here
+            let eduQualificationResult; // Initialize eduQualificationResult here
             const educationalQualifications = req.body.fields; // Assuming this is an array of qualifications
 
             const hashedPassword = crypto.createHash('sha1').update(password).digest('hex');
@@ -1584,7 +1731,7 @@ const EmployeeModel = {
             connection.beginTransaction();
 
             const userQuery = `INSERT INTO users (full_name,NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, password, signature_image, photo, mother_name, father_name, created_by) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
             const userParams = [full_name, NID, blood_group_id, unique_id, dob, gender, religion, mobile, email, hashedPassword, signature_image, photo, mother_name, father_name, created_by];
 
             connection.query(userQuery, userParams, async (err, results) => {
@@ -1601,23 +1748,23 @@ const EmployeeModel = {
                     const employeInfoParams = [experience, user_id];
 
                     const livingAddressQuery = `INSERT INTO living_address (division_id, same_as, district_id, upazila_id, address, user_id, created_by) 
-                                                VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                                            VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     const livingAddressParams = [division_id_living, same_as, district_id_living, upazila_id_living, address_id_living, user_id, created_by];
 
                     const permanentAddressQuery = `INSERT INTO parmanent_address (division_id, district_id, upazila_id, address, user_id, created_by) 
-                                                    VALUES (?, ?, ?, ?, ?, ?)`;
+                                                VALUES (?, ?, ?, ?, ?, ?)`;
                     const permanentAddressParams = [division_id_permanent, district_id_permanent, upazila_id_permanent, address_id_permanent, user_id, created_by];
 
                     const employeJoiningQuery = `INSERT INTO employe_joining (user_id, join_date, payroll_id, school_shift_id, branch_id, created_by, designation_id) 
-                                                VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                                            VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     const employeJoiningParams = [user_id, join_date, payroll_id, school_shift_id, branch_id, created_by, designation_id];
 
                     const employEuserParentQuery = `INSERT INTO user_parent (user_id, father_name, mother_name, father_service, mother_service) 
-                                                VALUES (?, ?, ?, ?, ?)`;
+                                            VALUES (?, ?, ?, ?, ?)`;
                     const employeParentParams = [user_id, father_name, mother_name, father_service, mother_service];
 
                     const employEuserParentContactQueryF = `INSERT INTO parent_contact (user_id, father_phone, mother_phone) 
-                                                VALUES (?, ?, ?)`;
+                                            VALUES (?, ?, ?)`;
                     const employeParentContactParamsF = [user_id, father_mobile, mother_mobile];
 
 
@@ -1639,19 +1786,86 @@ const EmployeeModel = {
                     for (const qualification of educationalQualifications) {
                         const { education, institute, result, passing_year } = qualification;
                         const eduQualificationQuery = `INSERT INTO educational_qualification (education, institute, result, passing_year, user_id) 
-                                                        VALUES (?, ?, ?, ?, ?)`;
+                                                    VALUES (?, ?, ?, ?, ?)`;
                         const eduQualificationParams = [education, institute, result, passing_year, user_id];
                         await connection.query(eduQualificationQuery, eduQualificationParams);
                     }
 
                     // New addition: Insert into employee_promotion table
                     const promotionQuery = `INSERT INTO employee_promotion (user_id, join_date, payroll_id, created_by, designation_id, school_shift_id, promotion_id, promotion_month, branch_id) 
-                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
                     const promotionParams = [user_id, join_date, payroll_id, created_by, designation_id, school_shift_id, designation_id, join_date, branch_id];
 
                     await connection.query(promotionQuery, promotionParams);
 
                     await connection.commit();
+
+                    if (sendSmsChecked === true) {
+
+                        const category = 'Enter Number';
+                        const total_number = 1;
+                        const one_time = 1;
+                        const status = 1; // Set status to 'pending'
+
+                        const campaignQuery = `INSERT INTO sms_campaign (name, category, created_by, total_number, one_time, status) VALUES (?, ?, ?, ?, ?, ?)`;
+                        const campaignParams = [name, category, created_by, total_number, one_time, status];
+
+                        campaignResult = await new Promise((resolve, reject) => {
+                            connection.query(campaignQuery, campaignParams, (error, result) => {
+                                if (error) {
+                                    return reject(error);
+                                }
+                                resolve(result);
+                            });
+                        });
+
+                        const campaign_id = campaignResult.insertId;
+
+
+                        const currentDate = new Date();
+                        const date = currentDate.toLocaleDateString();
+                        const smsTime = currentDate.toLocaleTimeString();
+
+                        // Replace placeholders with actual data
+                        let msg = employeeAttendanceSmsTemplate
+
+                            .replace('[[company_name]]', 'No Company')
+                            .replace('[[full_name]]', full_name)
+                            .replace('[[employee_id]]', unique_id)
+                            .replace('[[employee_designation]]', designation_id)
+                            .replace('[[payroll_name]]', payroll_id)
+                            .replace('[[payroll_total]]', '')
+                            .replace('[[joining_date]]', formatDate(formattedDisplayDate))
+                            .replace('[[sms_time]]', smsTime);
+
+                        // Insert into sms_campaign_log table
+                        const eduQualificationQuery = `INSERT INTO sms_campaign_log (campaign_id, sender_id, number, message, message_id, user_id, campaign_category) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                        const eduQualificationParams = [campaign_id, created_by, mobile, msg, "message_id", user_id, sms_campaign_category_id];
+
+                        eduQualificationResult = await new Promise((resolve, reject) => {
+                            connection.query(eduQualificationQuery, eduQualificationParams, (error, result) => {
+                                if (error) {
+                                    return reject(error);
+                                }
+                                resolve(result);
+                            });
+                        });
+
+                        const edu_qualification_id = eduQualificationResult.insertId;
+
+                        // Insert into attendance_sms table
+                        const attendanceSmsQuery = `INSERT INTO admission_sms (user_id, sms_campaign_log_id) VALUES (?, ?)`;
+                        const attendanceSmsParams = [user_id, edu_qualification_id];
+                        await new Promise((resolve, reject) => {
+                            connection.query(attendanceSmsQuery, attendanceSmsParams, (error) => {
+                                if (error) {
+                                    return reject(error);
+                                }
+                                resolve();
+                            });
+                        });
+                    }
+
 
                     res.status(200).json({ message: 'User created successfully' });
                 } catch (error) {

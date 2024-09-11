@@ -152,6 +152,7 @@ const AttendanceLogs = () => {
         setLoading(true);
         if (itemName === '') {
             alert('select a branch')
+            setLoading(false);
             return
         }
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_log_search`, {
@@ -351,7 +352,7 @@ const AttendanceLogs = () => {
         return formattedWords?.join(' ');
     };
 
-    
+
     const attendance_excel_download = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_log_search`, {
@@ -368,7 +369,7 @@ const AttendanceLogs = () => {
                 'Designation',
                 'Date',
                 'Time',
-                
+
             ];
 
             // Filter the data
@@ -379,9 +380,9 @@ const AttendanceLogs = () => {
                     'Name': category.full_name,
                     'Photo': category.photo ? `=${process.env.NEXT_PUBLIC_API_URL}:5003/${category.photo}` : '',
                     'Designation': category.designation_name,
-                    'Date': showFromDate  ? `${showFromDate}` : '',
+                    'Date': showFromDate ? `${showFromDate}` : '',
                     'Time': category.checktime,
-                  
+
                 };
                 return filteredData;
             });
@@ -417,7 +418,7 @@ const AttendanceLogs = () => {
                 itemName, searchQuery, employee, deviceName, fromDate
             });
             const searchResults = response.data.results;
-    
+
             // Define columns and headers
             const columns = [
                 'SL No.',
@@ -428,7 +429,7 @@ const AttendanceLogs = () => {
                 'Date',
                 'Time',
             ];
-    
+
             // Create header row
             const headerRow = new TableRow({
                 children: columns.map(column => new TableCell({
@@ -436,12 +437,12 @@ const AttendanceLogs = () => {
                     borders: {},
                 })),
             });
-    
+
             // Create data rows
             const dataRows = await Promise.all(searchResults.map(async (category, index) => {
                 // Debugging: Log the category object to check the data
                 console.log('Category:', category);
-    
+
                 // Fetch image data
                 const imageResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5003/${category.photo}`);
                 const imageData = await imageResponse.blob();
@@ -452,7 +453,7 @@ const AttendanceLogs = () => {
                         height: 100,
                     }
                 });
-    
+
                 return new TableRow({
                     children: [
                         new TableCell({
@@ -464,7 +465,7 @@ const AttendanceLogs = () => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.full_name  })],
+                            children: [new Paragraph({ text: category.full_name })],
                             borders: {},
                         }),
                         new TableCell({
@@ -472,7 +473,7 @@ const AttendanceLogs = () => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.designation_name  })],
+                            children: [new Paragraph({ text: category.designation_name })],
                             borders: {},
                         }),
                         new TableCell({
@@ -480,13 +481,13 @@ const AttendanceLogs = () => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.checktime  })],
+                            children: [new Paragraph({ text: category.checktime })],
                             borders: {},
                         }),
                     ],
                 });
             }));
-    
+
             const table = new Table({
                 rows: [headerRow, ...dataRows],
                 width: {
@@ -495,7 +496,7 @@ const AttendanceLogs = () => {
                 },
                 columnWidths: columns.map(() => 100 / columns.length),
             });
-    
+
             const doc = new Document({
                 sections: [{
                     properties: {},
@@ -510,7 +511,7 @@ const AttendanceLogs = () => {
                     ],
                 }],
             });
-    
+
             const buffer = await Packer.toBuffer(doc);
             const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
             const link = document.createElement('a');
@@ -522,7 +523,7 @@ const AttendanceLogs = () => {
             setError("An error occurred during printing.", error);
         }
     };
-    
+
 
     const buttonStyles = {
         color: '#fff',
@@ -533,20 +534,74 @@ const AttendanceLogs = () => {
 
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
-    
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-    
+
         let hours = date.getUTCHours();
         const minutes = String(date.getUTCMinutes()).padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
-    
+
         hours = hours % 12;
         hours = hours ? String(hours).padStart(2, '0') : '12'; // the hour '0' should be '12'
-    
+
         return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
     };
+    const [userId, setUserId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('userId') || '';
+        }
+        return '';
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
+        }
+    }, []);
+
+
+    const { data: moduleInfo = []
+    } = useQuery({
+        queryKey: ['moduleInfo'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/admin/module_info/module_info_all/${userId}`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
+    // console.log(moduleInfo.filter(moduleI => moduleI.controller_name === 'brand'))
+    const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'attendance')
+
+    //   console.log(filteredModuleInfo);
+
+
+
+    const filteredBtnIconDelete = brandList.filter(btn =>
+        btn.method_sort === 5
+    );
+
+    const attendance_delete = id => {
+
+        console.log(id)
+        const proceed = window.confirm(`Are You Sure delete${id}`)
+        if (proceed) {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_delete/${id}`, {
+                method: "POST",
+
+            })
+                .then(Response => Response.json())
+                .then(data => {
+                    news_search()
+                    console.log(data)
+                })
+        }
+    }
+   
 
     return (
         <div className="container-fluid">
@@ -594,13 +649,13 @@ const AttendanceLogs = () => {
                                                         ))}
                                                     </select>
                                                 </div>
-                                                <label className="col-form-label col-md-2 font-weight-bold">Device Id:</label>
+                                                <label className="col-form-label col-md-2 font-weight-bold">Device ID:</label>
                                                 <div className="col-md-4">
-                                             
-                                                    <input class="form-control form-control-sm  alpha_space item_name" placeholder='Your device id' type="text" value={deviceName}
+
+                                                    <input class="form-control form-control-sm  alpha_space item_name" placeholder='Your Device ID' type="text" value={deviceName}
                                                         onChange={(e) => setDeviceName(e.target.value)} />
-                                               
-                                                  
+
+
                                                 </div>
                                             </div>
                                             <div class="form-group row student">
@@ -631,56 +686,56 @@ const AttendanceLogs = () => {
                                             </div>
                                             <div class="form-group row student">
 
-<label class="col-form-label font-weight-bold col-md-2">Print Properties:</label>
-<div class="col-md-10">
-    <div class="input-group ">
-        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
-            <option value="legal">legal </option>
-            <option value="A4">A4 </option>
-            <option value="A3">A3 </option>
-            <option value="">Browser </option>
-        </select>
-        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
+                                                <label class="col-form-label font-weight-bold col-md-2">Print/PDF Properties:</label>
+                                                <div class="col-md-10">
+                                                    <div class="input-group ">
+                                                        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
+                                                            <option value="legal">legal </option>
+                                                            <option value="A4">A4 </option>
+                                                            <option value="A3">A3 </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
 
-            <option value="landscape">Landscape</option>
-            <option value="portrait">Portrait</option>
-            <option value="">Browser </option>
-        </select>
-        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
-            <option value="font-12">Font Standard</option>
-            <option value="font-10">Font Small</option>
+                                                            <option value="landscape">Landscape</option>
+                                                            <option value="portrait">Portrait</option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
+                                                            <option value="font-12">Font Standard</option>
+                                                            <option value="font-10">Font Small</option>
 
-        </select>
-        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
-            <option value="120%">Browser Zoom</option>
-            <option value="5%">5% Zoom</option>
-            <option value="10%">10% Zoom</option>
-            <option value="15%">15% Zoom</option>
-            <option value="20%">20% Zoom</option>
-            <option value="25%">25% Zoom</option>
-            <option value="30%">30% Zoom</option>
-            <option value="35%">35% Zoom</option>
-            <option value="40%">40% Zoom</option>
-            <option value="45%">45% Zoom</option>
-            <option value="50%">50% Zoom</option>
-            <option value="55%">55% Zoom</option>
-            <option value="60%">60% Zoom</option>
-            <option value="65%">65% Zoom</option>
-            <option value="70%">70% Zoom</option>
-            <option value="75%">75% Zoom</option>
-            <option value="80%">80% Zoom</option>
-            <option value="85%">85% Zoom</option>
-            <option value="90%">90% Zoom</option>
-            <option value="95%">95% Zoom</option>
-            <option value="100%" selected="">100% Zoom</option>
+                                                        </select>
+                                                        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
+                                                            <option value="120%">Browser Zoom</option>
+                                                            <option value="5%">5% Zoom</option>
+                                                            <option value="10%">10% Zoom</option>
+                                                            <option value="15%">15% Zoom</option>
+                                                            <option value="20%">20% Zoom</option>
+                                                            <option value="25%">25% Zoom</option>
+                                                            <option value="30%">30% Zoom</option>
+                                                            <option value="35%">35% Zoom</option>
+                                                            <option value="40%">40% Zoom</option>
+                                                            <option value="45%">45% Zoom</option>
+                                                            <option value="50%">50% Zoom</option>
+                                                            <option value="55%">55% Zoom</option>
+                                                            <option value="60%">60% Zoom</option>
+                                                            <option value="65%">65% Zoom</option>
+                                                            <option value="70%">70% Zoom</option>
+                                                            <option value="75%">75% Zoom</option>
+                                                            <option value="80%">80% Zoom</option>
+                                                            <option value="85%">85% Zoom</option>
+                                                            <option value="90%">90% Zoom</option>
+                                                            <option value="95%">95% Zoom</option>
+                                                            <option value="100%" selected="">100% Zoom</option>
 
-        </select>
-    </div>
+                                                        </select>
+                                                    </div>
 
-</div>
+                                                </div>
 
 
-</div>
+                                            </div>
                                             <div className="form-group row">
                                                 <div className="offset-md-2 col-md-10 float-left">
                                                     <input
@@ -688,18 +743,18 @@ const AttendanceLogs = () => {
                                                         type="button" name="search" className="btn btn-sm btn-info search_btn mr-2" value="Search" />
                                                     <input
                                                         onClick={attendance_word_download}
-                                                        type="button"  name="search"
+                                                        type="button" name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Doc" />
                                                     <input
-                                                    type='button'
+                                                        type='button'
                                                         onClick={attendance_excel_download}
                                                         name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download Excel" />
                                                     <input
                                                         onClick={attendance_pdf_download}
-                                                        type="button" name="search"  class="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
+                                                        type="button" name="search" class="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
                                                     <input
                                                         onClick={attendance_print_download}
                                                         type="button" name="search" class="btn btn-sm btn-success print_btn mr-2" value="Print" />
@@ -740,7 +795,8 @@ const AttendanceLogs = () => {
                                                             <th>Designation</th>
                                                             <th>Date</th>
                                                             <th>Time</th>
-                                                           
+                                                            <th>Action</th>
+
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -752,13 +808,32 @@ const AttendanceLogs = () => {
                                                                     <img src={`${process.env.NEXT_PUBLIC_API_URL}:5003/${attendances.photo}`} alt="No image found" className="img-fluid" />
                                                                 </td>
                                                                 <td>{attendances.designation_name}</td>
-                                                               
+
                                                                 <td>
-                                                                    {attendances.attendance_date.slice(0,10)}
+                                                                    {attendances.attendance_date.slice(0, 10)}
                                                                 </td>
-                                                               
+
                                                                 <td>{formatDate(attendances.checktime)}</td>
-                                                               
+                                                                <td>
+
+                                                                    <div className="flex items-center ">
+
+
+                                                                        {filteredBtnIconDelete.map((filteredBtnIconDelete => (
+                                                                            <button
+                                                                                key={filteredBtnIconDelete.id}
+                                                                                title='Delete'
+                                                                                onClick={() => attendance_delete(attendances.id)}
+                                                                                style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
+                                                                                className={filteredBtnIconDelete?.btn}
+                                                                            >
+                                                                                <a
+                                                                                    dangerouslySetInnerHTML={{ __html: filteredBtnIconDelete?.icon }}
+                                                                                ></a>
+                                                                            </button>
+                                                                        )))}
+                                                                    </div></td>
+
                                                             </tr>
                                                         ))}
                                                     </tbody>

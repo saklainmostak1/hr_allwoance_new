@@ -9,18 +9,6 @@ import React, { useEffect, useState } from 'react';
 const SalaryUpdate = ({ id }) => {
 
 
-    const { data: account_head = []
-    } = useQuery({
-        queryKey: ['account_head'],
-        queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`)
-
-            const data = await res.json()
-            return data
-        }
-    })
-
-
     const [created, setCreated] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('userId') || '';
@@ -34,6 +22,25 @@ const SalaryUpdate = ({ id }) => {
             setCreated(storedUserId);
         }
     }, []);
+
+    const [brandData, setBrandData] = useState({
+        salary_month: '', salary_date: '',
+        due: '', paid_amount: '', paid_by: '',
+        modified_by: created
+    });
+
+    const { data: account_head = []
+    } = useQuery({
+        queryKey: ['account_head'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
+
 
     const [fromDate, setFromDate] = useState('');
     const [bonus, setBonus] = useState(0);
@@ -169,7 +176,7 @@ const SalaryUpdate = ({ id }) => {
 
     const filteredAttendances = holidays.filter(att => {
         const checktimeMonthYear = att.start_date.substring(0, 7);
-        return checktimeMonthYear === month;
+        return checktimeMonthYear === brandData?.salary_month?.slice(0, 7);
     });
 
     const { data: leavesDays = [] } = useQuery({
@@ -192,10 +199,25 @@ const SalaryUpdate = ({ id }) => {
         }
     });
 
+    // const matchLength = leaveApproveCount.map(emp => {
+    //     const matchCount = leavesDaysApproved.filter(att => att.leave_application_id === emp.id).length;
+    //     return { user_id: emp.whose_leave, match_length: matchCount };
+    // });
+
     const matchLength = leaveApproveCount.map(emp => {
-        const matchCount = leavesDaysApproved.filter(att => att.leave_application_id === emp.id).length;
-        return { user_id: emp.whose_leave, match_length: matchCount };
+        const month = emp.start_date.slice(0, 7); // Get the month in 'YYYY-MM' format
+        const matchCount = leavesDaysApproved.filter(att => {
+            const attMonth = brandData?.salary_month?.slice(0, 7); // Get the month in 'YYYY-MM' format
+            return att.leave_application_id === emp.id && attMonth === month;
+        }).length;
+    
+        return { user_id: emp.whose_leave, month, match_length: matchCount };
     });
+    
+console.log(leavesDaysApproved)
+console.log(matchLength)
+console.log(leaveApproveCount)
+
 
 
     const formatDates = (date) => {
@@ -210,11 +232,7 @@ const SalaryUpdate = ({ id }) => {
 
 
 
-    const [brandData, setBrandData] = useState({
-        salary_month: '', salary_date: '',
-        due: '', paid_amount: '', paid_by: '',
-        modified_by: created
-    });
+
 
     useEffect(() => {
 
@@ -265,6 +283,39 @@ const SalaryUpdate = ({ id }) => {
             });
     };
 
+
+    const { data: absents = [] } = useQuery({
+        queryKey: ['absents'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/absent/absent_all`)
+            const data = await res.json()
+            return data
+        }
+    });
+console.log(absents)
+console.log(month)
+
+
+
+const absencesPerUser = absents.reduce((acc, absent) => {
+    // Extract the year-month from the absent_date
+    const absentMonth = absent.absent_date.slice(0, 7);
+
+    // Check if the absentMonth matches the specified month
+    if (absentMonth === brandData?.salary_month?.slice(0, 7)) {
+        // If user_id is already in the accumulator, increment the count
+        if (acc[absent.user_id]) {
+            acc[absent.user_id]++;
+        } else {
+            // Otherwise, initialize the count for this user_id
+            acc[absent.user_id] = 1;
+        }
+    }
+
+    return acc;
+}, {});
+
+console.log(absencesPerUser);
 
     return (
         <div className="container-fluid">
@@ -402,7 +453,7 @@ const SalaryUpdate = ({ id }) => {
                                                                     </td>
                                                                     <td>
                                                                         {
-                                                                            ((salary.salary / totalDay) * ((filteredAttendances.length) + (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) + (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0))).toFixed(2)
+                                                                            ((salary.salary) - ((salary.salary / totalDay) * parseFloat(absencesPerUser[salary.user_id] || 0) ))
                                                                         }
                                                                     </td>
                                                                     <td>
@@ -420,7 +471,7 @@ const SalaryUpdate = ({ id }) => {
                                                                     </td>
 
                                                                     <td>
-                                                                        {parseFloat(brandData.paid_amount) + parseFloat(bonus) - (salary.salary)}
+                                                                        {(salary.salary) - parseFloat(brandData.paid_amount) + parseFloat(bonus)}
                                                                         <input type="number"
                                                                             onChange={brand_input_change}
                                                                             name="due" class="form-control form-control-sm text-right due d-none" id="due"
@@ -439,7 +490,12 @@ const SalaryUpdate = ({ id }) => {
                                                                         }
                                                                     </td>
                                                                     <td>
-                                                                        Absent: {(Math.abs(
+                                                                        Absent:
+
+                                                                        {
+                                                                            absencesPerUser[salary.user_id] || 0
+                                                                        }
+                                                                         {/* {(Math.abs(
                                                                             (filteredAttendances.length +
                                                                                 (matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0) -
                                                                                 totalDay)
@@ -448,7 +504,7 @@ const SalaryUpdate = ({ id }) => {
 
 
                                                                             - (matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0)
-                                                                        }
+                                                                        } */}
 
                                                                         <br />
                                                                         Present:                                {matchLengths.find(item => item.user_id === salary.user_id)?.match_length || 0}
@@ -456,7 +512,10 @@ const SalaryUpdate = ({ id }) => {
                                                                     <td>
                                                                         Holiday: {filteredAttendances.length}
                                                                         <br />
-                                                                        Leave: {matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0}
+                                                                        {/* Leave: {matchLength.find(item => item.user_id === salary.user_id)?.match_length || 0} */}
+                                                                        Leave: {matchLength.find(item =>
+                                                                            item.user_id === salary.user_id && item.month === brandData?.salary_month?.slice(0, 7)
+                                                                        )?.match_length || 0}
                                                                     </td>
                                                                     <td>
                                                                         <select name="paid_by" id=""

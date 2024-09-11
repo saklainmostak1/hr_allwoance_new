@@ -787,42 +787,58 @@ app.get(
 
 
 const AttendanceModel = require('../app/model/Admin/attendance_model/attendance_model')
-app.post( "/Admin/attendance/attendance_search", AttendanceModel.attendance_search
+app.post("/Admin/attendance/attendance_search", AttendanceModel.attendance_search
 );
-app.post( "/Admin/attendance/attendance_create", AttendanceModel.attendance_create
+app.post("/Admin/attendance/attendance_create", AttendanceModel.attendance_create
 );
-app.post( "/Admin/absent/absent_create", AttendanceModel.absent_create
-);
-
-app.post( "/Admin/attendance/attendance_otp", AttendanceModel.send_attendance_otp
-);
-app.get( "/Admin/attendance/attendance_all", AttendanceModel.attendance_list
-);
-app.get( "/Admin/attendance/attendance_all_list", AttendanceModel.attendance_list_all_data
-);
-app.get( "/Admin/absent/absent_all", AttendanceModel.absent_list);
-
-app.post( "/Admin/attendance/attendance_list_search", AttendanceModel.attendance_list_search
-);
-app.post( "/Admin/attendance/attendance_list_pdf", AttendanceModel.attendance_list_pdf
-);
-app.post( "/Admin/attendance/attendance_list_print", AttendanceModel.attendance_list_print
-);
-app.post( "/Admin/attendance/attendance_log_search", AttendanceModel.attendance_log_search
-);
-app.post( "/Admin/attendance/attendance_log_prtint", AttendanceModel.attendance_log_print
-);
-app.post( "/Admin/attendance/attendance_log_pdf", AttendanceModel.attendance_log_pdf
-);
-app.post( "/Admin/attendance/attendance_summary_search", AttendanceModel.attendance_summary_search
-);
-app.post( "/Admin/attendance/attendance_summary_print", AttendanceModel.attendance_summary_print
-);
-app.post( "/Admin/attendance/attendance_summary_pdf", AttendanceModel.attendance_summary_pdf
-);
-app.get( "/Admin/attendance/attendance_details_list", AttendanceModel.attendance_details_list
+app.post("/Admin/absent/absent_create", AttendanceModel.absent_create
 );
 
+app.post("/Admin/attendance/attendance_otp", AttendanceModel.send_attendance_otp
+);
+app.get("/Admin/attendance/attendance_all", AttendanceModel.attendance_list
+);
+app.get("/Admin/attendance/attendance_all_list", AttendanceModel.attendance_list_all_data
+);
+app.get("/Admin/absent/absent_all", AttendanceModel.absent_list);
+
+app.post("/Admin/attendance/attendance_list_search", AttendanceModel.attendance_list_search
+);
+app.post("/Admin/attendance/attendance_list_pdf", AttendanceModel.attendance_list_pdf
+);
+app.post("/Admin/attendance/attendance_list_print", AttendanceModel.attendance_list_print
+);
+app.post("/Admin/attendance/attendance_log_search", AttendanceModel.attendance_log_search
+);
+app.post("/Admin/attendance/attendance_log_prtint", AttendanceModel.attendance_log_print
+);
+app.post("/Admin/attendance/attendance_log_pdf", AttendanceModel.attendance_log_pdf
+);
+app.post("/Admin/attendance/attendance_summary_search", AttendanceModel.attendance_summary_search
+);
+app.post("/Admin/attendance/attendance_summary_print", AttendanceModel.attendance_summary_print
+);
+app.post("/Admin/attendance/attendance_summary_pdf", AttendanceModel.attendance_summary_pdf
+);
+app.get("/Admin/attendance/attendance_details_list", AttendanceModel.attendance_details_list
+);
+app.post("/Admin/absent/absent_list_search", AttendanceModel.absent_list_search
+);
+app.post("/Admin/absent/absent_delete/:id", AttendanceModel.absent_delete
+);
+app.post("/Admin/attendance/attendance_delete/:id", AttendanceModel.attendance_delete
+);
+app.post("/Admin/attendance/attendance_details_print", AttendanceModel.attendance_details_print
+);
+app.post("/Admin/attendance/attendance_details_pdf", AttendanceModel.attendance_details_pdf
+);
+app.get("/Admin/attendance_sms/attendance_sms_campaign_category", AttendanceModel.sms_campaign_category_list
+);
+
+const smsSettings = require('../app/model/Admin/sms_settings_model/smsSettings')
+app.post('/smsSettings', smsSettings.updateSmsSettings)
+app.get('/smsSettings/', smsSettings.getSmsSettings)
+// app.post('/api/all_table_data', smsSettings.all_table_data)
 
 
 
