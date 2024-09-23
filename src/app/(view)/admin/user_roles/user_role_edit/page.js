@@ -291,10 +291,13 @@ const UserRoleEdit = ({ id }) => {
         }));
     };
     console.log(userRole?.user_role?.id)
-    console.log(selectedMethods)
+    console.log(selectedMethodsArray.toString())
     // selectedMethodsArrays + ',' +
     const handleEditUserRole = (event) => {
         event.preventDefault();
+        const user_page_list_id = selectedMethodsArray && selectedMethodsArray.length > 0
+            ? selectedMethodsArray.toString()
+            : selectedMethodsArrays.toString();
         const userRoleId = userRole.user_role?.id; // Get the user role ID
         const formData = {
             otp_expire: otp_expire,
@@ -303,8 +306,10 @@ const UserRoleEdit = ({ id }) => {
             user_role_id: userRoleId,
             role_name: userRole.user_role.role_name,
             // Include other user role properties...
-            user_page_list_id: selectedMethodsArray + ',' + selectedMethods.toString(),
-            //  || "0", // Convert to string
+            // user_page_list_id: selectedMethodsArrays + ',' + selectedMethods.toString(),
+            // user_page_list_id: selectedMethodsArray ? selectedMethodsArray.toString() : selectedMethodsArrays.toString(),
+            user_page_list_id: user_page_list_id,
+            //  || "0", // Convert to string  + ',' + selectedMethodsArrays
             user_default_page:
                 document.querySelector('input[name="default_page"]').value, // Example value, adjust as needed
             status: document.querySelector('input[name="status"]').value, // Example value, adjust as needed
@@ -326,7 +331,8 @@ const UserRoleEdit = ({ id }) => {
                 if (Response.ok === true) {
                     localStorage.setItem('otp_expire', otp_expire)
                     sessionStorage.setItem("message", "Data Update successfully!");
-                    router.push('/Admin/user_role/user_role_all')
+                    window.location.href = '/Admin/user_role/user_role_all';
+
                 }
             }
             )
@@ -1053,7 +1059,7 @@ const UserRoleEdit = ({ id }) => {
             `.form-check-input[data-page-group="${pageGroupId}"]`
         );
 
-        
+
 
         const methodIdSet = new Set(selectedMethods);
 
@@ -1071,11 +1077,11 @@ const UserRoleEdit = ({ id }) => {
                     const editAllCheckbox = document.getElementById('editAllCheckboxPageGroup');
                     const copyAllCheckbox = document.getElementById('copyAllCheckboxPageGroup');
                     const deleteAllCheckbox = document.getElementById('deleteAllCheckboxPageGroup');
-                 
 
 
 
-                    if ( viewAllCheckbox.checked || editAllCheckbox.checked || copyAllCheckbox.checked || deleteAllCheckbox.checked   ) {
+
+                    if (viewAllCheckbox.checked || editAllCheckbox.checked || copyAllCheckbox.checked || deleteAllCheckbox.checked) {
                         // Don't remove method_sort 0 and 2 when other checkboxes are still checked
                         checkboxes.forEach((checkbox) => {
                             const methodSort = parseInt(checkbox.getAttribute('data-method-sort'));
@@ -1654,89 +1660,89 @@ const UserRoleEdit = ({ id }) => {
                                                     }
                                                 </div>
 
+                                                <div className='mt-4'>
 
+
+                                                    <div>
+                                                        <div className="form-check form-check-inline w-15 m-0 mr-5" style={{ width: '15%', fontWeight: '650', fontSize: '12px' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={fastCheckboxChecked}
+                                                                onChange={handleFastCheckboxChange}
+                                                                name="check_box_otp"
+                                                                value="1"
+                                                                className="form-check-input"
+                                                            />
+                                                            <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
+                                                                Send OTP
+                                                            </label>
+                                                        </div>
+
+                                                        {fastCheckboxChecked && (
+                                                            <div className="form-group">
+                                                                <label htmlFor="selectField">Select Field:</label>
+                                                                <select
+                                                                    id="selectField"
+                                                                    className="form-control"
+                                                                    value={selectedOption}
+                                                                    onChange={(e) => setSelectedOption(e.target.value)}
+                                                                >
+
+                                                                    <option value="">Select</option>
+                                                                    <option value="1">Phone Number</option>
+                                                                    <option value="2">Email</option>
+
+                                                                </select>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <div className="form-check form-check-inline w-15 m-0 mr-5" style={{ fontWeight: '650', fontSize: '12px' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="pass_reset"
+                                                                value="1"
+                                                                className="form-check-input"
+                                                                checked={pass_reset === '1'}
+                                                                onChange={handleResetCheckboxChange}
+                                                            />
+                                                            <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
+                                                                Reset Password
+                                                            </label>
+                                                        </div>
+
+                                                        {pass_reset === '1' && (
+                                                            <div className="form-group m-0" style={{ fontWeight: '650', fontSize: '12px' }}>
+                                                                <label style={{ marginTop: '7px', fontSize: '18px' }} htmlFor="selectField">Select Your Reset Password Validation Time:</label>
+
+                                                                <select id="selectField" className="form-control" value={otp_expire} onChange={handleChanges}>
+                                                                    {options}
+                                                                </select>
+
+                                                                <p>{otp_expire} Minutes</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+
+                                                    <div class="form-group row mt-2">
+                                                        <div class="col-sm-6">
+                                                            <input
+                                                                onClick={handleEditUserRole}
+
+                                                                type="button" disabled="" class="btn btn-sm btn-success submit" value="Submit" />
+                                                        </div>
+                                                    </div>
+
+                                                </div>
 
                                             </div>
                                         </div>
-                                        <div className='mt-5'>
 
-                                            <div className=''>
-                                                <div>
-                                                    <div className="form-check form-check-inline w-15 py-2 mr-5" style={{ width: '15%', fontWeight: '650', fontSize: '12px' }}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={fastCheckboxChecked}
-                                                            onChange={handleFastCheckboxChange}
-                                                            name="check_box_otp"
-                                                            value="1"
-                                                            className="form-check-input"
-                                                        />
-                                                        <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
-                                                            Send OTP
-                                                        </label>
-                                                    </div>
-
-                                                    {fastCheckboxChecked && (
-                                                        <div className="form-group">
-                                                            <label htmlFor="selectField">Select Field:</label>
-                                                            <select
-                                                                id="selectField"
-                                                                className="form-control"
-                                                                value={selectedOption}
-                                                                onChange={(e) => setSelectedOption(e.target.value)}
-                                                            >
-
-                                                                <option value="">Select</option>
-                                                                <option value="1">Phone Number</option>
-                                                                <option value="2">Email</option>
-
-                                                            </select>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <div className="form-check form-check-inline w-15 py-2 mr-5" style={{ fontWeight: '650', fontSize: '12px' }}>
-                                                        <input
-                                                            type="checkbox"
-                                                            name="pass_reset"
-                                                            value="1"
-                                                            className="form-check-input"
-                                                            checked={pass_reset === '1'}
-                                                            onChange={handleResetCheckboxChange}
-                                                        />
-                                                        <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
-                                                            Reset Password
-                                                        </label>
-                                                    </div>
-
-                                                    {pass_reset === '1' && (
-                                                        <div className="form-group" style={{ fontWeight: '650', fontSize: '12px' }}>
-                                                            <label style={{ marginTop: '7px', fontSize: '18px' }} htmlFor="selectField">Select Your Reset Password Validation Time:</label>
-
-                                                            <select id="selectField" className="form-control" value={otp_expire} onChange={handleChanges}>
-                                                                {options}
-                                                            </select>
-
-                                                            <p>{otp_expire} Minutes</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-
-
-                                            </div>
-                                        </div>
 
                                         <input type="hidden" name="status" value='0' />
                                         <input type="hidden" name="default_page" value={userRole?.user_role?.user_role_permission[0]?.user_role_id} />
-                                        <div class="form-group row">
-                                            <div class="col-sm-6">
-                                                <input
-                                                    onClick={handleEditUserRole}
 
-                                                    type="button" disabled="" class="btn btn-sm btn-success submit" value="Submit" />
-                                            </div>
-                                        </div>
                                     </form>
 
                                 </div>

@@ -3129,6 +3129,7 @@ const EmployeeEdit = ({ id }) => {
             setFilteredUpazilas([]);
         }
     }, [selectedDistrict, upazilas]);
+    
     const { data: schoolShiftList = [],
     } = useQuery({
         queryKey: ['schoolShiftList'],

@@ -2795,7 +2795,7 @@ const usersListModel = {
     const { user_role_id, role_name, status, user_page_list_id, user_default_page, OTP, pass_reset, otp_expire } = req.body;
   
     // Check if required fields are provided
-    if (!user_role_id || !role_name || !user_page_list_id || !user_default_page) {
+    if (!user_role_id || !role_name || !user_page_list_id) {
       return res.status(400).json({ message: 'user_role_id, role_name, status, user_page_list_id, and user_default_page are required and should not be null' });
     }
   

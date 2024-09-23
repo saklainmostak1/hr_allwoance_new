@@ -3906,6 +3906,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, Marker, Polyline, useJsApiLoader } from '@react-google-maps/api';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 
 const EmployeeGoogleMap = () => {
 
@@ -3934,43 +3935,99 @@ const EmployeeGoogleMap = () => {
         fetchToken();
     }, []);
 
-    // console.log(token)
+    const { data: usersFireBaseToken = [],
+    } = useQuery({
+        queryKey: ['usersFireBaseToken'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_list_role_wise`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
+    console.log(usersFireBaseToken)
+
+   
+    console.log(token.accessToken)
     const handleClick = () => {
         const url = 'https://fcm.googleapis.com/v1/projects/hrapp-ef0a5/messages:send';
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.accessToken}`
+            'Authorization': `Bearer ${token.accessToken}` // Replace with your access token
         };
 
-        const body = JSON.stringify({
-            "message": {
-                "token": "fy26m3i5SvO_s_WV2HtNrV:APA91bEQlPt1Q8303eaCfX4czMykDCbbE17XzBoWWko7rd2ui3-s9T9jo62k_pYqeKWtwH7Z7cnUn6ZQ9eJz7353bndm8l7dntpd7ACq9Nq6Q0ta61UBG2eVAi0SNQo87p5r31U0Cwzx",
-                "notification": {
-                    "title": "location",
-                    "body": "your location is tracking by hrapp right now...."
-                },
-                "data": {
-                    "category": "location"
-                }
+        // Loop through the usersFireBaseToken array
+        usersFireBaseToken?.forEach(user => {
+            // Ensure the token exists before sending the request
+            if (user.token) {
+                const body = JSON.stringify({
+                    "message": {
+                        "token": user.token,  // User's token
+                        "notification": {
+                            "title": "Location Tracking",
+                            "body": "Your location is being tracked by HR App right now."
+                        },
+                        "data": {
+                            "category": "location"
+                        }
+                    }
+                });
+
+                // Send the request to FCM for each user
+                fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: body
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Notification sent to user ID ${user.id}:`, data);
+                    })
+                    .catch((error) => {
+                        console.error(`Error sending notification to user ID ${user.id}:`, error);
+                    });
+            } else {
+                console.warn(`No token found for user ID ${user.id}`);
             }
         });
-
-        fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: body
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
     }
 
 
+     // console.log(token)
+    // const handleClick = () => {
+    //     const url = 'https://fcm.googleapis.com/v1/projects/hrapp-ef0a5/messages:send';
+    //     const headers = {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${token.accessToken}`
+    //     };
 
+    //     const body = JSON.stringify({
+    //         "message": {
+    //             "token": "fy26m3i5SvO_s_WV2HtNrV:APA91bEQlPt1Q8303eaCfX4czMykDCbbE17XzBoWWko7rd2ui3-s9T9jo62k_pYqeKWtwH7Z7cnUn6ZQ9eJz7353bndm8l7dntpd7ACq9Nq6Q0ta61UBG2eVAi0SNQo87p5r31U0Cwzx",
+    //             "notification": {
+    //                 "title": "location",
+    //                 "body": "your location is tracking by hrapp right now...."
+    //             },
+    //             "data": {
+    //                 "category": "location"
+    //             }
+    //         }
+    //     });
+
+    //     fetch(url, {
+    //         method: 'POST',
+    //         headers: headers,
+    //         body: body
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log('Success:', data);
+    //         })
+    //         .catch((error) => {
+    //             console.error('Error:', error);
+    //         });
+    // }
 
     const [employeeList, setEmployeeList] = useState([]);
     const { isLoaded } = useJsApiLoader({
@@ -4216,7 +4273,6 @@ const EmployeeGoogleMap = () => {
         }, []);
 
 
-      
         return (
             <div className={`col-md-${isSingleEmployee ? 12 : 6}`}>
                 <div className='card mb-4'>
@@ -4243,8 +4299,8 @@ const EmployeeGoogleMap = () => {
                             </div>
                         </div>
                         <div style={{ height: '400px', width: '100%' }}>
-                        {isLoaded && employeeGeo.length > 0 ? (
-                            // {isLoaded && (
+                            {isLoaded && employeeGeo.length > 0 ? (
+                                // {isLoaded && (
                                 <GoogleMap
                                     mapContainerStyle={{ height: '100%', width: '100%' }}
                                     zoom={12}
@@ -4254,10 +4310,10 @@ const EmployeeGoogleMap = () => {
                                     {markers}
                                     {polylines}
                                 </GoogleMap>
-                            // )}
-                        ) : (
-                                                                'No data'
-                                                            )}
+                                // )}
+                            ) : (
+                                'No data'
+                            )}
                         </div>
                     </div>
                 </div>
@@ -4267,23 +4323,65 @@ const EmployeeGoogleMap = () => {
 
 
 
-    
+
 
     const [page_group, setPage_group] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('pageGroup') || '';
+            return localStorage.getItem('pageGroup') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
-        if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('pageGroup');
-          setPage_group(storedUserId);
-        }
-      }, []);
+    });
 
-  
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('pageGroup');
+            setPage_group(storedUserId);
+        }
+    }, []);
+
+
+
+    // Generate options
+    const options = [];
+
+    // Add specific seconds options
+    const secondsOptions = [20000, 30000]; // 20 seconds and 30 seconds
+    for (let i = 0; i < secondsOptions.length; i++) {
+        const time = secondsOptions[i];
+        const seconds = time / 1000;
+        options.push(
+            <option key={time} value={time}>
+                {seconds} Second{seconds > 1 ? 's' : ''}
+            </option>
+        );
+    }
+
+    // Add minute options from 1 to 30 minutes
+    for (let minutes = 1; minutes <= 30; minutes++) {
+        const time = minutes * 60000; // Convert minutes to milliseconds
+        options.push(
+            <option key={time} value={time}>
+                {minutes} Minute{minutes > 1 ? 's' : ''}
+            </option>
+        );
+    }
+
+    const { data: module_settings = [] } = useQuery({
+        queryKey: ['module_settings'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/module_settings/module_settings_all`);
+            const data = await res.json();
+            return data;
+        },
+    });
+
+    const Category = module_settings.find(moduleI => moduleI.table_name === 'time_table') || {};
+    const defaultInterval = parseFloat(Category.column_name) || null;
+
+    useEffect(() => {
+        setRefreshInterval(defaultInterval);
+    }, [defaultInterval]);
+
 
     return (
         <div>
@@ -4349,18 +4447,11 @@ const EmployeeGoogleMap = () => {
                                             <div className="input-group printable">
                                                 <select
                                                     id="refreshInterval"
-                                                    value={refreshInterval || ''}
+                                                    value={refreshInterval || '300000'}
                                                     onChange={(e) => setRefreshInterval(parseInt(e.target.value) || null)}
                                                     name="time" className="form-control form-control-sm required integer_no_zero">
-                                                    <option value='36000000'>Select Time</option>
-                                                    <option value='10000'>10 Seconds</option>
-                                                    <option value='20000'>20 Seconds</option>
-                                                    <option value='30000'>30 Seconds</option>
-                                                    <option value='60000'>1 Minute</option>
-                                                    <option value='120000'>2 Minutes</option>
-                                                    <option value='180000'>3 Minutes</option>
-                                                    <option value='240000'>4 Minutes</option>
-                                                    <option value='300000'>5 Minutes</option>
+                                                    <option value=''>Select Time</option>
+                                                    {options}
                                                 </select>
                                                 <div className="input-group-append">
                                                     <button

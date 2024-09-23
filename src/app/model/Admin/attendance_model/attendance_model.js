@@ -2,6 +2,7 @@ const { default: axios } = require('axios');
 const connection = require('../../../../connection/config/database')
 var wkhtmltopdf = require('wkhtmltopdf');
 var fs = require("fs");
+var mysql = require('mysql');
 
 wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
 
@@ -3304,6 +3305,345 @@ const AttendanceModel = {
             console.log(error)
         }
     },
+
+
+
+
+    //     absent_create_manual_attendance: async (req, res) => {
+    //     try {
+
+    //         const start = new Date();
+    //         const dataError = [];
+
+    //         if (req.method === 'GET') {
+    //             // Increase memory limit if necessary (handled in server configs generally)
+
+    //             // Fetch SMS settings
+    //             const [smsSettingsRows] = await connection.query('SELECT * FROM sms_settings WHERE id = 1');
+    //             const smsSettings = smsSettingsRows[0];
+
+    //             // Check for holiday
+    //             const attendanceDate = new Date().toISOString().split('T')[0];
+    //             const [holidayRows] = await connection.query('SELECT * FROM holidays WHERE holiday_date = ?', [attendanceDate]);
+    //             const holidayCount = holidayRows.length;
+
+    //             if (holidayCount > 0) {
+    //                 const holidayData = holidayRows[0];
+    //                 const msg = `Today ${attendanceDate}, ${holidayData.holiday_name} is a holiday. You can't take attendance today.`;
+    //                 dataError.push({ holiday_msg: msg });
+    //             } else if (smsSettings.te_absent_shift && smsSettings.te_absent_shift_enable === 1) {
+    //                 // Fetch leave-approved users
+    //                 const [lvApplicationRows] = await connection.query(`
+    //                     SELECT GROUP_CONCAT(whose_leave) as user_id
+    //                     FROM leave_application
+    //                     LEFT JOIN leave_application_date ON leave_application.id = leave_application_date.leave_application_id
+    //                     WHERE leave_application.application_status = 2
+    //                     AND leave_application_date.leave_date = ?`, [attendanceDate]);
+    //                 const lvUsersId = lvApplicationRows[0].user_id || '';
+
+    //                 // Fetch attendance users
+    //                 const [attendanceRows] = await connection.query(`
+    //                     SELECT GROUP_CONCAT(DISTINCT user_id) as att_user_id
+    //                     FROM attendance
+    //                     WHERE attendance_date = ?`, [attendanceDate]);
+    //                 const attUsersId = attendanceRows[0].att_user_id || '';
+
+    //                 // Combine leave and attendance users
+    //                 const notInUsers = [lvUsersId, attUsersId].filter(Boolean).join(',');
+
+    //                 // Fetch absent users
+    //                 const whereClause = notInUsers
+    //                     ? `users.status = 1 AND users.role_name IN (4, 10) AND users.id NOT IN (${notInUsers})`
+    //                     : `users.status = 1 AND users.role_name IN (4, 10)`;
+
+    //                 const [absentRows] = await connection.query(`
+    //                     SELECT GROUP_CONCAT(id) as user_id FROM users WHERE ${whereClause}`);
+    //                 const absentUsersId = absentRows[0].user_id || '';
+    //                 const absentIdArr = absentUsersId.split(',');
+
+    //                 if (absentIdArr.length > 0) {
+    //                     const currentTime = new Date().toLocaleTimeString();
+    //                     const data4 = [];
+
+    //                     for (let userId of absentIdArr) {
+    //                         // Check if the user is already marked as absent
+    //                         const [absentExistsRows] = await connection.query(`
+    //                             SELECT user_id FROM absent WHERE absent_date = ? AND user_id = ?`, [attendanceDate, userId]);
+    //                         const absentExistsCount = absentExistsRows.length;
+
+    //                         if (absentExistsCount === 0) {
+    //                             // Fetch user shift
+    //                             const [shiftRows] = await connection.query(`
+    //                                 SELECT school_shift_id FROM teacher_admission WHERE user_id = ?`, [userId]);
+    //                             const userShift = shiftRows[0].school_shift_id;
+    //                             const userShiftArr = userShift.split(',');
+
+    //                             if (smsSettings.te_one_time === 1) {
+    //                                 // Fetch max late time and end time for the shift
+    //                                 const [lateTimeRows] = await connection.query(`
+    //                                     SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
+    //                                     FROM school_shift WHERE id IN (${userShift})`);
+    //                                 const maxLateTime = lateTimeRows[0].max_late_time;
+    //                                 const maxEndTime = lateTimeRows[0].max_end_time;
+
+    //                                 if (currentTime > maxLateTime && currentTime < maxEndTime) {
+    //                                     data4.push({
+    //                                         user_id: userId,
+    //                                         created_by: null,
+    //                                         absent_date: attendanceDate,
+    //                                         device_id: 'Online'
+    //                                     });
+    //                                 } else {
+    //                                     dataError.push({ late_time_condition: 'Max late time and end time not matched.' });
+    //                                 }
+    //                             } else {
+    //                                 for (let shiftId of userShiftArr) {
+    //                                     const [lateTimeRows] = await connection.query(`
+    //                                         SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
+    //                                         FROM school_shift WHERE id = ?`, [shiftId]);
+    //                                     const maxLateTime = lateTimeRows[0].max_late_time;
+    //                                     const maxEndTime = lateTimeRows[0].max_end_time;
+
+    //                                     if (currentTime > maxLateTime && currentTime < maxEndTime) {
+    //                                         data4.push({
+    //                                             user_id: userId,
+    //                                             created_by: null,
+    //                                             absent_date: attendanceDate,
+    //                                             device_id: 'Online',
+    //                                             shift_id: shiftId
+    //                                         });
+    //                                     }
+    //                                 }
+    //                             }
+    //                         } else {
+    //                             dataError.push({ absent_exists: `Absence already exists for user_id ${userId}` });
+    //                         }
+    //                     }
+
+    //                     if (data4.length > 0) {
+    //                         await connection.query('INSERT INTO absent (user_id, created_by, absent_date, device_id, shift_id) VALUES ?', [data4.map(item => [item.user_id, item.created_by, item.absent_date, item.device_id, item.shift_id])]);
+
+    //                         // Send SMS (similar logic as in PHP function)
+    //                         // Example: await sendAbsenceSms(absentUsersId, attendanceDate);
+    //                     } else {
+    //                         dataError.push({ absent_msg: 'Absent data array is empty' });
+    //                     }
+    //                 } else {
+    //                     dataError.push({ absent_count_msg: 'Absent count is 0' });
+    //                 }
+    //             } else {
+    //                 dataError.push({ sms_setting_msg: 'SMS settings teacher employee absent shift not selected.' });
+    //             }
+    //         } else {
+    //             dataError.push({ request_msg: 'Not a GET request' });
+    //         }
+
+    //         const end = new Date();
+    //         const diffSeconds = Math.abs(end - start) / 1000;
+    //         dataError.push({ api_exec_time: `${diffSeconds} seconds` });
+
+    //         return res.json(dataError);
+    //     } catch (error) {
+    //         console.error(error);
+    //         return res.status(500).json({ error: 'Internal Server Error' });
+    //     }
+    // },
+
+
+
+
+    absent_create_manual_attendance: async (req, res) => {
+        try {
+
+            const start = new Date();
+            const dataError = [];
+
+
+                // Increase memory limit if necessary (handled in server configs generally)
+
+                // Fetch SMS settings
+                connection.query('SELECT * FROM sms_settings WHERE id = 1', (err, smsSettingsRows) => {
+                    if (err) throw err;
+                    const smsSettings = smsSettingsRows;
+
+                    // Check for holiday
+                    const attendanceDate = new Date().toISOString().split('T')[0];
+                    connection.query(`SELECT * FROM yearly_holiday WHERE start_date = ${attendanceDate}`, (err, holidayRows) => {
+                        if (err) throw err;
+                        const holidayCount = holidayRows.length;
+
+                        if (holidayRows.start_date == attendanceDate) {
+                            const holidayData = holidayRows;
+                            const msg = `Today ${attendanceDate}, ${holidayData.holiday_name} is a holiday. You can't take attendance today.`;
+                           return dataError.push({ holiday_msg: msg });
+                        } else if (smsSettings.te_absent_shift && smsSettings.te_absent_shift_enable === 1) {
+                            // Fetch leave-approved users
+                            connection.query(`
+                            SELECT GROUP_CONCAT(whose_leave) as user_id
+                            FROM leave_application
+                            LEFT JOIN leave_application_date ON leave_application.id = leave_application_date.leave_application_id
+                            WHERE leave_application.application_status = 2
+                            AND leave_application_date.leave_date = ?`, attendanceDate, (err, lvApplicationRows) => {
+                                if (err) throw err;
+                                const lvUsersId = lvApplicationRows.user_id || '';
+
+                                // Fetch attendance users
+                                connection.query(`
+                                SELECT GROUP_CONCAT(DISTINCT user_id) as att_user_id
+                                FROM attendance
+                                WHERE attendance_date = ?`, attendanceDate, (err, attendanceRows) => {
+                                    if (err) throw err;
+                                    const attUsersId = attendanceRows.att_user_id || '';
+
+                                    // Combine leave and attendance users
+                                    const notInUsers = [lvUsersId, attUsersId].filter(Boolean).join(',');
+
+                                    // Fetch absent users
+                                    const whereClause = notInUsers
+                                        ? `users.status = 1 AND users.role_name IN ( 10) AND users.id NOT IN (${notInUsers})`
+                                        : `users.status = 1 AND users.role_name IN ( 10)`;
+
+                                    connection.query(`
+                                    SELECT GROUP_CONCAT(id) as user_id FROM users WHERE ${whereClause}`, (err, absentRows) => {
+                                        if (err) throw err;
+                                        const absentUsersId = absentRows.user_id || '';
+                                        const absentIdArr = absentUsersId.split(',');
+
+                                        if (absentIdArr.length > 0) {
+                                            const currentTime = new Date().toLocaleTimeString();
+                                            const data4 = [];
+
+                                            absentIdArr.forEach(userId => {
+                                                // Check if the user is already marked as absent
+                                                connection.query(`
+                                                SELECT user_id FROM absent WHERE absent_date = ? AND user_id = ?`, [attendanceDate, userId], (err, absentExistsRows) => {
+                                                    if (err) throw err;
+                                                    const absentExistsCount = absentExistsRows.length;
+
+                                                    if (absentExistsCount === 0) {
+                                                        // Fetch user shift
+                                                        connection.query(`
+                                                        SELECT school_shift_id FROM employee_promotion WHERE user_id = ?`, [userId], (err, shiftRows) => {
+                                                            if (err) throw err;
+                                                            const userShift = shiftRows.school_shift_id;
+                                                            const userShiftArr = userShift;
+
+                                                            if (smsSettings.te_one_time === 1) {
+                                                                // Fetch max late time and end time for the shift
+                                                                connection.query(`
+                                                                SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
+                                                                FROM school_shift WHERE id IN (${userShift})`, (err, lateTimeRows) => {
+                                                                    if (err) throw err;
+                                                                    const maxLateTime = lateTimeRows.max_late_time;
+                                                                    const maxEndTime = lateTimeRows.max_end_time;
+
+                                                                    if (currentTime > maxLateTime && currentTime < maxEndTime) {
+                                                                        data4.push({
+                                                                            user_id: userId,
+                                                                            created_by: null,
+                                                                            absent_date: attendanceDate,
+                                                                            device_id: 'Online'
+                                                                        });
+                                                                    } else {
+                                                                    return    dataError.push({ late_time_condition: 'Max late time and end time not matched.' });
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                userShiftArr.forEach(shiftId => {
+                                                                    connection.query(`
+                                                                    SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
+                                                                    FROM school_shift WHERE id = ?`, [shiftId], (err, lateTimeRows) => {
+                                                                        if (err) throw err;
+                                                                        const maxLateTime = lateTimeRows[0].max_late_time;
+                                                                        const maxEndTime = lateTimeRows[0].max_end_time;
+
+                                                                        if (currentTime > maxLateTime && currentTime < maxEndTime) {
+                                                                            data4.push({
+                                                                                user_id: userId,
+                                                                                created_by: null,
+                                                                                absent_date: attendanceDate,
+                                                                                device_id: 'Online',
+                                                                                shift_id: shiftId
+                                                                            });
+                                                                        }
+                                                                    });
+                                                                });
+                                                            }
+                                                        });
+                                                    } else {
+                                                      return  dataError.push({ absent_exists: `Absence already exists for user_id ${userId}` });
+                                                    }
+                                                });
+                                            });
+
+                                            if (data4.length > 0) {
+                                                connection.query('INSERT INTO absent (user_id, created_by, absent_date, device_id, shift_id) VALUES ?', [data4.map(item => [item.user_id, item.created_by, item.absent_date, item.device_id, item.shift_id])], (err) => {
+                                                    if (err) throw err;
+                                                    sendAbsenceSms(absentUsersId, attendanceDate);
+                                                    // Send SMS (similar logic as in PHP function)
+                                                    // Example: sendAbsenceSms(absentUsersId, attendanceDate);
+                                                });
+                                            } else {
+                                             return   dataError.push({ absent_msg: 'Absent data array is empty' });
+                                            }
+                                        } else {
+                                          return  dataError.push({ absent_count_msg: 'Absent count is 0' });
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                        else{
+                          return  dataError.push({ not_found: 'not found' });
+                        }
+                    });
+                });
+            
+
+            const end = new Date();
+            const diffSeconds = Math.abs(end - start) / 1000;
+            dataError.push({ api_exec_time: `${diffSeconds} seconds` });
+
+            return res.json(dataError);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+    },
+    sendAbsenceSms: async (userIds, date) => {
+        try {
+          
+            // Replace with your SMS API endpoint and API key
+            const smsApiUrl = 'https://quicksmsapp.com/Api/sms/campaign_api';
+            const apiKey = '7ae89887eac6055a2b9adc494ca3b902';
+
+            // Format your message
+            const message = `Dear User, you were marked absent on ${date}. Please contact HR for more details.`;
+
+            // Prepare request payload
+            const payload = {
+                api_key: apiKey,
+                recipients: userIds.split(','),
+                message: message
+            };
+
+            // Send SMS request
+            const response = await axios.post(smsApiUrl, payload);
+
+            // Check response
+            if (response.data.status === 'success') {
+                console.log('SMS sent successfully');
+            } else {
+                console.error('SMS sending failed:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error sending SMS:', error.message);
+        }
+    },
+
+
+
+
 
 
 

@@ -5,7 +5,16 @@ var wkhtmltopdf = require('wkhtmltopdf');
 var fs = require("fs");
 
 wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
+const formatString = (str) => {
+    const words = str?.split('_');
 
+    const formattedWords = words?.map((word) => {
+        const capitalizedWord = word?.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        return capitalizedWord;
+    });
+
+    return formattedWords?.join(' ');
+};
 const EmployeeModel = {
 
     school_shiftt_create: async (req, res) => {
@@ -408,6 +417,65 @@ const EmployeeModel = {
             res.status(500).json({ message: "Error fetching employee data" });
         }
     },
+
+
+
+    employee_all_list_settings: async (req, res) => {
+        try {
+            const employeeDataQuery = `
+                SELECT 
+                    ei.*,
+                    ej.join_date AS join_date,
+                    d.designation_name,
+                    u.full_name,
+                    u.dob,
+                    u.gender,
+                    u.religion,
+                    u.mobile,
+                    u.unique_id,
+                    u.email,
+                    u.photo,
+                    up.father_name AS e_father_name,
+                    up.mother_name AS e_mother_name,
+                    b.branch_name AS branch_name,              -- Get branch name
+                    p.title AS payroll_name,            -- Get payroll name
+                    ss.name AS school_shift_name               -- Get school shift name
+                FROM 
+                    employe_info ei
+                 JOIN 
+                    employe_joining ej ON ei.user_id = ej.user_id
+                 JOIN 
+                    employee_promotion ep ON ei.user_id = ep.user_id
+                 JOIN 
+                    users u ON ei.user_id = u.id
+                 JOIN 
+                    designation d ON ep.designation_id = d.id
+                 JOIN 
+                    user_parent up ON ej.user_id = up.user_id
+                 JOIN 
+                    branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
+                 JOIN 
+                    payroll p ON ej.payroll_id = p.id            -- Join payroll to get payroll_name
+                 JOIN 
+                    school_shift ss ON ej.school_shift_id = ss.id -- Join school_shift to get school_shift_name
+                WHERE
+                    ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
+            `;
+            connection.query(employeeDataQuery, async (err, results) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).json({ message: 'Failed to fetch employee data' });
+                    return;
+                }
+                res.status(200).json(results);
+            });
+        } catch (error) {
+            console.error("Error fetching employee data:", error);
+            res.status(500).json({ message: "Error fetching employee data" });
+        }
+    },
+
+
 
 
     employee_all_list_single: async (req, res) => {
@@ -3011,6 +3079,7 @@ const EmployeeModel = {
             console.log(error)
         }
     },
+
     religion_list: async (req, res) => {
         try {
             const data = "select * from  religion";
@@ -3117,6 +3186,28 @@ const EmployeeModel = {
             return res.status(500).json({ message: 'Internal Server Error.' });
         }
     },
+
+    employee_list_role_wise: async (req, res) => {
+        try {
+            const data = `
+               SELECT users.id, users.token
+            FROM users
+            INNER JOIN employe_joining 
+            ON users.id = employe_joining.user_id;
+            `;
+
+            connection.query(data, function (error, result) {
+                if (!error) {
+                    res.send(result);
+                } else {
+                    console.log(error);
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
 
     employee_geo: async (req, res) => {
         try {
@@ -3619,6 +3710,468 @@ const EmployeeModel = {
             res.status(500).json({ message: "Error fetching employee data" });
         }
     },
+
+
+    employee_search: async (req, res) => {
+
+        try {
+            console.log("Search button clicked.");
+
+            // Extract necessary data from request
+            const { searchQuery, itemName, employee, shift, payroll, employee_id, fromDate, toDate } = req.body;
+
+            // Construct the base SQL query
+            let sql = `
+               SELECT 
+                ei.*,
+                ej.join_date AS join_date,
+                ep.payroll_id AS payroll_id,
+                ep.school_shift_id AS school_shift_id,
+                ep.designation_id AS designation_id,
+                ep.branch_id AS branch_id,
+                d.designation_name,
+                u.full_name,
+                u.father_name,
+                u.mother_name,
+                u.dob,
+                u.gender,
+                u.religion,
+                u.mobile,
+                u.unique_id,
+                u.email,
+                u.photo,
+                up.father_name AS e_father_name,
+                up.mother_name AS e_mother_name,
+                b.branch_name AS branch_name,              -- Get branch name
+                p.title AS payroll_name,            -- Get payroll name
+                ss.name AS school_shift_name               -- Get school shift name
+            FROM 
+                employe_info ei
+             JOIN 
+                employe_joining ej ON ei.user_id = ej.user_id
+             JOIN 
+                employee_promotion ep ON ei.user_id = ep.user_id
+             JOIN 
+                users u ON ei.user_id = u.id
+             JOIN 
+                designation d ON ep.designation_id = d.id
+             JOIN 
+                user_parent up ON ep.user_id = up.user_id
+             JOIN 
+                branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
+             JOIN 
+                payroll p ON ep.payroll_id = p.id            -- Join payroll to get payroll_name
+             JOIN 
+                school_shift ss ON ep.school_shift_id = ss.id -- Join school_shift to get school_shift_name
+            WHERE
+                ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
+                  AND 1=1
+            `;
+
+            // Add search conditions based on the provided parameters
+            if (employee) {
+
+                sql += ` AND LOWER(u.full_name) LIKE '%${employee}%'`;
+            }
+
+            if (fromDate && toDate) {
+                sql += ` AND ej.join_date BETWEEN '${fromDate}' AND '${toDate}'`;
+            }
+            if (searchQuery) {
+                sql += ` AND ep.designation_id LIKE '%${searchQuery}%'`;
+            }
+
+            if (itemName) {
+                sql += ` AND ep.branch_id LIKE '%${itemName}%'`;
+            }
+
+            if (shift) {
+                sql += ` AND ep.school_shift_id LIKE '%${shift}%'`;
+            }
+            if (payroll) {
+                sql += ` AND ep.payroll_id LIKE '%${payroll}%'`;
+            }
+            if (employee_id) {
+                sql += ` AND  u.unique_id LIKE '%${employee_id}%'`;
+            }
+
+
+            // sql += ` GROUP BY attendance.user_id, check_date`;
+
+
+            console.log("SQL Query:", sql);
+
+            // Execute the constructed SQL query
+            connection.query(sql, (error, results, fields) => {
+                if (error) {
+                    console.error("Error occurred during search:", error);
+                    res.status(500).json({ error: "An error occurred during search." });
+                } else {
+                    console.log("Search results:", results);
+                    res.status(200).json({ results });
+                }
+            });
+        } catch (error) {
+            console.error("An error occurred:", error);
+            res.status(500).json({ error: "An error occurred." });
+        }
+    },
+
+
+    employee_list_paigination: async (req, res) => {
+        const pageNo = Number(req.params.pageNo);
+        const perPage = Number(req.params.perPage);
+        try {
+            const skipRows = (pageNo - 1) * perPage;
+            let query = `
+     SELECT 
+                ei.*,
+                ej.join_date AS join_date,
+                ep.payroll_id AS payroll_id,
+                ep.school_shift_id AS school_shift_id,
+                ep.designation_id AS designation_id,
+                ep.branch_id AS branch_id,
+                d.designation_name,
+                u.full_name,
+                u.father_name,
+                u.mother_name,
+                u.dob,
+                u.gender,
+                u.religion,
+                u.mobile,
+                u.unique_id,
+                u.email,
+                u.photo,
+                up.father_name AS e_father_name,
+                up.mother_name AS e_mother_name,
+                b.branch_name AS branch_name,              -- Get branch name
+                p.title AS payroll_name,            -- Get payroll name
+                ss.name AS school_shift_name               -- Get school shift name
+            FROM 
+                employe_info ei
+             JOIN 
+                employe_joining ej ON ei.user_id = ej.user_id
+             JOIN 
+                employee_promotion ep ON ei.user_id = ep.user_id
+             JOIN 
+                users u ON ei.user_id = u.id
+             JOIN 
+                designation d ON ep.designation_id = d.id
+             JOIN 
+                user_parent up ON ep.user_id = up.user_id
+             JOIN 
+                branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
+             JOIN 
+                payroll p ON ep.payroll_id = p.id            -- Join payroll to get payroll_name
+             JOIN 
+                school_shift ss ON ep.school_shift_id = ss.id -- Join school_shift to get school_shift_name
+            WHERE
+                ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
+      ORDER BY u.id DESC
+      LIMIT ?, ?
+    `;
+
+            connection.query(query, [skipRows, perPage], (error, result) => {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                }
+
+                else {
+                    console.log(error)
+                }
+
+            })
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
+
+
+    employee_pdf: async (req, res) => {
+        try {
+            const { searchResults, selectedColumns, fontSize, orientation, selectedPrintSize } = req.body; // Assuming selectedColumns is an array of column names
+
+            console.log(searchResults, 'here all the searchResults');
+
+            const longTextColumns = ['full_name', 'description'];
+            let tableRows = '';
+            searchResults?.forEach((result, index) => {
+                let row = '<tr>';
+                selectedColumns.forEach(column => {
+                    if (column === 'serial') {
+                        row += `<td>${index + 1}</td>`; // Displaying index number starting from 1
+                    } else if (column === 'action') {
+                        // Skip this column
+                    }
+                    else if (column === 'join_date') {
+                        row += `<td>${result.join_date.slice(0, 10)}</td>`; // Displaying index number starting from 1
+                    }
+
+
+                    else if (column === 'photo') {
+                        if (result[column]) {
+                            // Encode the image URL
+                            const encodedURL = encodeURIComponent(result[column]);
+                            console.log(`http://192.168.0.185:5003/${result[column]}`, 'encodedURL welcome');
+                            // const encodedURL = encode(result[column]);
+                            row += `<td><img src="http://192.168.0.185:5003/${result[column]}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`;
+                        } else {
+                            // No file path provided, show a placeholder message
+                            row += `<td></td>`;
+                        }
+                    }
+                    else {
+                        const style = longTextColumns.includes(column) ? 'word-wrap: break-word; word-break: break-all;' : '';
+                        row += `<td style="${style}">${result[column]}</td>`;
+
+                    }
+                });
+                row += '</tr>';
+                tableRows += row;
+            });
+
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+
+            const html = `<html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Document</title>
+      
+              <style>
+             @page {
+                        size: ${pageSize} ${pageOrientation}; /* This sets the page size to A4 and orientation to Portrait */
+                        margin: 20mm; /* Adjust the margin as needed */
+                    }
+                    * { 
+                        font-family: 'Nikosh', sans-serif !important;
+                        font-size: ${fontSize || '12px'}; /* Apply dynamic font size */
+                    }
+            
+      
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                  }
+                  th, td {
+                      padding: 8px;
+                      text-align: left;
+                      border: 1px solid #ddd;
+                  }
+                  th {
+                      background-color: #f2f2f2;
+                  }
+                  img {
+                      max-width: 100px;
+                      max-height: 100px;
+                  }
+                  .container {
+                    text-align: center;
+                }
+                .container2 {
+                  display: flex;
+                  justify-content: space-between;
+              }
+              </style>
+          </head>
+          <body>
+         <div class='container'>
+         <h2 style="margin: 0; padding: 0;">Pathshala School & College category List</h2>
+         <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+         <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+         <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+         <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">category List</h3>
+         </div>
+         <div class="container2" style:"display: flex;
+         justify-content: space-between;">
+         <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+         <p style="margin: 0; padding: 0;">Collected By:</p>
+         <p style="margin: 0; padding: 0;">Date: </p>
+        </div>
+              <table>
+                  <thead>
+                      <tr>
+                          ${selectedColumns.filter(column => column !== 'action').map(column => {
+                if (column === 'status_id') {
+                    return `<th>Status</th>`;
+                }
+                else if (column === 'file_path') {
+                    return `<th>File</th>`;
+                }
+                else {
+                    return `<th>${formatString(column)}</th>`;
+                }
+            }).join('')}
+                      </tr>
+                  </thead>
+                  <tbody >
+                      ${tableRows}
+                  </tbody>
+              </table>
+          </body>
+          </html>`;
+
+            wkhtmltopdf(html, { pageSize: pageSize, orientation: pageOrientation }, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
+        } catch (error) {
+            console.error('Error in category_pdf:', error);
+            res.status(500).send('Error generating PDF');
+        }
+    },
+
+
+    employee_list_print: async (req, res) => {
+        try {
+            const { searchResults, selectedColumns, fontSize, orientation, selectedPrintSize, extraColumnValue } = req.body;
+
+            // Debugging logs
+            console.log('searchResults:', searchResults);
+            console.log('selectedColumns:', selectedColumns);
+
+            let tableRows = '';
+            let extraColumnHeaders = '';
+            let extraColumnData = '';
+            let header = '<tr>';
+
+            // Create table headers based on selectedColumns
+            if (selectedColumns && selectedColumns.length > 0) {
+                selectedColumns.forEach(column => {
+                    header += `<th>${column}</th>`;
+                });
+            }
+
+            // Create editable extra columns based on extraColumnValue
+            if (extraColumnValue && extraColumnValue > 0) {
+                for (let i = 1; i <= extraColumnValue; i++) {
+                    extraColumnHeaders += `<th><input type="text" name="extraColumnHeader_${i}" value="Column ${i}" /></th>`;
+                }
+            }
+
+            header += extraColumnHeaders;
+            header += '</tr>';
+
+            // Create table rows based on searchResults and selectedColumns
+            searchResults.forEach((result, i) => {
+                let row = '<tr>';
+                selectedColumns.forEach(column => {
+                    if (column === 'photo') {
+                        // Display image for the 'photo' column
+                        row += `<td><img src="http://192.168.0.185:5003/${result[column]}" alt="Photo" /></td>`;
+                    } else if (column === 'join_date') {
+                        // Format the 'join_date' column
+                        row += `<td>${result[column]?.slice(0, 10) || ''}</td>`;
+
+                    } else if (column === 'serial') {
+                        // Format the 'join_date' column
+                        row += `<td>${i + 1}</td>`;
+                    }
+
+                    else {
+                        row += `<td>${result[column] || ''}</td>`;
+                    }
+                });
+
+                // If extra columns are defined, add editable cells for them
+                if (extraColumnValue && extraColumnValue > 0) {
+                    for (let i = 1; i <= extraColumnValue; i++) {
+                        row += `<td><input type="text" name="extraColumnData_${result.id}_${i}" value="" /></td>`;
+                    }
+                }
+
+                row += '</tr>';
+                tableRows += row;
+            });
+
+            // Determine the page size and orientation based on selectedPrintSize and orientation
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+
+            // Generate HTML
+            const html = `<html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Document</title>
+                <style>
+                    @page {
+                        size: ${pageSize} ${pageOrientation}; /* This sets the page size to A4 and orientation to Portrait */
+                        margin: 20mm; /* Adjust the margin as needed */
+                    }
+                    * { 
+                        font-family: 'Nikosh', sans-serif !important;
+                        font-size: ${fontSize || '12px'}; /* Apply dynamic font size */
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 8px;
+                        text-align: left;
+                        border: 1px solid #ddd;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    img {
+                        max-width: 100px;
+                        max-height: 100px;
+                    }
+                    .container {
+                        text-align: center;
+                    }
+                    .container2 {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                    input[type="text"] {
+                        border: none;
+                        background-color: transparent;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <h2 style="margin: 0; padding: 0;">Pathshala School & College Attendance List</h2>
+                    <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+                    <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+                    <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+                    <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">Attendance List</h3>
+                </div>
+                <div class="container2">
+                    <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+                    <p style="margin: 0; padding: 0;">Collected By:</p>
+                    <p style="margin: 0; padding: 0;">Date: </p>
+                </div>
+                <table>
+                    <thead>
+                        ${formatString(header)}
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </body>
+            <script>
+                window.print();
+            </script>
+            </html>`;
+
+            res.send(html); // Send the HTML directly to the client
+        } catch (error) {
+            console.error('Error in employee_list_print:', error);
+            res.status(500).send('Error generating print view');
+        }
+    }
 
 
 

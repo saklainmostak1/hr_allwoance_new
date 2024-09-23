@@ -51,7 +51,7 @@ const ReligionModel = {
     try {
       const data = `SELECT bg.*, u.full_name AS author_name
                    FROM religion bg
-                   JOIN users u ON bg.created_by = u.id
+                  LEFT JOIN users u ON bg.created_by = u.id
                    ORDER BY bg.id DESC;`;
 
       connection.query(data, function (error, result) {

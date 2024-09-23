@@ -421,9 +421,9 @@ const expenceModel = {
                     expense_category.expense_category_name AS expense_category
                 FROM 
                     expense 
-                    INNER JOIN users AS users_created ON expense.created_by = users_created.id 
+                    LEFT JOIN users AS users_created ON expense.created_by = users_created.id 
                     LEFT JOIN users AS users_modified ON expense.modified_by = users_modified.id 
-                    INNER JOIN expense_category ON expense.expense_category = expense_category.id
+                    LEFT JOIN expense_category ON expense.expense_category = expense_category.id
                     LEFT JOIN expense_item ON expense.id = expense_item.expense_id;
             `;
 
@@ -811,7 +811,7 @@ const expenceModel = {
                 expense_category.expense_category_name AS expense_category
             FROM 
                 expense 
-                INNER JOIN users AS users_created ON expense.created_by = users_created.id 
+                LEFT JOIN users AS users_created ON expense.created_by = users_created.id 
                 LEFT JOIN users AS users_modified ON expense.modified_by = users_modified.id 
                 LEFT JOIN expense_category ON expense.expense_category = expense_category.id
                 LEFT JOIN expense_item ON expense.id = expense_item.expense_id

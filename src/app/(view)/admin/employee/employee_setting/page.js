@@ -1,18 +1,18 @@
-'use client'
+
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import Select from 'react-dropdown-select';
 
-const IncomeSettings = () => {
+const EmployeeSetting = () => {
 
 
-    const { data: incomes = [], isLoading, refetch
+    const { data: expenses = [], isLoading, refetch
     } = useQuery({
-        queryKey: ['incomes'],
+        queryKey: ['expenses'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income/income_list`)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_all_list_settings`)
 
             const data = await res.json()
             return data
@@ -32,10 +32,10 @@ const IncomeSettings = () => {
         }
     })
 
-    const income = module_settings.filter(moduleI => moduleI.table_name === 'income')
-    const columnListSelected = income[0]?.column_name
+    const expense = module_settings.filter(moduleI => moduleI.table_name === 'employee')
+    const columnListSelected = expense[0]?.column_name
     const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
-    console.log(columnListSelectedArray)
+
 
     const formatString = (str) => {
         const words = str?.split('_');
@@ -48,7 +48,7 @@ const IncomeSettings = () => {
         return formattedWords?.join(' ');
     };
 
-    const columnNames = incomes && incomes.length > 0 ? Object.keys(incomes[0]) : [];
+    const columnNames = expenses && expenses.length > 0 ? Object.keys(expenses[0]) : [];
 
 
     console.log('Column Names:', columnNames);
@@ -65,10 +65,11 @@ const IncomeSettings = () => {
     //         return data
     //     }
     // })
-    // console.log(moduleInfo.filter(moduleI => moduleI.controller_name === 'income'))
-    // const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'income')
+    // console.log(moduleInfo.filter(moduleI => moduleI.controller_name === 'expense'))
+    // const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'expense')
 
     //   console.log(filteredModuleInfo);
+
 
 
 
@@ -87,7 +88,6 @@ const IncomeSettings = () => {
             setPage_group(storedUserId);
         }
     }, []);
-
 
     const [selectedColumns, setSelectedColumns] = React.useState([]);
 
@@ -126,7 +126,6 @@ const IncomeSettings = () => {
         event.preventDefault();
         const form = event.target
         const name = form.name.value
-        const decimal_digit = form.decimal_digit.value
         const table_name = form.table_name.value
 
 
@@ -137,7 +136,7 @@ const IncomeSettings = () => {
             table_name: table_name.toLowerCase(),
             column_name: columnString,
             created_by: userId,
-            decimal_digit,
+         
         }
 
         console.log(addValue)
@@ -171,21 +170,22 @@ const IncomeSettings = () => {
                         <div class="body-content bg-light">
 
                             <div class=" border-primary shadow-sm border-0">
-                                <div class=" card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">income Settings</h5>
+                                <div class="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
+                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">expense Settings</h5>
                                     <div class="card-title font-weight-bold mb-0 card-header-color float-right">
 
-                                        <Link href={`/Admin/income/income_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create income</Link>
+                                        <Link href={`/Admin/expense/expense_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create Expense</Link>
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <form onSubmit={handleSubmit}>
                                         <div class="col-md-9 offset-md-1">
-                                            <div class="form-group row student">
+                                            <div class="form-group row student d-none">
                                                 <label class="col-form-label col-md-2"><strong>Name:</strong></label>
                                                 <div class="col-md-4">
                                                     <input
-                                                        defaultValue={income[0]?.name}
+
+                                                        value={expense[0]?.name}
                                                         name="name"
                                                         type="text" class="form-control form-control-sm  alpha_space student_id" id="student_id" placeholder="Name" />
                                                 </div>
@@ -193,7 +193,7 @@ const IncomeSettings = () => {
                                                 <label class="col-form-label col-md-2"><strong>Table Name:</strong></label>
                                                 <div class="col-md-4">
                                                     <input
-                                                        defaultValue={income[0]?.table_name}
+                                                        value={expense[0]?.table_name}
                                                         type="text" name="table_name" class="form-control form-control-sm  alpha_space student_id" id="student_id" placeholder="Table Name" />
                                                 </div>
                                             </div>
@@ -225,21 +225,7 @@ const IncomeSettings = () => {
                                                     />
                                                 </div>
 
-                                                <label class="col-form-label col-md-2"><strong>Decimal Digit:</strong></label>
-
-                                                <div class="col-md-4">
-
-                                                    <select
-                                                        required=""
-                                                        name="decimal_digit"
-                                                        className="form-control form-control-sm mb-2">
-                                                        <option value={income[0]?.decimal_digit}>{income[0]?.decimal_digit}</option>
-                                                        {income[0]?.decimal_digit == 2 ? '' : <option value='2'>2</option>}
-                                                        {income[0]?.decimal_digit == 3 ? null : <option value='3'>3</option>}
-                                                    </select>
-
-
-                                                </div>
+                                               
 
                                             </div>
                                         </div>
@@ -263,4 +249,4 @@ const IncomeSettings = () => {
     );
 };
 
-export default IncomeSettings;
+export default EmployeeSetting;

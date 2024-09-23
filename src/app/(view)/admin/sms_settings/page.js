@@ -337,9 +337,51 @@
 
 'use client'
 
+import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import Select from 'react-dropdown-select';
 
 const AdmissionSMS = () => {
+
+
+  const { data: schoolShiftList = [], isLoading, refetch
+  } = useQuery({
+    queryKey: ['schoolShiftList'],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/school_shift/school_shift_all`)
+
+      const data = await res.json()
+      return data
+    }
+  })
+
+  // const [selectedMonths, setSelectedMonths] = useState('');
+  // const handleChange = (selectedOptions) => {
+  //   const selectedValues = selectedOptions.map(option => option.value);
+  //   setSelectedMonths(selectedValues || []);
+  // };
+
+
+  // console.log(selectedMonths)
+  const [selectedMonths, setSelectedMonths] = useState('');
+
+  const handleChange = (selectedOptions) => {
+    // Extract values from the selected options
+    const selectedValues = selectedOptions.map(option => option.value);
+
+    // Convert array of values to a comma-separated string
+    const selectedValuesString = selectedValues.join(', ');
+
+    // Update the state with the comma-separated string
+    setSelectedMonths(selectedValuesString);
+  };
+
+  // Display the selected values as an array format
+  // const formattedSelectedMonths = `[${selectedMonths}]`;
+  // console.log(formattedSelectedMonths)
+
+  console.log(selectedMonths)
+
   const [smsSettings, setSmsSettings] = useState([]);
 
   const [isEaJoin2, setIsEaJoin2] = useState(false);
@@ -351,6 +393,7 @@ const AdmissionSMS = () => {
   const [isEaJoin1, setIsEaJoin1] = useState(false);
   const [isTeJoin1, setIsTeJoin1] = useState(false);
   const [isEsJoin1, setIsEsJoin1] = useState(false);
+  const [te_absent_shift_enable, sette_absent_shift_enable] = useState(false);
 
   useEffect(() => {
     getSmsSettings();
@@ -369,6 +412,7 @@ const AdmissionSMS = () => {
     setIsTeJoin2(data[0]?.is_te_absence === 1);
     setIsEsJoin1(data[0]?.auto_e_salary === 1);
     setIsEsJoin2(data[0]?.is_e_salary === 1);
+    sette_absent_shift_enable(data[0]?.te_absent_shift_enable === 1);
   };
 
   const handleSubmit = (event) => {
@@ -388,6 +432,7 @@ const AdmissionSMS = () => {
     const is_te_absence = isTeJoin2 ? 1 : 0;
     const auto_e_salary = isEsJoin1 ? 1 : 0;
     const is_e_salary = isEsJoin2 ? 1 : 0;
+    const te_absent_shift_enables = te_absent_shift_enable ? 1 : 0;
 
     const updateValue = {
       oe_join,
@@ -402,6 +447,8 @@ const AdmissionSMS = () => {
       is_te_absence,
       auto_e_salary,
       is_e_salary,
+      selectedMonths, 
+      te_absent_shift_enables
     };
 
     console.log(updateValue);
@@ -418,6 +465,8 @@ const AdmissionSMS = () => {
         console.log(data);
       });
   };
+
+
 
   return (
     <div>
@@ -580,9 +629,58 @@ const AdmissionSMS = () => {
                   <small id="passwordHelpBlock" className="form-text text-info">
                     [[company_name]], [[full_name]], [[teacher_id]], [[teacher_designation]], [[joining_date]], [[sms_time]], [[payroll_name]], [[payroll_total]] Keywords refer by Company Name, Teacher Name, Id, Designation, Joining Date, Sms Time, Payroll Name &amp; Payroll Total respectively.
                   </small>
+
                 </div>
               </div>
             </div>
+            <div class="row no-gutters mb-3">
+              <div class="col-md-3">
+                <label class="font-weight-bold text-right">Employee Absent Shift</label>
+              </div>
+              <div class="col-md-9">
+                <div class="input-group input-group-text">
+                  <div class="input-group-prepend">
+                    <div className="custom-control custom-switch text-left mr-5 mt-2">
+                      <input
+                        type="checkbox"
+                        name="te_absent_shift_enable"
+                        className="custom-control-input common_sms"
+                        checked={te_absent_shift_enable}
+                        id="te_absent_shift_enable"
+                        onChange={() => sette_absent_shift_enable((prevState) => !prevState)}
+                      />
+                      <label className="custom-control-label" htmlFor="te_absent_shift_enable">Enable</label>
+                    </div>
+
+
+                    <Select
+                    style={{width:'400px'}}
+                      multi
+                      options={[
+
+                        ...schoolShiftList.map(column => ({
+                          label: column.name,
+                          value: column.id,
+                        })),
+
+                      ]}
+                      onChange={handleChange}
+                    />
+
+
+
+                  </div>
+
+                  <div class="pl-2 input-group-append">
+                    {/* <div class=" px-5">
+                      <input type="checkbox" name="te_one_time" class=" from-control form-control-sm custom-control-input common_sms" id="te_one_time" value="1" />
+                      <label class="custom-control-label ml-2" for="te_one_time">One Time</label>
+                    </div> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
 

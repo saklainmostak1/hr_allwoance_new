@@ -49,6 +49,34 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
     },
   });
 
+  // const [intervalId, setIntervalId] = useState(null);
+
+  // // Fetching the data using react-query
+  // const { data: allSideNavDatas = [], isLoading, refetch } = useQuery({
+  //   queryKey: ['allSideNavData'],
+  //   queryFn: async () => {
+  //     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/admin/module_info/module_info_all/${usersId}/role`);
+  //     const data = await res.json();
+  //     return data;
+  //   },
+  // });
+
+  // useEffect(() => {
+  //   // Set up the interval to refetch data every 1 second
+  //   const id = setInterval(() => {
+  //     refetch();  // Refetch data every second
+  //   }, 1000);
+
+  //   // Store interval ID to clear it later
+  //   setIntervalId(id);
+
+  //   // Clear the interval on component unmount
+  //   return () => {
+  //     clearInterval(id);
+  //   };
+  // }, [refetch]);
+
+
   const allSideNavData = allSideNavDatas?.map(group => ({
     ...group,
     controllers: group.controllers.map(controller => ({

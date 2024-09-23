@@ -602,7 +602,7 @@ const UsersRoleCreates = () => {
             body: JSON.stringify(formData),
         })
             .then((Response) => {
-                
+
                 Response.json()
                 console.log(Response)
                 if (Response.ok === true) {
@@ -1572,87 +1572,85 @@ const UsersRoleCreates = () => {
                                                 {
                                                     checkBoxError && <p className='text-danger'>{checkBoxError}</p>
                                                 }
-                                                <div className='mt-5'>
+                                                <div className='mt-4'>
 
-                                                    <div className=''>
-                                                        <div>
-                                                            <div className="form-check form-check-inline w-15 py-2 mr-5" style={{ width: '15%', fontWeight: '650', fontSize: '12px' }}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={fastCheckboxChecked}
-                                                                    onChange={handleFastCheckboxChange}
-                                                                    name="check_box_otp"
-                                                                    value="1"
-                                                                    className="form-check-input"
-                                                                />
-                                                                <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
-                                                                    Send OTP
-                                                                </label>
-                                                            </div>
-
-                                                            {fastCheckboxChecked && (
-                                                                <div className="form-group">
-                                                                    <label htmlFor="selectField">Select Field:</label>
-                                                                    <select
-                                                                        id="selectField"
-                                                                        className="form-control"
-                                                                        value={selectedOption}
-                                                                        onChange={(e) => setSelectedOption(e.target.value)}
-                                                                    >
-
-                                                                        <option value="">Select</option>
-                                                                        <option value="1">Phone Number</option>
-                                                                        <option value="2">Email</option>
-
-                                                                    </select>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <div className="form-check form-check-inline w-15 py-2 mr-5" style={{ fontWeight: '650', fontSize: '12px' }}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    name="pass_reset"
-                                                                    value="1"
-                                                                    className="form-check-input"
-                                                                    checked={pass_reset === '1'}
-                                                                    onChange={handleResetCheckboxChange}
-                                                                />
-                                                                <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
-                                                                    Reset Password
-                                                                </label>
-                                                            </div>
-
-                                                            {pass_reset === '1' && (
-                                                                <div className="form-group" style={{ fontWeight: '650', fontSize: '12px' }}>
-                                                                    <label style={{ marginTop: '7px', fontSize: '18px' }} htmlFor="selectField">Select Your Reset Password Validation Time:</label>
-
-                                                                    <select id="selectField" className="form-control" value={otp_expire} onChange={handleChange}>
-                                                                        {options}
-                                                                    </select>
-
-                                                                    <p>{otp_expire} Minutes</p>
-                                                                </div>
-                                                            )}
+                                                    <div className='mb-0'>
+                                                        <div className="form-check form-check-inline w-15 mr-5" style={{ width: '15%', fontWeight: '650', fontSize: '12px' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={fastCheckboxChecked}
+                                                                onChange={handleFastCheckboxChange}
+                                                                name="check_box_otp"
+                                                                value="1"
+                                                                className="form-check-input"
+                                                            />
+                                                            <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
+                                                                Send OTP
+                                                            </label>
                                                         </div>
 
+                                                        {fastCheckboxChecked && (
+                                                            <div className="form-group m-0">
+                                                                <label htmlFor="selectField">Select Field:</label>
+                                                                <select
+                                                                    id="selectField"
+                                                                    className="form-control"
+                                                                    value={selectedOption}
+                                                                    onChange={(e) => setSelectedOption(e.target.value)}
+                                                                >
 
+                                                                    <option value="">Select</option>
+                                                                    <option value="1">Phone Number</option>
+                                                                    <option value="2">Email</option>
+
+                                                                </select>
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                    <div className='m-0'>
+                                                        <div className="form-check form-check-inline w-15 mr-5 m-0" style={{ fontWeight: '650', fontSize: '12px' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="pass_reset"
+                                                                value="1"
+                                                                className="form-check-input"
+                                                                checked={pass_reset === '1'}
+                                                                onChange={handleResetCheckboxChange}
+                                                            />
+                                                            <label style={{ marginTop: '7px', fontSize: '18px' }} className="px-2">
+                                                                Reset Password
+                                                            </label>
+                                                        </div>
+
+                                                        {pass_reset === '1' && (
+                                                            <div className="form-group m-0" style={{ fontWeight: '650', fontSize: '12px' }}>
+                                                                <label style={{ marginTop: '7px', fontSize: '18px' }} htmlFor="selectField">Select Your Reset Password Validation Time:</label>
+
+                                                                <select id="selectField" className="form-control" value={otp_expire} onChange={handleChange}>
+                                                                    {options}
+                                                                </select>
+
+                                                                <p>{otp_expire} Minutes</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                </div>
+                                                <div class="form-group row mt-2">
+                                                    <div class="col-sm-6">
+                                                        <input
+                                                            onClick={user_role_create}
+
+                                                            type="button" disabled="" class="btn btn-sm btn-success submit" value="Submit" />
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
 
                                         <input type="hidden" name="status" value='0' />
                                         <input type="hidden" name="default_page" value='0' />
-                                        <div class="form-group row">
-                                            <div class="col-sm-6">
-                                                <input
-                                                    onClick={user_role_create}
 
-                                                    type="button" disabled="" class="btn btn-sm btn-success submit" value="Submit" />
-                                            </div>
-
-                                        </div>
                                     </form>
 
                                 </div>
