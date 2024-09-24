@@ -11,7 +11,7 @@ var mysql = require('mysql');
 // });
 var connections = mysql.createConnection({
   // host: 'localhost',
-  host: '198.187.30.101',
+  host: '162.0.239.48',
   timezone: 'Z',
   port: '3306',
   user: "urbanit101_allowance",
