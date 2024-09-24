@@ -180,7 +180,9 @@ const DesignationCreate = () => {
       );
 
       if (response.ok) {
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
         router.push("/Admin/designation/designation_all");
       } else {
         setErrorMessages((prevErrors) => ({

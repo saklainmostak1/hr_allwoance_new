@@ -196,9 +196,36 @@ import { useRouter } from "next/navigation";
 const EditCompanyType = ({ id }) => {
   const router = useRouter();
   const [name, setName] = useState([])
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const [formData, setFormData] = useState({
     company_type_name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const [errorMessage, setErrorMessage] = useState("");
 

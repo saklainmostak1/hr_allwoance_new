@@ -554,7 +554,33 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const ReligionCreate = () => {
-  const created = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [created, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", created_by: created });
   const [errorMessage, setErrorMessage] = useState("");
@@ -639,7 +665,9 @@ const ReligionCreate = () => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
         router.push("/Admin/religion/religion_all");
       } else {
         console.error("Error creating religion:", data);

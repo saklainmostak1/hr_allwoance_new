@@ -6,11 +6,37 @@ import { useRouter } from "next/navigation";
 
 const EditDesignation = ({ id }) => {
   const router = useRouter();
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const [formData, setFormData] = useState({
     designation_name: "",
     serial_number: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
 
   const [errorMessages, setErrorMessages] = useState({
@@ -43,10 +69,10 @@ const EditDesignation = ({ id }) => {
       setFormData({
         designation_name,
         serial_number: serial_number.toString(), // Ensure serial_number is a string
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   // useEffect(() => {
   //   const fetchDesignations = async () => {
@@ -189,7 +215,9 @@ const EditDesignation = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
         router.push("/Admin/designation/designation_all");
       }
     } catch (error) {
@@ -201,7 +229,7 @@ const EditDesignation = ({ id }) => {
     }
   };
 
-  
+
 
   return (
     <div className="container-fluid">

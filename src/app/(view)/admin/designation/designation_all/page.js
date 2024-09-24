@@ -38,8 +38,33 @@ const DesignationList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -145,42 +170,45 @@ const DesignationList = ({ searchParams }) => {
 
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/designation/designation_delete/${id}`, {
-        method: "POST",
+      method: "POST",
     })
-        .then(response => {
-            console.log(response)
-            response.json()
-            if (response.ok === true) {
-                const procced = window.confirm(`Are You Sure delete`)
-                if (procced) {
-                    refetch();
-                    caregory_list()
-                }
-            }
-            else {
-                alert('Data already running. You cant Delete this item');
-            }
-        })
-        .then(data => {
-            if (data) {
+      .then(response => {
+        console.log(response)
+        response.json()
+        if (response.ok === true) {
+          const procced = window.confirm(`Are You Sure delete`)
+          if (procced) {
+            refetch();
+            caregory_list()
+          }
+        }
+        else {
+          alert('Data already running. You cant Delete this item');
+        }
+      })
+      .then(data => {
+        if (data) {
 
-                console.log(data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the data. Please try again.');
-        });
+          console.log(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the data. Please try again.');
+      });
 
-}
+  }
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
+    if (typeof window !== 'undefined') {
+
+      if (sessionStorage.getItem("message")) {
+        setMessage(sessionStorage.getItem("message"));
+        sessionStorage.removeItem("message");
+      }
     }
-  }, []);
+  }, [])
 
   console.log(filteredBtnIconList[0]?.display_name)
   console.log(brandList)
@@ -206,7 +234,7 @@ const DesignationList = ({ searchParams }) => {
                       href={`/Admin/designation/designation_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                     Back to {filteredBtnIconCreate[0]?.display_name}
+                      Back to {filteredBtnIconCreate[0]?.display_name}
                     </Link>
                   </div>
                 </div>
@@ -228,9 +256,8 @@ const DesignationList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/designation/designation_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/designation/designation_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -239,11 +266,10 @@ const DesignationList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/designation/designation_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -252,9 +278,8 @@ const DesignationList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/designation/designation_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/designation/designation_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -305,8 +330,8 @@ const DesignationList = ({ searchParams }) => {
                               <td>
                                 {noticeCategoryAll?.created_date
                                   ? formatDateTime(
-                                      noticeCategoryAll.created_date
-                                    )
+                                    noticeCategoryAll.created_date
+                                  )
                                   : ""}
                               </td>
 
@@ -387,9 +412,8 @@ const DesignationList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/designation/designation_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/designation/designation_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -398,11 +422,10 @@ const DesignationList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/designation/designation_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -411,9 +434,8 @@ const DesignationList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/designation/designation_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/designation/designation_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

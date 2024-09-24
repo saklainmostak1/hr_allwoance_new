@@ -52,8 +52,34 @@ const NewsList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -144,12 +170,16 @@ const NewsList = ({ searchParams }) => {
   // Paigination end
 
   const [message, setMessage] = useState();
-  useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+
+            if (sessionStorage.getItem("message")) {
+                setMessage(sessionStorage.getItem("message"));
+                sessionStorage.removeItem("message");
+            }
+        }
+    }, [])
+
 
   const longTextStyle = {
     wordBreak: "break-all",
@@ -315,7 +345,7 @@ const NewsList = ({ searchParams }) => {
 
   console.log(searchResults)
 
-  
+
 
 
   const news_excel_download = async () => {

@@ -13,6 +13,36 @@ import FroalaEditorComponent from "react-froala-wysiwyg";
 
 const EditVideoGallery = ({ id }) => {
   const router = useRouter();
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
+
+
   const [noticeData, setNoticeData] = useState({
     title: "",
     link: "",
@@ -20,7 +50,7 @@ const EditVideoGallery = ({ id }) => {
     status: "", // Ensure this is initialized
     video_category: "",
 
-    modified_by: localStorage.getItem("userId"),
+    modified_by:userId,
   });
 
   const handleModelChange = (content) => {
@@ -44,7 +74,7 @@ const EditVideoGallery = ({ id }) => {
 
   // single user data get
 
-  const modified = localStorage.getItem("userId");
+ 
 
   const {
     data: video = [],
@@ -82,9 +112,9 @@ const EditVideoGallery = ({ id }) => {
       video_category: brandSingle[0]?.video_category,
       link: brandSingle[0]?.link,
 
-      modified_by: modified,
+      modified_by: userId,
     });
-  }, [brandSingle, modified]);
+  }, [brandSingle, userId]);
 
   const [noticeAll, setNoticeAll] = useState([]);
 
@@ -195,7 +225,9 @@ const EditVideoGallery = ({ id }) => {
       .then((data) => {
         console.log(data);
         if (data) {
-          sessionStorage.setItem("message", "Data updated successfully");
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem("message", "Data saved successfully!");
+        }
           router.push("/Admin/video_gallery/video_gallery_all");
         }
       })
@@ -204,7 +236,7 @@ const EditVideoGallery = ({ id }) => {
       });
   };
 
-  const page_group = localStorage.getItem("pageGroup");
+
 
   const [statuss, setStatuss] = useState([]);
 

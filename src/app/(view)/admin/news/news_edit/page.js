@@ -21,6 +21,33 @@ import FroalaEditorComponent from "react-froala-wysiwyg";
 // import RichTextEditor from "react-rte";
 
 const EditNews = ({ id }) => {
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const router = useRouter();
   const [noticeData, setNoticeData] = useState({
     title: "",
@@ -30,7 +57,7 @@ const EditNews = ({ id }) => {
 
     status: "",
 
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const handleModelChange = (content) => {
     setNoticeData({ ...noticeData, description: content });
@@ -42,7 +69,7 @@ const EditNews = ({ id }) => {
 
   // single user data get
 
-  const modified = localStorage.getItem("userId");
+
 
   const {
     data: news = [],
@@ -79,9 +106,9 @@ const EditNews = ({ id }) => {
       summary: brandSingle[0]?.summary,
       publish_date: brandSingle[0]?.publish_date,
 
-      modified_by: modified,
+      modified_by: userId,
     });
-  }, [brandSingle, modified]);
+  }, [brandSingle, userId]);
 
   // textEditor
 
@@ -244,7 +271,9 @@ const EditNews = ({ id }) => {
       .then((data) => {
         console.log(data);
         if (data) {
-          sessionStorage.setItem("message", "Data updated successfully");
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem("message", "Data saved successfully!");
+        }
           router.push("/Admin/news/news_all");
         }
       })
@@ -253,7 +282,7 @@ const EditNews = ({ id }) => {
       });
   };
 
-  const page_group = localStorage.getItem("pageGroup");
+
 
   const [statuss, setStatuss] = useState([]);
 

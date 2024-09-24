@@ -193,10 +193,36 @@ import { useRouter } from "next/navigation";
 
 const EditReligion = ({ id }) => {
   const router = useRouter();
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
 
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const [formData, setFormData] = useState({
     name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [name, setName] = useState("");
@@ -230,10 +256,10 @@ const EditReligion = ({ id }) => {
       const { name } = noticeCategorySingle[0];
       setFormData({
         name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -302,7 +328,9 @@ const EditReligion = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
         router.push("/Admin/religion/religion_all");
       } else {
         console.error("Error updating religion:", data);

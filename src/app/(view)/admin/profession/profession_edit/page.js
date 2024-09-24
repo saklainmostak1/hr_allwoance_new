@@ -194,9 +194,37 @@ import { useRouter } from "next/navigation";
 const EditProfession = ({ id }) => {
   const router = useRouter();
 
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
+
   const [formData, setFormData] = useState({
     profession_name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -234,10 +262,10 @@ const EditProfession = ({ id }) => {
       const { profession_name } = noticeCategorySingle[0];
       setFormData({
         profession_name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -311,7 +339,9 @@ const EditProfession = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
         router.push("/Admin/profession/profession_all");
       } else {
         console.error("Error updating profession:", data);

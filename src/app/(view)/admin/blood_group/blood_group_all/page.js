@@ -39,8 +39,34 @@ const BloodGroupList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -136,42 +162,46 @@ const BloodGroupList = ({ searchParams }) => {
 
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/blood_group/blood_group_delete/${id}`, {
-        method: "POST",
+      method: "POST",
     })
-        .then(response => {
-            console.log(response)
-            response.json()
-            if (response.ok === true) {
-                const procced = window.confirm(`Are You Sure delete`)
-                if (procced) {
-                    refetch();
-                    caregory_list()
-                }
-            }
-            else {
-                alert('Data already running. You cant Delete this item');
-            }
-        })
-        .then(data => {
-            if (data) {
+      .then(response => {
+        console.log(response)
+        response.json()
+        if (response.ok === true) {
+          const procced = window.confirm(`Are You Sure delete`)
+          if (procced) {
+            refetch();
+            caregory_list()
+          }
+        }
+        else {
+          alert('Data already running. You cant Delete this item');
+        }
+      })
+      .then(data => {
+        if (data) {
 
-                console.log(data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the data. Please try again.');
-        });
+          console.log(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the data. Please try again.');
+      });
 
-}
+  }
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+      if (typeof window !== 'undefined') {
+
+          if (sessionStorage.getItem("message")) {
+              setMessage(sessionStorage.getItem("message"));
+              sessionStorage.removeItem("message");
+          }
+      }
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -216,9 +246,8 @@ const BloodGroupList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/blood_group/blood_group_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/blood_group/blood_group_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -227,11 +256,10 @@ const BloodGroupList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/blood_group/blood_group_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -240,9 +268,8 @@ const BloodGroupList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/blood_group/blood_group_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/blood_group/blood_group_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -296,8 +323,8 @@ const BloodGroupList = ({ searchParams }) => {
                               <td>
                                 {photogalleryCategoryAll?.created_date
                                   ? formatDateTime(
-                                      photogalleryCategoryAll.created_date
-                                    )
+                                    photogalleryCategoryAll.created_date
+                                  )
                                   : ""}
                               </td>
 
@@ -377,9 +404,8 @@ const BloodGroupList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/blood_group/blood_group_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/blood_group/blood_group_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -388,11 +414,10 @@ const BloodGroupList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/blood_group/blood_group_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -401,9 +426,8 @@ const BloodGroupList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/blood_group/blood_group_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/blood_group/blood_group_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

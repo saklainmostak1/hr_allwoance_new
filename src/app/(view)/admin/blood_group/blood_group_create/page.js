@@ -315,7 +315,33 @@ import { useQuery } from "@tanstack/react-query";
 
 const BloodGroupCreate = () => {
   const [numToAdd, setNumToAdd] = useState(1);
-  const created = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [created, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const router = useRouter();
   const [bloodGroups, setBloodGroups] = useState([
     { blood_group_name: "", created_by: created },
@@ -503,7 +529,9 @@ const BloodGroupCreate = () => {
       .then((data) => {
         console.log(data);
 
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
       })
       .catch((error) => console.error(error));
     router.push(`/Admin/blood_group/blood_group_all`);

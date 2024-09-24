@@ -7,6 +7,34 @@ import Select from 'react-dropdown-select';
 const NewsSttings = () => {
 
 
+    const [page_group, setPage_group] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('pageGroup') || '';
+        }
+        return '';
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('pageGroup');
+            setPage_group(storedUserId);
+        }
+    }, []);
+
+    const [userId, setUserId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('userId') || '';
+        }
+        return '';
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
+        }
+    }, []);
+
     const { data: categorys = [], isLoading, refetch
     } = useQuery({
         queryKey: ['categorys'],
@@ -73,7 +101,7 @@ const NewsSttings = () => {
 
 
 
-    const page_group = localStorage.getItem('pageGroup')
+
 
 
     const [selectedColumns, setSelectedColumns] = React.useState([]);
@@ -92,7 +120,7 @@ const NewsSttings = () => {
     console.log(selectedColumns)
     const filteredColumns = columnNames.filter(column => column !== 'id');
 
-    const userId = localStorage.getItem('userId')
+    
 
     // Function to handle checkbox change
     const handleSubmit = (event) => {

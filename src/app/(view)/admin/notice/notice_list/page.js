@@ -105,8 +105,34 @@ const NoticeList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -215,11 +241,15 @@ const NoticeList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+      if (typeof window !== 'undefined') {
+
+          if (sessionStorage.getItem("message")) {
+              setMessage(sessionStorage.getItem("message"));
+              sessionStorage.removeItem("message");
+          }
+      }
+  }, [])
+
 
 
 
@@ -377,7 +407,7 @@ const NoticeList = ({ searchParams }) => {
 
 
 
- 
+
 
 
   const news_excel_download = async () => {
@@ -671,7 +701,7 @@ const NoticeList = ({ searchParams }) => {
   //   }
   // };
 
-  
+
   const news_pdf = async () => {
 
     // const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_person_list_visit/${id}`);

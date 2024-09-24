@@ -5,11 +5,41 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const CopynoticeCategory = ({ id }) => {
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
+
+
   const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     status: "",
-    created_by: localStorage.getItem("userId"),
+    created_by: userId,
   });
 
   const { data: noticeCategoryAll = [] } = useQuery({
@@ -54,10 +84,10 @@ const CopynoticeCategory = ({ id }) => {
       setFormData({
         name,
         status,
-        created_by: localStorage.getItem("userId"),
+        created_by: userId,
       });
     }
-  }, [noticeSingle]);
+  }, [noticeSingle, userId]);
 
   console.log(noticeSingle);
 
@@ -146,7 +176,9 @@ const CopynoticeCategory = ({ id }) => {
       const data = await response.json();
       if (data) {
         console.log(data);
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
         router.push("/Admin/notice_category/notice_category_all");
       } else {
         console.error("Error creating gender:", data);

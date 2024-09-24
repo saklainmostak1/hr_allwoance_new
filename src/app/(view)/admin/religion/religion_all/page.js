@@ -293,9 +293,33 @@ const ReligionList = ({ searchParams }) => {
       return data;
     },
   });
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -357,8 +381,8 @@ const ReligionList = ({ searchParams }) => {
   }, [currentPage]);
 
   const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
-console.log(pageUsers)
-console.log(photogalleryCategoryAll)
+  console.log(pageUsers)
+  console.log(photogalleryCategoryAll)
   // Paigination end
 
   // const photogalleryCategoryAll_delete = (id) => {
@@ -427,11 +451,15 @@ console.log(photogalleryCategoryAll)
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
+    if (typeof window !== 'undefined') {
+
+      if (sessionStorage.getItem("message")) {
+        setMessage(sessionStorage.getItem("message"));
+        sessionStorage.removeItem("message");
+      }
     }
-  }, []);
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -476,9 +504,8 @@ console.log(photogalleryCategoryAll)
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/religion/religion_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/religion/religion_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -487,11 +514,10 @@ console.log(photogalleryCategoryAll)
                           <Link
                             key={page}
                             href={`/Admin/religion/religion_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -500,9 +526,8 @@ console.log(photogalleryCategoryAll)
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/religion/religion_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/religion/religion_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -622,9 +647,8 @@ console.log(photogalleryCategoryAll)
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/religion/religion_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/religion/religion_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -633,11 +657,10 @@ console.log(photogalleryCategoryAll)
                           <Link
                             key={page}
                             href={`/Admin/religion/religion_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -646,9 +669,8 @@ console.log(photogalleryCategoryAll)
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/religion/religion_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/religion/religion_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

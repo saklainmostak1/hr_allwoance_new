@@ -293,7 +293,9 @@ const [name, setName] = useState([])
         .then((data) => {
           console.log(data);
 
-          sessionStorage.setItem("message", "Data saved successfully!");
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem("message", "Data saved successfully!");
+        }
           router.push("/Admin/company_type/company_type_all");
         });
     } catch (error) {

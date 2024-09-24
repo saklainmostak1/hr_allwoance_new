@@ -321,8 +321,33 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -489,11 +514,15 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
+    if (typeof window !== 'undefined') {
+
+      if (sessionStorage.getItem("message")) {
+        setMessage(sessionStorage.getItem("message"));
+        sessionStorage.removeItem("message");
+      }
     }
-  }, []);
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -516,7 +545,7 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                       href={`/Admin/video_gallery_category/video_gallery_category_create?page_group`}
                       className="btn btn-sm btn-info"
                     >
-                    Back to  Create Video Gallery Category
+                      Back to  Create Video Gallery Category
                     </Link>
                   </div>
                 </div>
@@ -538,9 +567,8 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -549,11 +577,10 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/video_gallery_category/video_gallery_category_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -562,9 +589,8 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -619,8 +645,8 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                               <td>
                                 {noticeCategoryAll?.created_date
                                   ? formatDateTime(
-                                      noticeCategoryAll.created_date
-                                    )
+                                    noticeCategoryAll.created_date
+                                  )
                                   : ""}
                               </td>
 
@@ -725,9 +751,8 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -736,11 +761,10 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/video_gallery_category/video_gallery_category_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -749,9 +773,8 @@ const VideoGalleryCategoryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/video_gallery_category/video_gallery_category_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

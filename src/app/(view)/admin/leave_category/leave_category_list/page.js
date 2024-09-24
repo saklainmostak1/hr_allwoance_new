@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-const LeaveCategoryList = ({searchParams}) => {
+const LeaveCategoryList = ({ searchParams }) => {
   const {
     data: leaveCategoryAll = [],
     isLoading,
@@ -22,8 +22,33 @@ const LeaveCategoryList = ({searchParams}) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -115,34 +140,34 @@ const LeaveCategoryList = ({searchParams}) => {
 
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_category/leave_category_delete/${id}`, {
-        method: "POST",
+      method: "POST",
     })
-        .then(response => {
-            console.log(response)
-            response.json()
-            if (response.ok === true) {
-                const procced = window.confirm(`Are You Sure delete`)
-                if (procced) {
-                    refetch();
-                    caregory_list()
-                }
-            }
-            else {
-                alert('Data already running. You cant Delete this item');
-            }
-        })
-        .then(data => {
-            if (data) {
+      .then(response => {
+        console.log(response)
+        response.json()
+        if (response.ok === true) {
+          const procced = window.confirm(`Are You Sure delete`)
+          if (procced) {
+            refetch();
+            caregory_list()
+          }
+        }
+        else {
+          alert('Data already running. You cant Delete this item');
+        }
+      })
+      .then(data => {
+        if (data) {
 
-                console.log(data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the data. Please try again.');
-        });
+          console.log(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the data. Please try again.');
+      });
 
-}
+  }
 
   const [message, setMessage] = useState();
   useEffect(() => {

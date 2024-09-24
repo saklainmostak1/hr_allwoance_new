@@ -4,10 +4,40 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const CopyPhotoGalleryCategory = ({ id }) => {
+
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
+
   const [formData, setFormData] = useState({
     name: "",
     status: "",
-    created_by: localStorage.getItem("userId"),
+    created_by: userId,
   });
 
   
@@ -40,10 +70,10 @@ const CopyPhotoGalleryCategory = ({ id }) => {
       setFormData({
         name,
         status,
-        created_by: localStorage.getItem("userId"),
+        created_by: userId,
       });
     }
-  }, [photogallerycategorySingle]);
+  }, [photogallerycategorySingle, userId]);
 
   console.log(photogallerycategorySingle);
 

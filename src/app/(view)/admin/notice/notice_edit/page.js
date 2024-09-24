@@ -19,6 +19,36 @@ import "froala-editor/js/plugins.pkgd.min.js";
 
 const EditNotice = ({ id }) => {
   const router = useRouter();
+
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const [noticeData, setNoticeData] = useState({
     title: "",
     description: "",
@@ -26,7 +56,7 @@ const EditNotice = ({ id }) => {
     notice_category: "",
     publish_date: "",
     file: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
 
   const handleModelChange = (content) => {
@@ -108,7 +138,7 @@ const EditNotice = ({ id }) => {
 
   // single user data get
 
-  const modified = localStorage.getItem("userId");
+
 
   const {
     data: notices = [],
@@ -153,9 +183,9 @@ const EditNotice = ({ id }) => {
         ? selectedFile[0]?.path
         : brandSingle[0]?.file,
 
-      modified_by: modified,
+      modified_by: userId,
     });
-  }, [brandSingle, modified, selectedFile]);
+  }, [brandSingle, userId, selectedFile]);
 
   useEffect(() => {
     const formattedDate = noticeData.publish_date?.split("T")[0];
@@ -439,7 +469,9 @@ const EditNotice = ({ id }) => {
       .then((data) => {
         console.log(data);
         if (data) {
-          sessionStorage.setItem("message", "Data updated successfully");
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem("message", "Data saved successfully!");
+          }
           router.push("/Admin/notice/notice_all");
         }
       })
@@ -448,7 +480,6 @@ const EditNotice = ({ id }) => {
       });
   };
 
-  const page_group = localStorage.getItem("pageGroup");
 
   const [statuss, setStatuss] = useState([]);
 

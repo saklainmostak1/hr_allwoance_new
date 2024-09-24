@@ -38,8 +38,33 @@ const ProfessionList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -187,11 +212,15 @@ const ProfessionList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+      if (typeof window !== 'undefined') {
+
+          if (sessionStorage.getItem("message")) {
+              setMessage(sessionStorage.getItem("message"));
+              sessionStorage.removeItem("message");
+          }
+      }
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -236,9 +265,8 @@ const ProfessionList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/profession/profession_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/profession/profession_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -247,11 +275,10 @@ const ProfessionList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/profession/profession_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -260,9 +287,8 @@ const ProfessionList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/profession/profession_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/profession/profession_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -313,8 +339,8 @@ const ProfessionList = ({ searchParams }) => {
                               <td>
                                 {noticeCategoryAll?.created_date
                                   ? formatDateTime(
-                                      noticeCategoryAll.created_date
-                                    )
+                                    noticeCategoryAll.created_date
+                                  )
                                   : ""}
                               </td>
 
@@ -395,9 +421,8 @@ const ProfessionList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/profession/profession_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/profession/profession_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -406,11 +431,10 @@ const ProfessionList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/profession/profession_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -419,9 +443,8 @@ const ProfessionList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/profession/profession_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/profession/profession_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

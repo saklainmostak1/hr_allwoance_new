@@ -173,7 +173,33 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const NewsCategoryCreate = () => {
-  const created_by = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [created_by, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -183,7 +209,7 @@ const NewsCategoryCreate = () => {
 
 
   const [status, setStatus] = useState([])
- 
+
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
@@ -193,7 +219,7 @@ const NewsCategoryCreate = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
- 
+
   const [name, setName] = useState([])
   const [statuss, setstatus] = useState([])
 
@@ -238,7 +264,7 @@ const NewsCategoryCreate = () => {
   const user_create = async (e) => {
     e.preventDefault();
 
-   
+
 
     // const normalizedInputName = formData.name
     //   .trim()
@@ -293,7 +319,9 @@ const NewsCategoryCreate = () => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
         router.push("/Admin/news_category/news_category_all");
       } else {
         console.error("Error creating gender:", data);
@@ -356,7 +384,7 @@ const NewsCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        
+
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${errorMessage ? "is-invalid" : ""
                           }`}

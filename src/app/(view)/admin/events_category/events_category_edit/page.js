@@ -205,16 +205,42 @@ const EditPhotoGalleryCategory = ({ id }) => {
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
-    .then(res => res.json())
-    .then(data => setStatus(data))
+      .then(res => res.json())
+      .then(data => setStatus(data))
   }, [])
 
 
   const router = useRouter();
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const [formData, setFormData] = useState({
     name: "", status: '',
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
 
 
@@ -254,10 +280,10 @@ const EditPhotoGalleryCategory = ({ id }) => {
       setFormData({
         status,
         name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -307,7 +333,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
       return
 
     }
-   
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/events_category/events_category_edit/${id}`,
@@ -321,7 +347,9 @@ const EditPhotoGalleryCategory = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
       } else {
         console.error("Error updating religion:", data);
       }
@@ -383,7 +411,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        
+
                         onChange={handleChange}
                         value={formData.name}
                         className="form-control form-control-sm required"
@@ -398,7 +426,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
                       {
                         errorMessage && <p className="text-danger m-0">{errorMessage}</p>
                       }
-                      
+
                     </div>
                   </div>
                   <div className="form-group row">
@@ -427,7 +455,7 @@ const EditPhotoGalleryCategory = ({ id }) => {
                           status.map(sta =>
 
                             <>
-                            <option value={sta.id}>{sta.status_name}</option>
+                              <option value={sta.id}>{sta.status_name}</option>
                             </>
                           )
                         }

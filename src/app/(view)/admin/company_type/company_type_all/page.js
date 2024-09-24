@@ -38,9 +38,33 @@ const CompanyTypeList = ({ searchParams }) => {
       return data;
     },
   });
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -141,11 +165,15 @@ const CompanyTypeList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+      if (typeof window !== 'undefined') {
+
+          if (sessionStorage.getItem("message")) {
+              setMessage(sessionStorage.getItem("message"));
+              sessionStorage.removeItem("message");
+          }
+      }
+  }, [])
+
 
   console.log(pageUsers);
 
@@ -192,9 +220,8 @@ const CompanyTypeList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/company_type/company_type_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/company_type/company_type_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -203,11 +230,10 @@ const CompanyTypeList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/company_type/company_type_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -216,9 +242,8 @@ const CompanyTypeList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/company_type/company_type_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/company_type/company_type_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -337,9 +362,8 @@ const CompanyTypeList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/company_type/company_type_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/company_type/company_type_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -348,11 +372,10 @@ const CompanyTypeList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/company_type/company_type_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -361,9 +384,8 @@ const CompanyTypeList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/company_type/company_type_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/company_type/company_type_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

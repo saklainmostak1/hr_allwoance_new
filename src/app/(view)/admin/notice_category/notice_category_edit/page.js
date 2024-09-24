@@ -210,9 +210,37 @@ const EditnoticeCategory = ({ id }) => {
       .then(data => setStatus(data))
   }, [])
 
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
+
   const [formData, setFormData] = useState({
     name: "", status: '',
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const [errorMessage, setErrorMessage] = useState("");
    
@@ -249,10 +277,10 @@ const EditnoticeCategory = ({ id }) => {
       setFormData({
         name,
         status,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -327,7 +355,9 @@ const EditnoticeCategory = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
       } else {
         console.error("Error updating religion:", data);
       }

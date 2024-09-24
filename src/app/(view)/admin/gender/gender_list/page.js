@@ -38,8 +38,34 @@ const GenderList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -171,13 +197,16 @@ const GenderList = ({ searchParams }) => {
     }
   };
 
-  const [message, setMessage] = useState();
-  useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
-    }
-  }, []);
+   const [message, setMessage] = useState();
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+
+            if (sessionStorage.getItem("message")) {
+                setMessage(sessionStorage.getItem("message"));
+                sessionStorage.removeItem("message");
+            }
+        }
+    }, [])
 
   return (
     <div className="container-fluid">
@@ -223,9 +252,8 @@ const GenderList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/gender/gender_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/gender/gender_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -234,11 +262,10 @@ const GenderList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/gender/gender_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -247,9 +274,8 @@ const GenderList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/gender/gender_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/gender/gender_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -399,9 +425,8 @@ const GenderList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/gender/gender_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/gender/gender_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -410,11 +435,10 @@ const GenderList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/gender/gender_all?page=${page}`}
-                            className={` ${
-                              page === activePage
+                            className={` ${page === activePage
                                 ? "font-bold bg-primary px-2 border-left py-1 text-white"
                                 : "text-primary px-2 border-left py-1"
-                            }`}
+                              }`}
                           >
                             {" "}
                             {page}
@@ -423,9 +447,8 @@ const GenderList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/gender/gender_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/gender/gender_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

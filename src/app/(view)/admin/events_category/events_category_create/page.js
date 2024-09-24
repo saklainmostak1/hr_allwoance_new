@@ -185,7 +185,33 @@ const PhotoGalleryCategoryCreate = () => {
   console.log(status)
 
 
-  const created_by = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [created_by, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -304,7 +330,9 @@ const PhotoGalleryCategoryCreate = () => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+      }
         router.push("/Admin/events_category/events_category_all");
       } else {
         console.error("Error creating gender:", data);

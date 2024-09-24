@@ -193,10 +193,38 @@ import { useRouter } from "next/navigation";
 
 const GenderEdit = ({ id }) => {
   const router = useRouter();
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
 
   const [formData, setFormData] = useState({
     gender_name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [name, setName] = useState([])
@@ -229,10 +257,10 @@ const GenderEdit = ({ id }) => {
       const { gender_name } = noticeCategorySingle[0];
       setFormData({
         gender_name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [noticeCategorySingle]);
+  }, [noticeCategorySingle, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -303,7 +331,9 @@ const GenderEdit = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
       } else {
         console.error("Error updating religion:", data);
       }
@@ -365,7 +395,7 @@ const GenderEdit = ({ id }) => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        
+
                         onChange={handleChange}
                         value={formData.gender_name}
                         className="form-control form-control-sm required"

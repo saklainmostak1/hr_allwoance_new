@@ -314,9 +314,33 @@ const NewsCategoryList = ({ searchParams }) => {
       return data;
     },
   });
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -418,11 +442,15 @@ const NewsCategoryList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
+    if (typeof window !== 'undefined') {
+
+      if (sessionStorage.getItem("message")) {
+        setMessage(sessionStorage.getItem("message"));
+        sessionStorage.removeItem("message");
+      }
     }
-  }, []);
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -467,9 +495,8 @@ const NewsCategoryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/news_category/news_category_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/news_category/news_category_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -478,11 +505,10 @@ const NewsCategoryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/news_category/news_category_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -491,9 +517,8 @@ const NewsCategoryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/news_category/news_category_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/news_category/news_category_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -548,8 +573,8 @@ const NewsCategoryList = ({ searchParams }) => {
                               <td>
                                 {noticeCategoryAll?.created_date
                                   ? formatDateTime(
-                                      noticeCategoryAll.created_date.slice(0,10)
-                                    )
+                                    noticeCategoryAll.created_date.slice(0, 10)
+                                  )
                                   : ""}
                               </td>
 
@@ -654,9 +679,8 @@ const NewsCategoryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/news_category/news_category_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/news_category/news_category_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -665,11 +689,10 @@ const NewsCategoryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/news_category/news_category_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -678,9 +701,8 @@ const NewsCategoryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/news_category/news_category_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/news_category/news_category_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

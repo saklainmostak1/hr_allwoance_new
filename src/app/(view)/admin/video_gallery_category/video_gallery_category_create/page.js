@@ -175,7 +175,33 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const VideoGalleryCategoryCreate = () => {
-  const created_by = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [created_by, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -298,7 +324,9 @@ const VideoGalleryCategoryCreate = () => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data saved successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
         router.push("/Admin/video_gallery_category/video_gallery_category_all");
       } else {
         console.error("Error creating gender:", data);
@@ -361,7 +389,7 @@ const VideoGalleryCategoryCreate = () => {
                     </label>
                     <div className="col-md-6">
                       <input
-                        
+
                         onChange={handleChange}
                         className={`form-control form-control-sm required ${errorMessage ? "is-invalid" : ""
                           }`}

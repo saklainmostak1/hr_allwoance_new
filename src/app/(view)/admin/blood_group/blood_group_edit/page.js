@@ -6,9 +6,38 @@ import { useRouter } from "next/navigation";
 
 const EditBloodGroup = ({ id }) => {
   const router = useRouter();
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     blood_group_name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
   const [errors, setErrors] = useState({
     blood_group_name: "",
@@ -30,10 +59,10 @@ const EditBloodGroup = ({ id }) => {
       const { blood_group_name } = newsCategorySingle[0];
       setFormData({
         blood_group_name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [newsCategorySingle]);
+  }, [newsCategorySingle, userId]);
 
   const { data: bloodgroups = [] } = useQuery({
     queryKey: ["bloodgroups"],
@@ -62,7 +91,7 @@ const EditBloodGroup = ({ id }) => {
     }));
   };
 
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,7 +138,9 @@ const EditBloodGroup = ({ id }) => {
       );
       const data = await response.json();
       if (data) {
-        sessionStorage.setItem("message", "Data Updated successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data Updated successfully!");
+      }
         router.push("/Admin/blood_group/blood_group_all");
       } else {
         setErrors((prevErrors) => ({

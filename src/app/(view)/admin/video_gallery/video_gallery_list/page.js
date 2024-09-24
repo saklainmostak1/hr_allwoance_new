@@ -383,8 +383,34 @@ const VideoGalleryList = ({ searchParams }) => {
     },
   });
 
-  const page_group = localStorage.getItem("pageGroup");
-  const userId = localStorage.getItem("userId");
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const { data: moduleInfo = [] } = useQuery({
     queryKey: ["moduleInfo"],
     queryFn: async () => {
@@ -475,11 +501,15 @@ const VideoGalleryList = ({ searchParams }) => {
 
   const [message, setMessage] = useState();
   useEffect(() => {
-    if (sessionStorage.getItem("message")) {
-      setMessage(sessionStorage.getItem("message"));
-      sessionStorage.removeItem("message");
+    if (typeof window !== 'undefined') {
+
+      if (sessionStorage.getItem("message")) {
+        setMessage(sessionStorage.getItem("message"));
+        sessionStorage.removeItem("message");
+      }
     }
-  }, []);
+  }, [])
+
 
   return (
     <div className="container-fluid">
@@ -490,7 +520,7 @@ const VideoGalleryList = ({ searchParams }) => {
               {message}
             </div>
           )}
-  <div className='card mb-4'>
+          <div className='card mb-4'>
             <div class=" body-content bg-light">
 
               <div class=" border-primary shadow-sm border-0">
@@ -502,7 +532,7 @@ const VideoGalleryList = ({ searchParams }) => {
                   </div>
                 </div>
 
-               
+
                 <div class="card-body">
                   <form class="">
                     <div class="col-md-10 offset-md-1">
@@ -562,12 +592,12 @@ const VideoGalleryList = ({ searchParams }) => {
 
                         <label class="col-form-label col-md-3"><strong>News Name:</strong></label>
                         <div className="col-md-3">
-                          <input class="form-control form-control-sm  alpha_space item_name" type="text" 
-                          
+                          <input class="form-control form-control-sm  alpha_space item_name" type="text"
+
                           // value={itemName}
                           //   onChange={(e) => setItemName(e.target.value)} 
-                            
-                            />
+
+                          />
                         </div>
                         <label class="col-form-label col-md-3"><strong>News Category Name:</strong></label>
                         <div className="col-md-3">
@@ -650,26 +680,26 @@ const VideoGalleryList = ({ searchParams }) => {
 
 
                           <Select
-                            // multi
-                            // options={[
-                            //   { label: 'Serial', value: 'serial' }, // Serial option
-                            //   ...filteredColumns.map(column => ({
-                            //     label: formatString(column),
-                            //     value: column,
-                            //   })),
-                            //   { label: 'Action', value: 'action' }, // Action option
-                            // ]}
-                            // values={
+                          // multi
+                          // options={[
+                          //   { label: 'Serial', value: 'serial' }, // Serial option
+                          //   ...filteredColumns.map(column => ({
+                          //     label: formatString(column),
+                          //     value: column,
+                          //   })),
+                          //   { label: 'Action', value: 'action' }, // Action option
+                          // ]}
+                          // values={
 
-                            //   columnListSelectedArray?.map(column => ({
-                            //     label: formatString(column),
-                            //     value: column,
-                            //   }))
+                          //   columnListSelectedArray?.map(column => ({
+                          //     label: formatString(column),
+                          //     value: column,
+                          //   }))
 
-                            // }
+                          // }
 
 
-                            // onChange={category_column_change}
+                          // onChange={category_column_change}
                           />
                         </div>
                       </div>
@@ -822,9 +852,8 @@ const VideoGalleryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery/video_gallery_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/video_gallery/video_gallery_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -833,11 +862,10 @@ const VideoGalleryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/video_gallery/video_gallery_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -846,9 +874,8 @@ const VideoGalleryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery/video_gallery_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/video_gallery/video_gallery_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>
@@ -934,9 +961,8 @@ const VideoGalleryList = ({ searchParams }) => {
                                       <iframe
                                         width="200"
                                         height="113"
-                                        src={`https://player.vimeo.com/video/${
-                                          videoLink.split("vimeo.com/")[1]
-                                        }`}
+                                        src={`https://player.vimeo.com/video/${videoLink.split("vimeo.com/")[1]
+                                          }`}
                                         frameBorder="0"
                                         allow="autoplay; fullscreen; picture-in-picture"
                                         allowFullScreen
@@ -1066,9 +1092,8 @@ const VideoGalleryList = ({ searchParams }) => {
                         {currentPage > 1 && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery/video_gallery_all?page=${
-                              activePage - 1
-                            }`}
+                            href={`/Admin/video_gallery/video_gallery_all?page=${activePage - 1
+                              }`}
                           >
                             &lt;
                           </Link>
@@ -1077,11 +1102,10 @@ const VideoGalleryList = ({ searchParams }) => {
                           <Link
                             key={page}
                             href={`/Admin/video_gallery/video_gallery_all?page=${page}`}
-                            className={` ${
-                              page === activePage
-                                ? "font-bold bg-primary px-2 border-left py-1 text-white"
-                                : "text-primary px-2 border-left py-1"
-                            }`}
+                            className={` ${page === activePage
+                              ? "font-bold bg-primary px-2 border-left py-1 text-white"
+                              : "text-primary px-2 border-left py-1"
+                              }`}
                           >
                             {" "}
                             {page}
@@ -1090,9 +1114,8 @@ const VideoGalleryList = ({ searchParams }) => {
                         {currentPage < totalPages && (
                           <Link
                             className=" text-primary px-2 border-left py-1"
-                            href={`/Admin/video_gallery/video_gallery_all?page=${
-                              activePage + 1
-                            }`}
+                            href={`/Admin/video_gallery/video_gallery_all?page=${activePage + 1
+                              }`}
                           >
                             &gt;
                           </Link>

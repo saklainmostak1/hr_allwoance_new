@@ -212,9 +212,36 @@ import { useRouter } from "next/navigation";
 
 const EditEducation = ({ id }) => {
   const router = useRouter();
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('pageGroup');
+        setPage_group(storedUserId);
+    }
+}, []);
+
+const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('userId') || '';
+    }
+    return '';
+});
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }
+}, []);
   const [formData, setFormData] = useState({
     education_name: "",
-    modified_by: localStorage.getItem("userId"),
+    modified_by: userId,
   });
 
   const [errors, setErrors] = useState({
@@ -255,10 +282,10 @@ const EditEducation = ({ id }) => {
       const { education_name } = currentEducation[0];
       setFormData({
         education_name,
-        modified_by: localStorage.getItem("userId"),
+        modified_by: userId,
       });
     }
-  }, [currentEducation]);
+  }, [currentEducation, userId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

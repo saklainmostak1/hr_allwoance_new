@@ -5,14 +5,44 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const CopynewsCategory = ({ id }) => {
+
+
+  const [page_group, setPage_group] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('pageGroup') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('pageGroup');
+      setPage_group(storedUserId);
+    }
+  }, []);
+
+  const [userId, setUserId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId') || '';
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     status: "",
-    created_by: localStorage.getItem("userId"),
+    created_by: userId,
   });
 
   const [status, setStatus] = useState([])
- 
+
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/status/all_status`)
@@ -57,10 +87,10 @@ const CopynewsCategory = ({ id }) => {
       setFormData({
         name,
         status,
-        created_by: localStorage.getItem("userId"),
+        created_by: userId,
       });
     }
-  }, [newsSingle]);
+  }, [newsSingle, userId]);
 
   console.log(newsSingle);
 
@@ -130,7 +160,9 @@ const CopynewsCategory = ({ id }) => {
       const data = await response.json();
       console.log(data);
       if (data) {
-        sessionStorage.setItem("message", "Data Copy successfully!");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("message", "Data saved successfully!");
+        }
         router.push("/Admin/news_category/news_category_all");
       }  // Handle response data or success message
     } catch (error) {
@@ -231,9 +263,9 @@ const CopynewsCategory = ({ id }) => {
                       >
                         <option>Select Status</option>
                         {
-                          status.map(sta => 
+                          status.map(sta =>
                             <>
-                            <option value={sta.id}>{sta.status_name}</option>
+                              <option value={sta.id}>{sta.status_name}</option>
                             </>
                           )
                         }
