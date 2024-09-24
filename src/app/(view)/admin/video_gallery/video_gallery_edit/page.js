@@ -4,7 +4,6 @@ import axios from "axios";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import "froala-editor/css/froala_style.min.css";
 import "froala-editor/css/froala_editor.pkgd.min.css";
 
@@ -12,15 +11,9 @@ import "froala-editor/js/plugins.pkgd.min.js";
 
 import FroalaEditorComponent from "react-froala-wysiwyg";
 
-// import "froala-editor/js/plugins.pkgd.min.js";
+const EditVideoGallery = ({ id }) => {
+  const router = useRouter();
 
-// Load all plugins
-
-// Require Editor CSS files.
-
-// import RichTextEditor from "react-rte";
-
-const EditNews = ({ id }) => {
   const [page_group, setPage_group] = useState(() => {
     if (typeof window !== 'undefined') {
         return localStorage.getItem('pageGroup') || '';
@@ -48,38 +41,50 @@ useEffect(() => {
         setUserId(storedUserId);
     }
 }, []);
-  const router = useRouter();
+
+
   const [noticeData, setNoticeData] = useState({
     title: "",
-    news_category: "",
-    summary: "",
+    link: "",
     description: "",
+    status: "", // Ensure this is initialized
+    video_category: "",
 
-    status: "",
-
-    modified_by: userId,
+    modified_by:userId,
   });
+
   const handleModelChange = (content) => {
     setNoticeData({ ...noticeData, description: content });
   };
 
-  // state management
-
   const [errorMessage, setErrorMessage] = useState("");
+  const [sameName, setSameName] = useState("");
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileSizeError, setFileSizeError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
+  const [reformattedDate, setReformattedDate] = useState("");
+  // const [value, setValue] = useState(RichTextEditor.createEmptyValue());
+  const [currentFile, setCurrentFile] = useState(noticeData.file);
+  const [fileNames, setFileNames] = useState([]);
+
+  const [oldFileUrl, setOldFileUrl] = useState(null);
 
   // single user data get
 
-
+ 
 
   const {
-    data: news = [],
+    data: video = [],
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["news"],
+    queryKey: ["video"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news/news_all`
+        `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery/video_gallery_all`
       );
       const data = await res.json();
       // Filter out the brand with id
@@ -90,7 +95,9 @@ useEffect(() => {
 
   const [brandSingle, setBrandSingle] = useState([]);
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news/news_all/${id}`)
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery/video_gallery_all/${id}`
+    )
       .then((Response) => Response.json())
       .then((data) => setBrandSingle(data));
   }, [id]);
@@ -102,93 +109,37 @@ useEffect(() => {
       title: brandSingle[0]?.title,
       status: brandSingle[0]?.status,
       description: brandSingle[0]?.description,
-      news_category: brandSingle[0]?.news_category,
-      summary: brandSingle[0]?.summary,
-      publish_date: brandSingle[0]?.publish_date,
+      video_category: brandSingle[0]?.video_category,
+      link: brandSingle[0]?.link,
 
       modified_by: userId,
     });
   }, [brandSingle, userId]);
 
-  // textEditor
-
-  // const onChange = (value) => {
-  //   setValue(value);
-  //   setNoticeData((prevData) => ({
-  //     ...prevData,
-  //     description: value.toString("html"),
-  //   }));
-  // };
-
-  // publish_date formattedDate
-
-  // publish_date value target
-
-  // // input field target
-
-  // const notice_input_change = (event) => {
-  //   const { name, value } = event.target;
-  //   setNoticeData((prevData) => ({
-  //     ...prevData,
-  //     [name]: value,
-  //   }));
-  // };
-
-  // file'value target & create file path with file's date and time
-
-  // IMAGE DELETE SUBMIT FORM SERVER
-
-  // const activeDisplayed = false;
-  // const inactiveDisplayed = false;
-
-  // const [noticeAll, setNoticeAll] = useState([]);
-
-  // useEffect(() => {
-  //   fetch(
-  //     `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/notice_category/notice_category_all`
-  //   )
-  //     .then((res) => res.json())
-  //     .then((data) => setNoticeAll(data))
-  //     .catch((error) => console.log(error.message));
-  // }, []);
-
   const [noticeAll, setNoticeAll] = useState([]);
 
   useEffect(() => {
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news_category/news_category_all`
+      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery_category/video_gallery_category_all`
     )
       .then((res) => res.json())
       .then((data) => setNoticeAll(data))
       .catch((error) => console.log(error.message));
   }, []);
 
-  // const [activeDisplayed, setActiveDisplayed] = useState(false);
-  // // const [inactiveDisplayed, setInactiveDisplayed] = useState(false);
-
-  // // // Compute whether to display 'Active' and 'Inactive' options
-  // // noticeAll.forEach((item) => {
-  // //   if (item.status === 1 && !activeDisplayed) {
-  // //     setActiveDisplayed(true);
-  // //   }
-  // //   if (item.status === 2 && !inactiveDisplayed) {
-  // //     setInactiveDisplayed(true);
-  // //   }
-  // // });
-
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("");
   const [description, setDescription] = useState("");
-  const [summary, setSummary] = useState("");
-  const [newscategory, setNewscategory] = useState("");
+  const [link, setLink] = useState("");
+  const [videocategory, setVideocategory] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "title") {
       setTitle("");
     }
-    if (name === "news_category") {
-      setNewscategory("");
+    if (name === "video_category") {
+      setVideocategory("");
     }
     if (name === "description") {
       setDescription("");
@@ -196,11 +147,11 @@ useEffect(() => {
     if (name === "status") {
       setStatus("");
     }
-    if (name === "summary") {
-      setSummary("");
+    if (name === "link") {
+      setLink("");
     }
 
-    const existingBrand = news.find(
+    const existingBrand = video.find(
       (brand) =>
         brand?.title?.toLowerCase() === noticeData?.title?.toLowerCase()
     );
@@ -219,11 +170,11 @@ useEffect(() => {
     e.preventDefault();
 
     if (!noticeData.title) {
-      setTitle("News title  is required");
+      setTitle("Notice title  is required");
       return;
     }
-    if (!noticeData.news_category) {
-      setNewscategory("News category title  is required");
+    if (!noticeData.video_category) {
+      setVideocategory("Video category title  is required");
       return;
     }
 
@@ -235,8 +186,8 @@ useEffect(() => {
       setStatus("Status  is required");
       return;
     }
-    if (!noticeData.summary) {
-      setSummary("Summary  is required");
+    if (!noticeData.link) {
+      setLink("Link  is required");
       return;
     }
 
@@ -244,7 +195,7 @@ useEffect(() => {
       return name?.trim().replace(/\s+/g, "");
     };
 
-    const existingBrand = news.find(
+    const existingBrand = video.find(
       (brand) =>
         normalizebrandName(brand.title.toLowerCase()) ===
         normalizebrandName(noticeData.title.toLowerCase())
@@ -252,19 +203,22 @@ useEffect(() => {
     if (existingBrand) {
       // Show error message
       setErrorMessage(
-        "News name already exists. Please choose a different Notice Category name."
+        "Video Category name already exists. Please choose a different Video Category name."
       );
       return;
     }
 
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news/news_edit/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery/video_gallery_edit/${id}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(noticeData),
+        body: JSON.stringify({
+          ...noticeData,
+          file: uploadedFileUrl || noticeData.file,
+        }),
       }
     )
       .then((response) => response.json())
@@ -274,7 +228,7 @@ useEffect(() => {
           if (typeof window !== 'undefined') {
             sessionStorage.setItem("message", "Data saved successfully!");
         }
-          router.push("/Admin/news/news_all");
+          router.push("/Admin/video_gallery/video_gallery_all");
         }
       })
       .catch((error) => {
@@ -292,22 +246,19 @@ useEffect(() => {
       .then((data) => setStatuss(data));
   }, []);
 
-
-  
-
   return (
     <div class="col-md-12 body-content bg-light p-4">
       <div class=" border-primary shadow-sm border-0">
         <div class="card-header py-1 bg-dark custom-card-header clearfix bg-gradient-primary text-white">
           <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">
-            Update News
+            Update Video Gallery
           </h5>
           <div class="card-title font-weight-bold mb-0 card-header-color float-right">
             <Link
-              href={`/Admin/news/news_all?page_group=${page_group}`}
+              href={`/Admin/video_gallery/video_gallery_all?page_group=${page_group}`}
               class="btn btn-sm btn-info"
             >
-              Back News List
+              Back Video Gallery List
             </Link>
           </div>
         </div>
@@ -342,7 +293,7 @@ useEffect(() => {
 
             <div className="form-group row">
               <label className="col-form-label font-weight-bold col-md-3">
-                News Category:
+                Video Category:
                 <small>
                   <sup>
                     <small>
@@ -354,11 +305,11 @@ useEffect(() => {
               <div className="col-md-6">
                 <select
                   onChange={handleChange}
-                  value={noticeData.news_category}
-                  name="news_category"
-                  id="news_category"
+                  value={noticeData.notice_category}
+                  name="notice_category"
+                  id="notice_category"
                   className="form-control form-control-sm required"
-                  placeholder="Select News Category"
+                  placeholder="Select Notice Category"
                 >
                   <option value="">Select Notice Category</option>
                   {noticeAll.map((item) => (
@@ -367,34 +318,36 @@ useEffect(() => {
                     </>
                   ))}
                 </select>
-                {newscategory && <p className="text-danger">{newscategory}</p>}
+                {videocategory && (
+                  <p className="text-danger">{videocategory}</p>
+                )}
               </div>
             </div>
 
             <div className="form-group row">
               <label className="col-form-label font-weight-bold col-md-3">
-                Summary:
+                Link:
                 <small>
                   <sup>
                     <small>
                       <i className="text-danger fas fa-star"></i>
                     </small>
                   </sup>
-                </small>{" "}
+                </small>
               </label>
               <div className="col-md-6">
-                <textarea
-                  type="text"
-                  name="summary"
-                  id="summary"
-                  rows="5"
+                <input
+                  required
+                  value={noticeData.link}
                   onChange={handleChange}
-                  value={noticeData.summary}
                   className="form-control form-control-sm required"
-                  placeholder="Enter Summary"
-                ></textarea>
+                  id="link"
+                  placeholder="Enter Link"
+                  type="text"
+                  name="link"
+                />
                 {errorMessage && <p className="text-danger">{errorMessage}</p>}
-                {summary && <div className="text-danger">{summary}</div>}
+                {link && <p className="text-danger">{link}</p>}
               </div>
             </div>
 
@@ -626,4 +579,4 @@ useEffect(() => {
   );
 };
 
-export default EditNews;
+export default EditVideoGallery;

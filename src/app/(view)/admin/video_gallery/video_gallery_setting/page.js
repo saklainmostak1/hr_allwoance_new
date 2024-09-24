@@ -1,10 +1,11 @@
 'use client'
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Select from 'react-dropdown-select';
 
-const NewsSttings = () => {
+const VideoGallerySetting = () => {
+
 
 
     const [page_group, setPage_group] = useState(() => {
@@ -39,7 +40,7 @@ const NewsSttings = () => {
     } = useQuery({
         queryKey: ['categorys'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/news/news_all`)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/video_gallery/video_gallery_all`)
 
             const data = await res.json()
             return data
@@ -59,7 +60,7 @@ const NewsSttings = () => {
         }
     })
 
-    const category = module_settings.filter(moduleI => moduleI.table_name === 'news')
+    const category = module_settings.filter(moduleI => moduleI.table_name === 'video_gallery')
     const columnListSelected = category[0]?.column_name
     const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
 
@@ -99,11 +100,6 @@ const NewsSttings = () => {
 
 
 
-
-
-
-
-
     const [selectedColumns, setSelectedColumns] = React.useState([]);
 
 
@@ -120,7 +116,7 @@ const NewsSttings = () => {
     console.log(selectedColumns)
     const filteredColumns = columnNames.filter(column => column !== 'id');
 
-    
+
 
     // Function to handle checkbox change
     const handleSubmit = (event) => {
@@ -168,10 +164,10 @@ const NewsSttings = () => {
 
                             <div class=" border-primary shadow-sm border-0">
                                 <div class=" card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">News Settings</h5>
+                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Video Gallery Settings</h5>
                                     <div class="card-title font-weight-bold mb-0 card-header-color float-right">
 
-                                        <Link href={`/Admin/news/news_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create News</Link>
+                                        <Link href={`/Admin/video_gallery/video_gallery_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create Video Gallery</Link>
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -242,4 +238,4 @@ const NewsSttings = () => {
     );
 };
 
-export default NewsSttings;
+export default VideoGallerySetting;

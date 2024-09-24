@@ -328,7 +328,7 @@ const SmsApiCreate = () => {
                                     <form onSubmit={sms_api_create} className="form-horizontal" method="post" autoComplete="off">
                                         <div className="form-group row">
                                             <label className="control-label font-weight-bold col-md-2">
-                                                API Name: <sup><i className="text-danger fas fa-star"></i></sup>
+                                                API Name: <small><sup><i className="text-danger fas fa-star"></i></sup></small>
                                             </label>
                                             <div className="col-md-8">
                                                 <input
@@ -343,7 +343,7 @@ const SmsApiCreate = () => {
                                         </div>
                                         <div className="form-group row">
                                             <label className="control-label font-weight-bold col-md-2">
-                                                SMS API URL: <sup><i className="text-danger fas fa-star"></i></sup>
+                                                SMS API URL: <small><sup><i className="text-danger fas fa-star"></i></sup></small>
                                             </label>
                                             <div className="col-md-8">
                                                 <input
@@ -400,8 +400,8 @@ const SmsApiCreate = () => {
                                                             <table className="table table-bordered table-hover table-striped table-sm">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th>SMS API Param<sup><i className="text-danger fas fa-star"></i></sup></th>
-                                                                        <th>SMS API Param Value<sup><i className="text-danger fas fa-star"></i></sup></th>
+                                                                        <th>SMS API Param <small><sup><i className="text-danger fas fa-star"></i></sup></small></th>
+                                                                        <th>SMS API Param Value <small><sup><i className="text-danger fas fa-star"></i></sup></small></th>
                                                                         <th>Options</th>
                                                                         <th>Action</th>
                                                                     </tr>
@@ -457,7 +457,7 @@ const SmsApiCreate = () => {
                                             </div>
                                         </div>
                                         <div className="form-group row">
-                                            <label className="control-label font-weight-bold col-md-2">API Balance URL:<sup><i className="text-danger fas fa-star"></i></sup></label>
+                                            <label className="control-label font-weight-bold col-md-2">API Balance URL: <small><sup><i className="text-danger fas fa-star"></i></sup></small></label>
                                             <div className="col-md-8">
                                                 <div className="input-group input-group-sm">
                                                     <input onChange={handleInputChange} value={fields.balance_url} type="text" name="balance_url" className="form-control form-control-sm" placeholder="Enter API Balance URL" />
@@ -505,7 +505,7 @@ const SmsApiCreate = () => {
 
                                         <div className="form-group row">
                                             <label className="control-label font-weight-bold col-md-2">
-                                                API Status: <sup><i className="text-danger fas fa-star"></i></sup>
+                                                API Status:<small><sup><i className="text-danger fas fa-star"></i></sup></small>
                                             </label>
                                             <div className="col-md-8">
                                                 <select name="status_url"
