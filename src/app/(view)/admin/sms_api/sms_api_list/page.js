@@ -215,7 +215,6 @@ const SmsApiList = () => {
             fetchBalances();
         }
     }, [smsApiLists]);
-    
     // const balance = response.data.Balance !== undefined || response.data.balance !== undefined ? response.data.Balance || response.data.balance : 'N/A';
 
     console.log(balanceData)

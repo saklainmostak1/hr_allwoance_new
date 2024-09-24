@@ -175,6 +175,9 @@ const SmsApiUpdate = ({ id }) => {
         });
     };
 
+
+    
+
     const handleRemoveField = (index) => {
         setFields(prev => {
             const updatedParams = prev.sms_api_params.filter((_, i) => i !== index);
@@ -199,6 +202,9 @@ const SmsApiUpdate = ({ id }) => {
             return { ...prev, sms_api_params: updatedParams, branch_name: newBranchId }; // Update branch_name here
         });
     };
+
+
+
     const { data: branchAll = [] } = useQuery({
         queryKey: ['branchAll'],
         queryFn: async () => {
@@ -226,7 +232,7 @@ const SmsApiUpdate = ({ id }) => {
             setstatus_url(' Must Be filled')
             return
         }
-        
+
         if (!fields.balance_url) {
             setbalance_url(' Must Be filled')
             return
@@ -310,9 +316,9 @@ const SmsApiUpdate = ({ id }) => {
                                                     value={fields.api_url}
                                                     onChange={handleInputChange}
                                                     type="text" className="form-control form-control-sm required" placeholder="Enter SMS API URL" />
-                                                     {
-                                                        api_url && <p className='text-danger'>{api_url}</p>
-                                                    }
+                                                {
+                                                    api_url && <p className='text-danger'>{api_url}</p>
+                                                }
                                             </div>
                                         </div>
 
@@ -380,7 +386,7 @@ const SmsApiUpdate = ({ id }) => {
                                                                             </td>
                                                                             <td>
                                                                                 <input
-                                                                                    disabled={param.options === '1' || param.options === '2'}
+                                                                                    disabled={param.options === 1 || param.options === '1' || param.options === 2 || param.options === '2'}
                                                                                     value={param.sms_value}
                                                                                     onChange={(e) => handleChange(index, e)}
                                                                                     type="text" name="sms_value" className="form-control form-control-sm required" placeholder="Enter API Value" />
@@ -477,8 +483,8 @@ const SmsApiUpdate = ({ id }) => {
                                                     <option value="2">Inactive</option>
                                                 </select>
                                                 {
-                                                        status_url && <p className='text-danger'>{status_url}</p>
-                                                    }
+                                                    status_url && <p className='text-danger'>{status_url}</p>
+                                                }
 
                                             </div>
                                         </div>

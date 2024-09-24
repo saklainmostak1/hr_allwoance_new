@@ -845,21 +845,7 @@ app.get("/Admin/absent_sms/absent_create_manual_attendance", AttendanceModel.abs
 );
 
 
-app.get('/api/sms-balance', async (req, res) => {
-  const url = req.body.url; // Assuming the URL is sent in the request body
 
-  if (!url) {
-    return res.status(400).send('URL is required');
-  }
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    res.status(500).send('Error fetching balance');
-  }
-});
 
 
 
@@ -880,6 +866,7 @@ app.post("/Admin/sms_api/sms_api_delete/:id", smsApiModel.sms_api_delete
 app.get("/Admin/all_table", smsApiModel.all_table_list
 );
 
+// npm uninstall react-html-table-to-excel
 
 app.get('/api/balance', async (req, res) => {
   const { url } = req.query; // Extract apiKey and url from the query parameters
