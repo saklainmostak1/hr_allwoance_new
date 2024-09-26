@@ -85,13 +85,13 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
     }))
   }));
 
-  console.log(allSideNavData);
+  // console.log(allSideNavData);
 
 
 
   const filteredData = allSideNavData?.map(navData => navData?.controllers.map(controller => controller.display_names.map(displayName => displayName.method_id === 3222)))
 
-  console.log(filteredData);
+  // console.log(filteredData);
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
@@ -105,7 +105,7 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
   const filteredUsers = users.filter(user => user.id === 1);
 
-  console.log(filteredUsers);
+  // console.log(filteredUsers);
 
 
   const [clickedButtons, setClickedButtons] = useState(new Array(allSideNavData.length).fill(false));
@@ -137,7 +137,7 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
 
   const [pageGroup, setPageGroup] = useState('')
-  console.log(pageGroup)
+  // console.log(pageGroup)
 
   const [controllerName, setControllerName] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -183,7 +183,7 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
     setControllerName(controllerName)
   }
 
-  console.log(displayNames, 'displayNames')
+  // console.log(displayNames, 'displayNames')
 
 
   const [page_group, setPage_group] = useState(() => {
@@ -225,18 +225,18 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
     }
   }, []);
 
-  console.log(controllerNames)
+  // console.log(controllerNames)
 
 
 
 
   const filterUser = allSideNavData?.filter(u => u.page_group === page_group)
 
-  console.log(filterUser[0]?.controllers, 'filterUser[0]?.controllers')
+  // console.log(filterUser[0]?.controllers, 'filterUser[0]?.controllers')
 
   const pageGroupNav = filterUser[0]?.controllers
   // const displayNames = (pageGroupNav?.map(paegGroups => paegGroups.display_names.map(displayName => displayName.display_name)))
-  console.log(pageGroupNav?.map(paegGroups => paegGroups.display_names.map(displayName => displayName.display_name)))
+  // console.log(pageGroupNav?.map(paegGroups => paegGroups.display_names.map(displayName => displayName.display_name)))
 
 
 
@@ -292,7 +292,7 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
   }, []);
 
 
-  console.log(pageGroupNav, 'pageGroupNav')
+  // console.log(pageGroupNav, 'pageGroupNav')
 
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -335,7 +335,7 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
 
 
-  console.log(controllerName, 'controllerName')
+  // console.log(controllerName, 'controllerName')
 
 
 
@@ -370,10 +370,10 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
       .then(Response => Response.json())
       .then(data => setSideNav(data))
   }, [])
-  console.log(sideNav)
+  // console.log(sideNav)
 
   const filteredCategories = sideNav.filter(category => category.status === 1);
-  console.log(filteredCategories[0]?.admin_template, 'filteredCategories[0]?.admin_template')
+  // console.log(filteredCategories[0]?.admin_template, 'filteredCategories[0]?.admin_template')
 
   // const wrapperStyle = {
   //   flexDirection: filteredCategories[0]?.side_menu_position === 'right' ? 'row-reverse' : 'row'
@@ -395,27 +395,27 @@ const AdminSidebar = ({ isSidebarActive, child, toggleSidebar, props }) => {
 
   // Show button when page is scrolled down
   const toggleVisibility = () => {
-    if (window.pageYOffset > 300) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
+    // if (window.pageYOffset > 300) {
+    //   setIsVisible(true);
+    // } else {
+    //   setIsVisible(false);
+    // }
   };
 
   // Scroll the window to the top
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    // window.scrollTo({
+    //   top: 0,
+    //   behavior: 'smooth'
+    // });
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
+    // window.addEventListener('scroll', toggleVisibility);
 
-    return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-    };
+    // return () => {
+    //   window.removeEventListener('scroll', toggleVisibility);
+    // };
   }, []);
 
 

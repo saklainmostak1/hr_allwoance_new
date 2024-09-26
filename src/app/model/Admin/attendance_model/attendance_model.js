@@ -24,22 +24,58 @@ const formatString = (str) => {
 const AttendanceModel = {
 
 
+    // send_attendance_otp: async (req, res) => {
+    //     try {
+    //         const { quick_api, mobile, msg } = req.body;
+
+    //         // Validate that required parameters are present
+    //         if (!quick_api || !mobile || !msg) {
+    //             return res.status(400).json({ error: 'Missing required parameters' });
+    //         }
+
+    //         console.log('Sending SMS with Params:', { quick_api, mobile, msg });
+
+    //         const response = await axios.get(
+    //             'https://quicksmsapp.com/Api/sms/campaign_api',
+    //             {
+    //                 params: {
+    //                     quick_api,
+    //                     mobile,
+    //                     msg,
+    //                 },
+    //             }
+    //         );
+
+    //         console.log('SMS API Response:', response.data);
+    //         res.json(response.data);
+    //     } catch (error) {
+    //         if (error.response) {
+    //             console.error('Error Response:', error.response.data);
+    //             res.status(error.response.status).json({ error: error.response.data });
+    //         } else {
+    //             console.error('Request Error:', error.message);
+    //             res.status(500).json({ error: 'Internal Server Error' });
+    //         }
+    //     }
+    // },
+
+
     send_attendance_otp: async (req, res) => {
         try {
-            const { quick_api, mobile, msg } = req.body;
+            const { formattedUrl, mobile, msg } = req.body;
 
             // Validate that required parameters are present
-            if (!quick_api || !mobile || !msg) {
+            if (!formattedUrl || !mobile || !msg) {
                 return res.status(400).json({ error: 'Missing required parameters' });
             }
 
-            console.log('Sending SMS with Params:', { quick_api, mobile, msg });
+            console.log('Sending SMS with Params:', { mobile, msg });
 
             const response = await axios.get(
-                'https://quicksmsapp.com/Api/sms/campaign_api',
+                `${formattedUrl}`,
                 {
                     params: {
-                        quick_api,
+                        
                         mobile,
                         msg,
                     },
@@ -3459,146 +3495,146 @@ const AttendanceModel = {
             const dataError = [];
 
 
-                // Increase memory limit if necessary (handled in server configs generally)
+            // Increase memory limit if necessary (handled in server configs generally)
 
-                // Fetch SMS settings
-                connection.query('SELECT * FROM sms_settings WHERE id = 1', (err, smsSettingsRows) => {
+            // Fetch SMS settings
+            connection.query('SELECT * FROM sms_settings WHERE id = 1', (err, smsSettingsRows) => {
+                if (err) throw err;
+                const smsSettings = smsSettingsRows;
+
+                // Check for holiday
+                const attendanceDate = new Date().toISOString().split('T')[0];
+                connection.query(`SELECT * FROM yearly_holiday WHERE start_date = ${attendanceDate}`, (err, holidayRows) => {
                     if (err) throw err;
-                    const smsSettings = smsSettingsRows;
+                    const holidayCount = holidayRows.length;
 
-                    // Check for holiday
-                    const attendanceDate = new Date().toISOString().split('T')[0];
-                    connection.query(`SELECT * FROM yearly_holiday WHERE start_date = ${attendanceDate}`, (err, holidayRows) => {
-                        if (err) throw err;
-                        const holidayCount = holidayRows.length;
-
-                        if (holidayRows.start_date == attendanceDate) {
-                            const holidayData = holidayRows;
-                            const msg = `Today ${attendanceDate}, ${holidayData.holiday_name} is a holiday. You can't take attendance today.`;
-                           return dataError.push({ holiday_msg: msg });
-                        } else if (smsSettings.te_absent_shift && smsSettings.te_absent_shift_enable === 1) {
-                            // Fetch leave-approved users
-                            connection.query(`
+                    if (holidayRows.start_date == attendanceDate) {
+                        const holidayData = holidayRows;
+                        const msg = `Today ${attendanceDate}, ${holidayData.holiday_name} is a holiday. You can't take attendance today.`;
+                        return dataError.push({ holiday_msg: msg });
+                    } else if (smsSettings.te_absent_shift && smsSettings.te_absent_shift_enable === 1) {
+                        // Fetch leave-approved users
+                        connection.query(`
                             SELECT GROUP_CONCAT(whose_leave) as user_id
                             FROM leave_application
                             LEFT JOIN leave_application_date ON leave_application.id = leave_application_date.leave_application_id
                             WHERE leave_application.application_status = 2
                             AND leave_application_date.leave_date = ?`, attendanceDate, (err, lvApplicationRows) => {
-                                if (err) throw err;
-                                const lvUsersId = lvApplicationRows.user_id || '';
+                            if (err) throw err;
+                            const lvUsersId = lvApplicationRows.user_id || '';
 
-                                // Fetch attendance users
-                                connection.query(`
+                            // Fetch attendance users
+                            connection.query(`
                                 SELECT GROUP_CONCAT(DISTINCT user_id) as att_user_id
                                 FROM attendance
                                 WHERE attendance_date = ?`, attendanceDate, (err, attendanceRows) => {
-                                    if (err) throw err;
-                                    const attUsersId = attendanceRows.att_user_id || '';
+                                if (err) throw err;
+                                const attUsersId = attendanceRows.att_user_id || '';
 
-                                    // Combine leave and attendance users
-                                    const notInUsers = [lvUsersId, attUsersId].filter(Boolean).join(',');
+                                // Combine leave and attendance users
+                                const notInUsers = [lvUsersId, attUsersId].filter(Boolean).join(',');
 
-                                    // Fetch absent users
-                                    const whereClause = notInUsers
-                                        ? `users.status = 1 AND users.role_name IN ( 10) AND users.id NOT IN (${notInUsers})`
-                                        : `users.status = 1 AND users.role_name IN ( 10)`;
+                                // Fetch absent users
+                                const whereClause = notInUsers
+                                    ? `users.status = 1 AND users.role_name IN ( 10) AND users.id NOT IN (${notInUsers})`
+                                    : `users.status = 1 AND users.role_name IN ( 10)`;
 
-                                    connection.query(`
+                                connection.query(`
                                     SELECT GROUP_CONCAT(id) as user_id FROM users WHERE ${whereClause}`, (err, absentRows) => {
-                                        if (err) throw err;
-                                        const absentUsersId = absentRows.user_id || '';
-                                        const absentIdArr = absentUsersId.split(',');
+                                    if (err) throw err;
+                                    const absentUsersId = absentRows.user_id || '';
+                                    const absentIdArr = absentUsersId.split(',');
 
-                                        if (absentIdArr.length > 0) {
-                                            const currentTime = new Date().toLocaleTimeString();
-                                            const data4 = [];
+                                    if (absentIdArr.length > 0) {
+                                        const currentTime = new Date().toLocaleTimeString();
+                                        const data4 = [];
 
-                                            absentIdArr.forEach(userId => {
-                                                // Check if the user is already marked as absent
-                                                connection.query(`
+                                        absentIdArr.forEach(userId => {
+                                            // Check if the user is already marked as absent
+                                            connection.query(`
                                                 SELECT user_id FROM absent WHERE absent_date = ? AND user_id = ?`, [attendanceDate, userId], (err, absentExistsRows) => {
-                                                    if (err) throw err;
-                                                    const absentExistsCount = absentExistsRows.length;
+                                                if (err) throw err;
+                                                const absentExistsCount = absentExistsRows.length;
 
-                                                    if (absentExistsCount === 0) {
-                                                        // Fetch user shift
-                                                        connection.query(`
+                                                if (absentExistsCount === 0) {
+                                                    // Fetch user shift
+                                                    connection.query(`
                                                         SELECT school_shift_id FROM employee_promotion WHERE user_id = ?`, [userId], (err, shiftRows) => {
-                                                            if (err) throw err;
-                                                            const userShift = shiftRows.school_shift_id;
-                                                            const userShiftArr = userShift;
+                                                        if (err) throw err;
+                                                        const userShift = shiftRows.school_shift_id;
+                                                        const userShiftArr = userShift;
 
-                                                            if (smsSettings.te_one_time === 1) {
-                                                                // Fetch max late time and end time for the shift
-                                                                connection.query(`
+                                                        if (smsSettings.te_one_time === 1) {
+                                                            // Fetch max late time and end time for the shift
+                                                            connection.query(`
                                                                 SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
                                                                 FROM school_shift WHERE id IN (${userShift})`, (err, lateTimeRows) => {
+                                                                if (err) throw err;
+                                                                const maxLateTime = lateTimeRows.max_late_time;
+                                                                const maxEndTime = lateTimeRows.max_end_time;
+
+                                                                if (currentTime > maxLateTime && currentTime < maxEndTime) {
+                                                                    data4.push({
+                                                                        user_id: userId,
+                                                                        created_by: null,
+                                                                        absent_date: attendanceDate,
+                                                                        device_id: 'Online'
+                                                                    });
+                                                                } else {
+                                                                    return dataError.push({ late_time_condition: 'Max late time and end time not matched.' });
+                                                                }
+                                                            });
+                                                        } else {
+                                                            userShiftArr.forEach(shiftId => {
+                                                                connection.query(`
+                                                                    SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
+                                                                    FROM school_shift WHERE id = ?`, [shiftId], (err, lateTimeRows) => {
                                                                     if (err) throw err;
-                                                                    const maxLateTime = lateTimeRows.max_late_time;
-                                                                    const maxEndTime = lateTimeRows.max_end_time;
+                                                                    const maxLateTime = lateTimeRows[0].max_late_time;
+                                                                    const maxEndTime = lateTimeRows[0].max_end_time;
 
                                                                     if (currentTime > maxLateTime && currentTime < maxEndTime) {
                                                                         data4.push({
                                                                             user_id: userId,
                                                                             created_by: null,
                                                                             absent_date: attendanceDate,
-                                                                            device_id: 'Online'
+                                                                            device_id: 'Online',
+                                                                            shift_id: shiftId
                                                                         });
-                                                                    } else {
-                                                                    return    dataError.push({ late_time_condition: 'Max late time and end time not matched.' });
                                                                     }
                                                                 });
-                                                            } else {
-                                                                userShiftArr.forEach(shiftId => {
-                                                                    connection.query(`
-                                                                    SELECT MAX(late_time) as max_late_time, MAX(end_time) as max_end_time
-                                                                    FROM school_shift WHERE id = ?`, [shiftId], (err, lateTimeRows) => {
-                                                                        if (err) throw err;
-                                                                        const maxLateTime = lateTimeRows[0].max_late_time;
-                                                                        const maxEndTime = lateTimeRows[0].max_end_time;
-
-                                                                        if (currentTime > maxLateTime && currentTime < maxEndTime) {
-                                                                            data4.push({
-                                                                                user_id: userId,
-                                                                                created_by: null,
-                                                                                absent_date: attendanceDate,
-                                                                                device_id: 'Online',
-                                                                                shift_id: shiftId
-                                                                            });
-                                                                        }
-                                                                    });
-                                                                });
-                                                            }
-                                                        });
-                                                    } else {
-                                                      return  dataError.push({ absent_exists: `Absence already exists for user_id ${userId}` });
-                                                    }
-                                                });
+                                                            });
+                                                        }
+                                                    });
+                                                } else {
+                                                    return dataError.push({ absent_exists: `Absence already exists for user_id ${userId}` });
+                                                }
                                             });
+                                        });
 
-                                            if (data4.length > 0) {
-                                                connection.query('INSERT INTO absent (user_id, created_by, absent_date, device_id, shift_id) VALUES ?', [data4.map(item => [item.user_id, item.created_by, item.absent_date, item.device_id, item.shift_id])], (err) => {
-                                                    if (err) throw err;
-                                                    sendAbsenceSms(absentUsersId, attendanceDate);
-                                                    // Send SMS (similar logic as in PHP function)
-                                                    // Example: sendAbsenceSms(absentUsersId, attendanceDate);
-                                                });
-                                            } else {
-                                             return   dataError.push({ absent_msg: 'Absent data array is empty' });
-                                            }
+                                        if (data4.length > 0) {
+                                            connection.query('INSERT INTO absent (user_id, created_by, absent_date, device_id, shift_id) VALUES ?', [data4.map(item => [item.user_id, item.created_by, item.absent_date, item.device_id, item.shift_id])], (err) => {
+                                                if (err) throw err;
+                                                sendAbsenceSms(absentUsersId, attendanceDate);
+                                                // Send SMS (similar logic as in PHP function)
+                                                // Example: sendAbsenceSms(absentUsersId, attendanceDate);
+                                            });
                                         } else {
-                                          return  dataError.push({ absent_count_msg: 'Absent count is 0' });
+                                            return dataError.push({ absent_msg: 'Absent data array is empty' });
                                         }
-                                    });
+                                    } else {
+                                        return dataError.push({ absent_count_msg: 'Absent count is 0' });
+                                    }
                                 });
                             });
-                        }
-                        else{
-                          return  dataError.push({ not_found: 'not found' });
-                        }
-                    });
+                        });
+                    }
+                    else {
+                        return dataError.push({ not_found: 'not found' });
+                    }
                 });
-            
+            });
+
 
             const end = new Date();
             const diffSeconds = Math.abs(end - start) / 1000;
@@ -3610,9 +3646,11 @@ const AttendanceModel = {
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     },
+
+    
     sendAbsenceSms: async (userIds, date) => {
         try {
-          
+
             // Replace with your SMS API endpoint and API key
             const smsApiUrl = 'https://quicksmsapp.com/Api/sms/campaign_api';
             const apiKey = '7ae89887eac6055a2b9adc494ca3b902';

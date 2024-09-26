@@ -408,9 +408,9 @@ const incomeModel = {
                     income_category.income_category_name AS income_category
                 FROM 
                     income 
-                    INNER JOIN users AS users_created ON income.created_by = users_created.id 
+                    LEFT JOIN users AS users_created ON income.created_by = users_created.id 
                     LEFT JOIN users AS users_modified ON income.modified_by = users_modified.id 
-                    INNER JOIN income_category ON income.income_category = income_category.id
+                    LEFT JOIN income_category ON income.income_category = income_category.id
                     LEFT JOIN income_item ON income.id = income_item.income_id;
             `;
 
@@ -634,7 +634,7 @@ const incomeModel = {
             income_category.income_category_name AS income_category
         FROM 
             income 
-            INNER JOIN users AS users_created ON income.created_by = users_created.id 
+            LEFT JOIN users AS users_created ON income.created_by = users_created.id 
             LEFT JOIN users AS users_modified ON income.modified_by = users_modified.id 
             LEFT JOIN income_category ON income.income_category = income_category.id
             LEFT JOIN income_item ON income.id = income_item.income_id

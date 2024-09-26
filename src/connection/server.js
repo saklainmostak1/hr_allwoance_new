@@ -1102,6 +1102,9 @@ app.get('/absent/absent_online_entry_employee', (req, res) => {
 });
 
 async function sendSms(mobile, msg) {
+
+  
+
   const quick_api = '7ae89887eac6055a2b9adc494ca3b902';
   const apiUrl = 'https://quicksmsapp.com/Api/sms/campaign_api';
   try {

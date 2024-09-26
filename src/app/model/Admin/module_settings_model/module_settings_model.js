@@ -32,7 +32,7 @@ const moduleSettings = {
 
     module_setting_create: async (req, res) => {
         try {
-            const { name, table_name, column_name, created_by, search } = req.body;
+            const { name, table_name, column_name, created_by, columnListSelectedSerachArrays , selectedColumnsSearchs} = req.body;
 
             // Check if the table_name already exists
             connection.query(
@@ -47,8 +47,8 @@ const moduleSettings = {
                     if (results.length > 0) {
                         // If table_name already exists, update column_name
                         connection.query(
-                            'UPDATE module_settings SET column_name = ?, created_by = ?, search = ? WHERE table_name = ?',
-                            [column_name, created_by, search, table_name],
+                            'UPDATE module_settings SET column_name = ?, created_by = ?, search = ?, search_value = ? WHERE table_name = ?',
+                            [column_name, created_by,   columnListSelectedSerachArrays, selectedColumnsSearchs, table_name],
                             (updateError, updateResult) => {
                                 if (updateError) {
                                     console.log(updateError);

@@ -616,7 +616,7 @@ const LeaveApplicationModel = {
             console.log("Search button clicked.");
 
             // Extract necessary data from request
-            const { fromDate, toDate, searchQuery, status, userGroup } = req.body;
+            const { fromDate, toDate, searchQuery, status, userGroup, multiSearch } = req.body;
 
             console.log(userGroup)
             // Construct the base SQL query with placeholders for parameters
@@ -672,9 +672,11 @@ const LeaveApplicationModel = {
                 sql += ` AND designation.designation_name = ?`;
                 queryParams.push(userGroup);
             }
-
+            if (multiSearch && multiSearch.length > 0) {
+                sql += ` ORDER BY ${multiSearch}`; // Append convertedData to the ORDER BY clause
+            }
             // Append ORDER BY clause at the end
-            sql += ` ORDER BY leave_application.id DESC`;
+            // sql += ` ORDER BY leave_application.id DESC`;
 
             console.log("SQL Query:", sql);
             console.log("Query Params:", queryParams);

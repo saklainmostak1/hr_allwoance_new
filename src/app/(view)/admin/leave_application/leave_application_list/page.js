@@ -1346,6 +1346,11 @@ const ListLeaveApplication = ({ searchParams }) => {
     const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
     const columnListSelectedSearch = Category[0]?.search
     const columnListSelectedSerachArray = columnListSelectedSearch?.split(',').map(item => item.trim());
+    const columnListSelectedsearchAscDesc = Category[0]?.search_value
+    const columnListSelectedSerachArrays = columnListSelectedsearchAscDesc?.split(',').map(item => item.trim());
+
+    
+
 
     console.log(Category[0]?.column_name)
 
@@ -1369,7 +1374,29 @@ const ListLeaveApplication = ({ searchParams }) => {
 
 
     const [selectedColumnsSearch, setSelectedColumnsSerach] = useState([]);
+  
+    useEffect(() => {
+        setSelectedColumnsSerach(columnListSelectedSerachArray)
+    }, [])
 
+    function convertSortString(inputString) {
+        const match = inputString.match(/(.*)_\((ASC|DESC)\)/);
+
+        if (match) {
+            const fieldName = match[1];
+            const sortOrder = match[2];
+            return `${fieldName} ${sortOrder}`;
+        } else {
+            return "Invalid input format.";
+        }
+    }
+
+    const brand_column_changes = (selectedItems) => {
+        setSelectedColumnsSerach(selectedItems.map((item) => item.value));
+        // brand_search(); 
+    };
+
+    const multiSearch = selectedColumnsSearch?.map(convertSortString);
 
     const [selectedColumns, setSelectedColumns] = React.useState([]);
 
@@ -1695,7 +1722,7 @@ const ListLeaveApplication = ({ searchParams }) => {
     const period_search = () => {
         setLoading(true);
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_search`, {
-            fromDate, toDate, searchQuery, status, selectedColumns, userGroup
+            fromDate, toDate, searchQuery, status, selectedColumns, userGroup, multiSearch
         })
             .then(response => {
                 setSearchResults(response.data.results);
@@ -1731,7 +1758,7 @@ const ListLeaveApplication = ({ searchParams }) => {
     const category_print = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_search`, {
-                fromDate, toDate, searchQuery, status, selectedColumns, userGroup
+                fromDate, toDate, searchQuery, status, selectedColumns, userGroup, multiSearch
             });
             const searchResults = response.data.results;
             console.log(searchResults)
@@ -1930,7 +1957,7 @@ const ListLeaveApplication = ({ searchParams }) => {
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_search`, {
-                fromDate, toDate, searchQuery, status, selectedColumns
+                fromDate, toDate, searchQuery, status, selectedColumns, multiSearch
             });
             const searchResults = response.data.results;
 
@@ -2003,7 +2030,7 @@ const ListLeaveApplication = ({ searchParams }) => {
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_search`, {
-                fromDate, toDate, searchQuery, status, selectedColumns
+                fromDate, toDate, searchQuery, status, selectedColumns, multiSearch
             });
             const searchResults = response.data.results;
             if (!selectedColumns || !searchResults || !searchResults.length) {
@@ -2095,7 +2122,7 @@ const ListLeaveApplication = ({ searchParams }) => {
     const category_PDF_download = async () => {
         // setLoading(true);
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/leave_application/leave_application_search`, {
-            fromDate, toDate, searchQuery, status, selectedColumns
+            fromDate, toDate, searchQuery, status, selectedColumns, multiSearch
         });
 
         const searchResults = response.data.results;
@@ -2246,6 +2273,57 @@ const ListLeaveApplication = ({ searchParams }) => {
                                                     />
 
                                                 </div>
+                                            </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label col-md-3"><strong>Search Properties:</strong></label>
+
+                                                <div className="col-md-9">
+
+
+                                                    <Select
+                                                        name='select'
+                                                        labelField='label'
+                                                        valueField='value'
+                                                        values={
+
+                                                            columnListSelectedSerachArrays?.map(column => ({
+                                                                label: formatString(column),
+                                                                value: column,
+                                                            }))}
+                                                        options={
+                                                            columnListSelectedSerachArray?.map(column => {
+                                                                let label = formatString(column);
+                                                                let value = column;
+                                                                
+                                                                return {
+                                                                    label: label,
+                                                                    value: value,
+                                                                };
+                                                            })
+                                                        }
+                                                        // values={
+
+                                                        //     columnListSelectedSerachArray?.map(column => ({
+                                                        //         label: formatString(column),
+                                                        //         value: column,
+                                                        //     }))
+
+                                                        // }
+                                                        onChange={brand_column_changes}
+
+                                                        multi
+
+                                                    />
+
+
+
+
+
+
+                                                </div>
+
+
                                             </div>
                                             <div class="form-group row student">
 

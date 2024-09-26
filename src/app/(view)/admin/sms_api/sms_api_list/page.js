@@ -8,6 +8,9 @@ import React, { useEffect, useState } from 'react';
 
 const SmsApiList = () => {
 
+ 
+   
+
     const {
         data: smsApiLists = [],
         isLoading,
@@ -18,9 +21,10 @@ const SmsApiList = () => {
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/sms_api/sms_api_all`
             );
-
+    
             const data = await res.json();
-            return data;
+            // Assuming data is an array of objects and each object has an 'id' property
+            return data.sort((a, b) => b.id - a.id); // Sort in descending order by ID
         },
     });
 
@@ -218,6 +222,7 @@ const SmsApiList = () => {
     // const balance = response.data.Balance !== undefined || response.data.balance !== undefined ? response.data.Balance || response.data.balance : 'N/A';
 
     console.log(balanceData)
+    console.log(smsApiLists)
 
     return (
         <div className="container-fluid">
@@ -252,11 +257,12 @@ const SmsApiList = () => {
                                             <thead>
                                                 <tr>
                                                     <th>SL No.</th>
-                                                    <th>Name</th>
-                                                    <th>Api URL</th>
+                                                    <th>Api Name</th>
+                                                    {/* <th>Api URL</th> */}
                                                     <th>Sms Rate</th>
                                                     <th>Balance</th>
                                                     <th>Status</th>
+                                                    <th>Method</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -285,9 +291,9 @@ const SmsApiList = () => {
                                                             <td>
                                                                 {sms_api?.api_name}
                                                             </td>
-                                                            <td>
+                                                            {/* <td>
                                                                 {sms_api?.api_url}
-                                                            </td>
+                                                            </td> */}
                                                             <td>
                                                                 {sms_api?.balance_rate}
                                                             </td>
@@ -295,6 +301,9 @@ const SmsApiList = () => {
 
                                                             <td>
                                                                 {sms_api?.status}
+                                                            </td>
+                                                            <td>
+                                                                {sms_api?.method_name}
                                                             </td>
 
 
@@ -306,7 +315,7 @@ const SmsApiList = () => {
                                                                         {filteredBtnIconView?.map((filteredBtnIconEdit => (
                                                                             <button
                                                                                 key={filteredBtnIconEdit.id}
-                                                                                title='Edit'
+                                                                                title='View'
                                                                                 style={{ width: "35px ", height: '30px', marginLeft: '5px', marginTop: '5px' }}
                                                                                 className={filteredBtnIconEdit?.btn}
                                                                             >

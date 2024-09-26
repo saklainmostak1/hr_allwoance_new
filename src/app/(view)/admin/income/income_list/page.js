@@ -17,7 +17,8 @@ const IncomeList = ({ searchParams }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [error, setError] = useState(null);
-
+    const [itemName, setItemName] = useState([]);
+    const [invoiceId, setInvoiceId] = useState([]);
 
 
 
@@ -35,25 +36,7 @@ const IncomeList = ({ searchParams }) => {
 
     const [selectedColumns, setSelectedColumns] = React.useState([]);
 
-    const category_search = () => {
-        setLoading(true);
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income/income_search`, {
-            selectedColumns,
-            searchQuery,
 
-            fromDate,
-            toDate
-        })
-            .then(response => {
-                setSearchResults(response.data.results);
-                setError(null);
-                setLoading(false);
-            })
-            .catch(error => {
-                setError("An error occurred during search.", error);
-                setSearchResults([]);
-            });
-    };
     const formatString = (str) => {
         const words = str?.split('_');
 
@@ -77,31 +60,31 @@ const IncomeList = ({ searchParams }) => {
 
     const [page_group, setPage_group] = useState(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('pageGroup') || '';
+            return localStorage.getItem('pageGroup') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
-        if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('pageGroup');
-          setPage_group(storedUserId);
-        }
-      }, []);
+    });
 
-      const [userId, setUserId] = useState(() => {
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          return localStorage.getItem('userId') || '';
+            const storedUserId = localStorage.getItem('pageGroup');
+            setPage_group(storedUserId);
+        }
+    }, []);
+
+    const [userId, setUserId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('userId') || '';
         }
         return '';
-      });
-    
-      useEffect(() => {
+    });
+
+    useEffect(() => {
         if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userId');
-          setUserId(storedUserId);
+            const storedUserId = localStorage.getItem('userId');
+            setUserId(storedUserId);
         }
-      }, []);
+    }, []);
 
     const { data: incomeCategory = [], isLoading,
     } = useQuery({
@@ -160,13 +143,62 @@ const IncomeList = ({ searchParams }) => {
 
     console.log(module_settings)
     const Category = module_settings.filter(moduleI => moduleI.table_name === 'income');
-    const columnListSelected = Category[0]?.column_name;
+    // const columnListSelected = Category[0]?.column_name;
+    const columnListSelected = Category[0]?.column_name
+    const columnListSelectedSearch = Category[0]?.search
+    const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
+    const columnListSelectedSerachArray = columnListSelectedSearch?.split(',').map(item => item.trim());
+    //  Column
+    const columnListSelectedsearchAscDesc = Category[0]?.search_value
+    const columnListSelectedSerachArrays = columnListSelectedsearchAscDesc?.split(',').map(item => item.trim());
+
+    const [selectedColumnsSearch, setSelectedColumnsSerach] = useState([]);
+    useEffect(() => {
+        setSelectedColumnsSerach(columnListSelectedSerachArray)
+    }, [])
+
+    function convertSortString(inputString) {
+        const match = inputString.match(/(.*)_\((ASC|DESC)\)/);
+
+        if (match) {
+            const fieldName = match[1];
+            const sortOrder = match[2];
+            return `${fieldName} ${sortOrder}`;
+        } else {
+            return "Invalid input format.";
+        }
+    }
+
+    const brand_column_changes = (selectedItems) => {
+        setSelectedColumnsSerach(selectedItems.map((item) => item.value));
+        // brand_search(); 
+    };
+
+    const multiSearch = selectedColumnsSearch?.map(convertSortString);
 
     const decimal_digit = Category[0]?.decimal_digit;
-    console.log(decimal_digit, '-------------------------------------');
+    // console.log(decimal_digit, '-------------------------------------');
 
-
-    const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
+    const category_search = () => {
+        setLoading(true);
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income/income_search`, {
+            selectedColumns,
+            searchQuery,
+            multiSearch,
+            fromDate,
+            toDate
+        })
+            .then(response => {
+                setSearchResults(response.data.results);
+                setError(null);
+                setLoading(false);
+            })
+            .catch(error => {
+                setError("An error occurred during search.", error);
+                setSearchResults([]);
+            });
+    };
+    // const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
 
     // Paigination start
     const parentUsers = incomeList
@@ -207,8 +239,16 @@ const IncomeList = ({ searchParams }) => {
 
     const activePage = searchParams?.page ? parseInt(searchParams.page) : 1;
 
-    const handlePrint = (selectedColumns) => {
+    const handlePrint = async () => {
         // Open a new window for printing
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/income/income_search`, {
+            selectedColumns,
+            searchQuery,
+            multiSearch,
+            fromDate,
+            toDate
+        });
+        const searchResults = response.data.results;
         const printWindow = window.open('', '_blank');
 
         // Start building the HTML content for printing
@@ -323,6 +363,47 @@ const IncomeList = ({ searchParams }) => {
     }, [])
 
     console.log(searchResults)
+
+    const [showFromDate, setShowFromDate] = useState('');
+    const [showToDate, setShowToDate] = useState('');
+
+
+    const handleDateChangess = (event) => {
+        const selectedDate = new Date(event.target.value);
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+        const year = String(selectedDate.getFullYear()); // Get last two digits of the year
+        const formattedDate = `${day}-${month}-${year}`;
+        setShowFromDate(formattedDate);
+        setFromDate(selectedDate);
+    };
+
+    // Open date picker when text input is clicked
+    const handleTextInputClick = () => {
+        document.getElementById('dateInput').showPicker();
+    };
+
+    const handleDateChangesss = (event) => {
+        const selectedDate = new Date(event.target.value);
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+        const year = String(selectedDate.getFullYear()); // Get last two digits of the year
+        const formattedDate = `${day}-${month}-${year}`;
+        setShowToDate(formattedDate);
+        setToDate(selectedDate);
+    };
+
+    // Open date picker when text input is clicked
+    const handleTextInputClicks = () => {
+        document.getElementById('dateInputTo').showPicker();
+    };
+    const buttonStyles = {
+        color: '#fff',
+        backgroundColor: '#510bc4',
+        backgroundImage: 'none',
+        borderColor: '#4c0ab8',
+    };
+
     return (
         <div class="container-fluid">
             <div class=" row ">
@@ -352,26 +433,126 @@ const IncomeList = ({ searchParams }) => {
                                     <form class="">
                                         <div class="col-md-10 offset-md-1">
 
-
-
-
-
                                             <div class="form-group row student">
 
-                                                <label class="col-form-label col-md-2"><strong>From Date:</strong></label>
-                                                <div className="col-md-4">
-                                                    <input class="form-control form-control-sm  alpha_space student_id" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+                                                <label htmlFor="fromDate" class="col-form-label col-md-3"><strong>From Date:</strong></label>
+
+                                                <div className="col-md-3">
+
+
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+
+                                                        value={showFromDate}
+                                                        onClick={handleTextInputClick}
+                                                        placeholder="dd-mm-yy"
+                                                        className="form-control"
+                                                        style={{ display: 'inline-block', }}
+                                                    />
+                                                    <input
+
+                                                        type="date"
+                                                        id="dateInput"
+                                                        onChange={handleDateChangess}
+                                                        style={{ position: 'absolute', bottom: '-20px', left: '0', visibility: 'hidden' }}
+                                                    />
+
+
                                                 </div>
 
-                                                <label class="col-form-label col-md-2"><strong>To Date:</strong></label>
-                                                <div class="col-md-4">
-                                                    <input class="form-control form-control-sm  alpha_space student_id" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+                                                <label htmlFor="toDate" class="col-form-label col-md-3"><strong>To Date:</strong></label>
+                                                <div class="col-md-3">
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+
+                                                        value={showToDate}
+                                                        onClick={handleTextInputClicks}
+                                                        placeholder="dd-mm-yy"
+                                                        className="form-control"
+                                                        style={{ display: 'inline-block', }}
+                                                    />
+                                                    <input
+
+                                                        type="date"
+                                                        id="dateInputTo"
+                                                        onChange={handleDateChangesss}
+                                                        style={{ position: 'absolute', bottom: '-20px', left: '0', visibility: 'hidden' }}
+                                                    />
+                                                    {/* <DatePicker
+        id="toDate"
+        isClearable
+        selected={toDate}
+        dateFormat="dd-MM-yyyy" // Set the date format
+        placeholderText="dd-mm-yyyy"
+        class="form-control form-control-sm  alpha_space student_id" onChange={
+            handleDateChanges
+        } /> */}
                                                 </div>
                                             </div>
                                             <div class="form-group row student">
 
-                                                <label class="col-form-label col-md-2"><strong>Spense Category Name:</strong></label>
-                                                <div className="col-md-4">
+                                                <label class="col-form-label col-md-3"><strong>Search Properties:</strong></label>
+
+                                                <div className="col-md-9">
+
+
+                                                    <Select
+                                                        name='select'
+                                                        labelField='label'
+                                                        valueField='value'
+                                                        values={
+
+                                                            columnListSelectedSerachArrays?.map(column => ({
+                                                                label: formatString(column),
+                                                                value: column,
+                                                            }))}
+                                                        options={
+                                                            columnListSelectedSerachArray?.map(column => {
+                                                                let label = formatString(column);
+                                                                let value = column;
+                                                                if (column.endsWith("(ASC)")) {
+                                                                    label = "Income Category (asc)";
+                                                                    value = "income_category_id_(ASC)";
+                                                                } else if (column.endsWith("(DESC)")) {
+                                                                    label = "Income Category (desc)";
+                                                                    value = "income_category_id_(DESC)";
+                                                                }
+
+                                                                return {
+                                                                    label: label,
+                                                                    value: value,
+                                                                };
+                                                            })
+                                                        }
+                                                        // values={
+
+                                                        //     columnListSelectedSerachArray?.map(column => ({
+                                                        //         label: formatString(column),
+                                                        //         value: column,
+                                                        //     }))
+
+                                                        // }
+                                                        onChange={brand_column_changes}
+
+                                                        multi
+
+                                                    />
+
+
+
+
+
+
+                                                </div>
+
+
+                                            </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label col-md-3"><strong>Income Category Name:</strong></label>
+                                                <div className="col-md-3">
                                                     <select
                                                         value={searchQuery}
                                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -394,9 +575,78 @@ const IncomeList = ({ searchParams }) => {
 
                                                     </select>
                                                 </div>
-                                                <label class="col-form-label col-md-2"><strong>Design:</strong></label>
+                                                <label class="col-form-label col-md-3"><strong>Item Name:</strong></label>
+                                                <div className="col-md-3">
+                                                    <input placeholder='Income Name' class="form-control form-control-sm  alpha_space item_name" type="text" value={itemName}
+                                                        onChange={(e) => setItemName(e.target.value)} />
+                                                </div>
+                                            </div>
+                                            <div class="form-group row student">
 
-                                                <div className="col-md-4">
+                                                <label class="col-form-label col-md-3"><strong>Voucher Id</strong></label>
+                                                <div className="col-md-3">
+                                                    <input class="form-control form-control-sm  alpha_space invoice_id" type="number" value={invoiceId} onChange={(e) => setInvoiceId(e.target.value)} />
+                                                </div>
+
+                                            </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label font-weight-bold col-md-3">Print Properties:</label>
+                                                <div class="col-md-9">
+                                                    <div class="input-group ">
+                                                        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
+                                                            <option value="legal">legal </option>
+                                                            <option value="A4">A4 </option>
+                                                            <option value="A3">A3 </option>
+                                                            <option value="">Browser </option>
+                                                        </select>
+                                                        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
+
+                                                            <option value="landscape">Landscape</option>
+                                                            <option value="portrait">Portrait</option>
+                                                            <option value="">Browser </option>
+                                                        </select>
+                                                        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
+                                                            <option value="font-12">Font Standard</option>
+                                                            <option value="font-10">Font Small</option>
+
+                                                        </select>
+                                                        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
+                                                            <option value="120%">Browser Zoom</option>
+                                                            <option value="5%">5% Zoom</option>
+                                                            <option value="10%">10% Zoom</option>
+                                                            <option value="15%">15% Zoom</option>
+                                                            <option value="20%">20% Zoom</option>
+                                                            <option value="25%">25% Zoom</option>
+                                                            <option value="30%">30% Zoom</option>
+                                                            <option value="35%">35% Zoom</option>
+                                                            <option value="40%">40% Zoom</option>
+                                                            <option value="45%">45% Zoom</option>
+                                                            <option value="50%">50% Zoom</option>
+                                                            <option value="55%">55% Zoom</option>
+                                                            <option value="60%">60% Zoom</option>
+                                                            <option value="65%">65% Zoom</option>
+                                                            <option value="70%">70% Zoom</option>
+                                                            <option value="75%">75% Zoom</option>
+                                                            <option value="80%">80% Zoom</option>
+                                                            <option value="85%">85% Zoom</option>
+                                                            <option value="90%">90% Zoom</option>
+                                                            <option value="95%">95% Zoom</option>
+                                                            <option value="100%" selected="">100% Zoom</option>
+
+                                                        </select>
+                                                    </div>
+
+                                                </div>
+
+
+                                            </div>
+                                            <div class="form-group row student">
+
+
+                                                <label class="col-form-label col-md-3"><strong>Design:</strong></label>
+
+                                                <div className="col-md-9">
 
 
                                                     <Select
@@ -417,23 +667,34 @@ const IncomeList = ({ searchParams }) => {
                                                             }))
 
                                                         }
+
+
                                                         onChange={category_column_change}
                                                     />
                                                 </div>
                                             </div>
-
-
-
-
-
-
                                         </div>
-
                                         <div class="form-group row">
                                             <div class="offset-md-2 col-md-6 float-left">
                                                 <input type="button" onClick={category_search} name="search" class="btn btn-sm btn-info search_btn mr-2" value="Search" />
-                                                <input onClick={() => handlePrint(columnListSelectedArray)} type="button" name="search" class="btn btn-sm btn-success print_btn mr-2" value="Print" />
+                                                <input onClick={handlePrint}
+                                                    type="button" name="search" class="btn btn-sm btn-success print_btn mr-2" value="Print" />
+                                                <input
+                                                    type="button"
 
+                                                    name="search"
+                                                    className="btn btn-sm btn-secondary excel_btn mr-2"
+                                                    value="Download Excel"
+                                                />
+
+                                                <input
+                                                    type="button"
+
+                                                    name="search"
+                                                    className="btn btn-sm btn-secondary excel_btn mr-2"
+                                                    value="Download Docx"
+                                                />
+                                                <input type="button" name="search" class="btn btn-sm btn-indigo pdf_btn mr-2" style={buttonStyles} value="Download PDF" />
                                             </div>
                                         </div>
                                     </form>

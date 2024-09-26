@@ -1,5 +1,6 @@
 'use client'
 
+
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +9,112 @@ import React, { useEffect, useState } from 'react';
 
 const SalaryCreate = () => {
 
+
+    const {
+        data: apiData = [],
+        isLoading,
+        refetch,
+    } = useQuery({
+        queryKey: ["apiData"],
+        queryFn: async () => {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/sms_api/sms_api_all`
+            );
+
+            const data = await res.json();
+            return data;
+        },
+    });
+
+
+    const [apiUrl, setApiUrl] = useState('');
+    const [apiResponse, setApiResponse] = useState(null);
+
+
+    useEffect(() => {
+        // Filter apiData for entries with status_url === '1'
+        const filteredApiData = apiData.filter(item => item.status_url === '1');
+
+        // Check if there are any valid entries after filtering
+        if (filteredApiData.length === 0 || !filteredApiData[0].sms_api_params || filteredApiData[0].sms_api_params.length === 0) {
+            return; // Exit if no valid data is available
+        }
+
+        // Use the first valid entry for further processing
+        const apiEntry = filteredApiData[0];
+
+        // Sort the sms_api_params based on the options field
+        const sortedParams = apiEntry.sms_api_params.sort((a, b) => a.options - b.options);
+
+        // Construct the query string from the sorted parameters
+        const queryParams = sortedParams.map(param => {
+            const key = param.options === 1 ? 'mobile' : (param.sms_key === 'number' ? 'mobile' : param.sms_key);
+            return `${key}=${encodeURIComponent(param.sms_value)}`;
+        }).join('&');
+
+        // Final URL for API call
+        const constructedUrl = `${apiEntry.main_url}${queryParams}`; // Add '?' before query params
+        setApiUrl(constructedUrl); // Store the constructed URL in the state
+
+        // Define a flag or condition to prevent automatic API call
+        const shouldFetch = false; // Change this based on your logic
+
+        if (shouldFetch) {
+            // Fetching the API data
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(constructedUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`); // Check if response is ok
+                    }
+                    const result = await response.json();
+                    setApiResponse(result); // Set the API response in state
+                } catch (error) {
+                    console.error('Error fetching the API:', error);
+                }
+            };
+
+            // Trigger API call if the condition is met
+            fetchData();
+        }
+    }, [apiData]); // apiData as dependency
+
+    console.log(apiUrl);
+
+
+
+
+    // // Split the original URL at the first occurrence of "?"
+    // const [baseUrl, paramString] = apiUrl?.split('?');
+
+    // // Now extract the first parameter
+    // const [firstParam] = paramString?.split('&');
+
+    // // Construct the formatted URL using the base URL and the first parameter
+    // const formattedUrl = `${baseUrl}?${firstParam}`;
+
+    // console.log(formattedUrl);
+
+
+    const [formattedUrl, setFormattedUrl] = useState([])
+    const [baseUrl, paramString] = apiUrl.split('?');
+
+    // Check if paramString is defined before attempting to split
+    const firstParam = paramString ? paramString.split('&')[0] : null;
+    useEffect(() => {
+
+        if (firstParam) {
+            // Construct the formatted URL using the base URL and the first parameter
+            const formattedUrl = `${baseUrl}?${firstParam}`;
+            setFormattedUrl(formattedUrl);
+        } else {
+            console.log("No parameters found.");
+        }
+    }, [firstParam, baseUrl])
+
+    console.log(formattedUrl)
+
+   
 
     const { data: account_head = []
     } = useQuery({
@@ -372,7 +479,8 @@ const SalaryCreate = () => {
                 .replace('[[sms_time]]', smsTime);
 
             axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_otp`, {
-                quick_api: quickApi,
+                // quick_api: quickApi,
+                formattedUrl,
                 mobile: employee.mobile,
                 msg: msg,
             })
@@ -559,8 +667,8 @@ const SalaryCreate = () => {
                                 <div className="border-primary shadow-sm border-0">
                                     <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
                                         <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Employee Salary Generate</h5>
-                                        <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                            <div className='mt-4'>
+                                        <div className="card-title font-weight-bold mb-0 card-header-color float-right d-flex">
+                                            <div className='m-0'>
                                                 <label className='font-weight-bold'>
                                                     <input
                                                         type="checkbox"
@@ -570,7 +678,7 @@ const SalaryCreate = () => {
                                                     <span> Send SMS</span>
                                                 </label>
                                             </div>
-                                            <div className="offset-md-3 col-sm-6">
+                                            <div className="ml-2 m-0">
                                                 <input
                                                     onClick={sendOtpToAllEmployees}
                                                     type="submit" name="create" className="btn btn-sm btn-success" value="Submit" />

@@ -193,6 +193,7 @@ const smsApiModel = {
                                 id: row.id,
                                 user_id: row.user_id,
                                 api_name: row.api_name,
+                                method_name: row.method_name,
                                 main_url: row.main_url,
                                 balance_url: row.balance_url,
                                 balance_param: row.balance_param,

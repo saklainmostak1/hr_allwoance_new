@@ -423,43 +423,35 @@ const EmployeeModel = {
     employee_all_list_settings: async (req, res) => {
         try {
             const employeeDataQuery = `
-                SELECT 
-                    ei.*,
-                    ej.join_date AS join_date,
-                    d.designation_name,
-                    u.full_name,
-                    u.dob,
-                    u.gender,
-                    u.religion,
-                    u.mobile,
-                    u.unique_id,
-                    u.email,
-                    u.photo,
-                    up.father_name AS e_father_name,
-                    up.mother_name AS e_mother_name,
-                    b.branch_name AS branch_name,              -- Get branch name
-                    p.title AS payroll_name,            -- Get payroll name
-                    ss.name AS school_shift_name               -- Get school shift name
-                FROM 
-                    employe_info ei
-                 JOIN 
-                    employe_joining ej ON ei.user_id = ej.user_id
-                 JOIN 
-                    employee_promotion ep ON ei.user_id = ep.user_id
-                 JOIN 
-                    users u ON ei.user_id = u.id
-                 JOIN 
-                    designation d ON ep.designation_id = d.id
-                 JOIN 
-                    user_parent up ON ej.user_id = up.user_id
-                 JOIN 
-                    branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
-                 JOIN 
-                    payroll p ON ej.payroll_id = p.id            -- Join payroll to get payroll_name
-                 JOIN 
-                    school_shift ss ON ej.school_shift_id = ss.id -- Join school_shift to get school_shift_name
-                WHERE
-                    ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
+                 SELECT 
+                ej.join_date AS join_date,
+                d.designation_name,
+                u.full_name,
+                u.gender,
+                u.religion,
+                u.mobile,
+                u.unique_id,
+                u.email,
+                u.photo,
+                b.branch_name AS branch_name,              -- Get branch name
+                p.title AS payroll_name,                   -- Get payroll name
+                ss.name AS school_shift_name                -- Get school shift name
+            FROM 
+                employe_joining ej 
+            JOIN 
+                employee_promotion ep ON ej.user_id = ep.user_id
+            JOIN 
+                users u ON ej.user_id = u.id
+            JOIN 
+                designation d ON ep.designation_id = d.id
+            JOIN 
+                branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
+            JOIN 
+                payroll p ON ej.payroll_id = p.id            -- Join payroll to get payroll_name
+            JOIN 
+                school_shift ss ON ej.school_shift_id = ss.id -- Join school_shift to get school_shift_name
+            WHERE
+                ej.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
             `;
             connection.query(employeeDataQuery, async (err, results) => {
                 if (err) {
@@ -3718,54 +3710,52 @@ const EmployeeModel = {
             console.log("Search button clicked.");
 
             // Extract necessary data from request
-            const { searchQuery, itemName, employee, shift, payroll, employee_id, fromDate, toDate } = req.body;
-
+            const { searchQuery, itemName, employee, shift, payroll, employee_id, fromDate, toDate, multiSearch } = req.body;
+            console.log(multiSearch, "Search button clicked.");
             // Construct the base SQL query
+            // school_shift_id
             let sql = `
                SELECT 
-                ei.*,
-                ej.join_date AS join_date,
-                ep.payroll_id AS payroll_id,
-                ep.school_shift_id AS school_shift_id,
-                ep.designation_id AS designation_id,
-                ep.branch_id AS branch_id,
-                d.designation_name,
-                u.full_name,
-                u.father_name,
-                u.mother_name,
-                u.dob,
-                u.gender,
-                u.religion,
-                u.mobile,
-                u.unique_id,
-                u.email,
-                u.photo,
-                up.father_name AS e_father_name,
-                up.mother_name AS e_mother_name,
-                b.branch_name AS branch_name,              -- Get branch name
-                p.title AS payroll_name,            -- Get payroll name
-                ss.name AS school_shift_name               -- Get school shift name
-            FROM 
-                employe_info ei
-             JOIN 
-                employe_joining ej ON ei.user_id = ej.user_id
-             JOIN 
-                employee_promotion ep ON ei.user_id = ep.user_id
-             JOIN 
-                users u ON ei.user_id = u.id
-             JOIN 
-                designation d ON ep.designation_id = d.id
-             JOIN 
-                user_parent up ON ep.user_id = up.user_id
-             JOIN 
-                branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
-             JOIN 
-                payroll p ON ep.payroll_id = p.id            -- Join payroll to get payroll_name
-             JOIN 
-                school_shift ss ON ep.school_shift_id = ss.id -- Join school_shift to get school_shift_name
-            WHERE
-                ei.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
-                  AND 1=1
+            ej.join_date AS join_date,
+            ep.payroll_id AS payroll_id,
+            ep.school_shift_id AS shift_id,
+            ep.designation_id AS designation_id,
+            ep.branch_id AS branch_id,
+            d.designation_name,
+            u.full_name,
+            u.father_name,
+            u.mother_name,
+            u.dob,
+            u.gender,
+            u.religion,
+            u.mobile,
+            u.unique_id,
+            u.email,
+            u.photo,
+            up.father_name AS e_father_name,
+            up.mother_name AS e_mother_name,
+            b.branch_name AS branch_name,              -- Get branch name
+            p.title AS payroll_name,            -- Get payroll name
+            ss.name AS school_shift_name               -- Get school shift name
+        FROM 
+            employe_joining ej
+         JOIN 
+            employee_promotion ep ON ej.user_id = ep.user_id
+         JOIN 
+            users u ON ej.user_id = u.id
+         JOIN 
+            designation d ON ep.designation_id = d.id
+         JOIN 
+            user_parent up ON ep.user_id = up.user_id
+         JOIN 
+            branch_info b ON ep.branch_id = b.id         -- Join branch_info to get branch_name
+         JOIN 
+            payroll p ON ep.payroll_id = p.id            -- Join payroll to get payroll_name
+         JOIN 
+            school_shift ss ON ep.school_shift_id = ss.id -- Join school_shift to get school_shift_name
+        WHERE
+            ej.user_id IN (SELECT DISTINCT user_id FROM employe_joining)
+              AND 1=1
             `;
 
             // Add search conditions based on the provided parameters
@@ -3795,7 +3785,9 @@ const EmployeeModel = {
                 sql += ` AND  u.unique_id LIKE '%${employee_id}%'`;
             }
 
-
+            if (multiSearch && multiSearch.length > 0) {
+                sql += ` ORDER BY ${multiSearch}`; // Append convertedData to the ORDER BY clause
+            }
             // sql += ` GROUP BY attendance.user_id, check_date`;
 
 

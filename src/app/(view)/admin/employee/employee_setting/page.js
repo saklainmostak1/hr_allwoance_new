@@ -33,9 +33,16 @@ const EmployeeSetting = () => {
     })
 
     const expense = module_settings.filter(moduleI => moduleI.table_name === 'employee')
+    // const columnListSelected = expense[0]?.column_name
+    // const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
     const columnListSelected = expense[0]?.column_name
+    const columnListSelectedSearch = expense[0]?.search
+    const columnListSelectedsearchAscDesc = expense[0]?.search_value
     const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
+    const columnListSelectedSerachArray = columnListSelectedSearch?.split(',').map(item => item.trim());
 
+    const columnListSelectedSerachArrays = columnListSelectedsearchAscDesc?.split(',').map(item => item.trim());
+    console.log(columnListSelectedSerachArrays)
 
     const formatString = (str) => {
         const words = str?.split('_');
@@ -54,25 +61,16 @@ const EmployeeSetting = () => {
     console.log('Column Names:', columnNames);
 
 
+    const [selectedColumnsSearch, setSelectedColumnsSerach] = useState([]);
+    useEffect(() => {
+        setSelectedColumnsSerach(columnListSelectedSerachArray)
+    }, [])
 
-    // const { data: moduleInfo = []
-    // } = useQuery({
-    //     queryKey: ['moduleInfo'],
-    //     queryFn: async () => {
-    //         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/admin/module_info/module_info_all`)
-
-    //         const data = await res.json()
-    //         return data
-    //     }
-    // })
-    // console.log(moduleInfo.filter(moduleI => moduleI.controller_name === 'expense'))
-    // const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'expense')
-
-    //   console.log(filteredModuleInfo);
-
-
-
-
+    const brand_column_changes = (selectedItems) => {
+        setSelectedColumnsSerach(selectedItems.map((item) => item.value));
+        // brand_search(); 
+    };
+    console.log(selectedColumnsSearch)
 
 
     const [page_group, setPage_group] = useState(() => {
@@ -93,8 +91,11 @@ const EmployeeSetting = () => {
 
 
 
-    const columnString = selectedColumns.join(', ');
+    const columnString = selectedColumns?.join(', ');
 
+    useEffect(() => {
+        setSelectedColumns(columnListSelectedArray)
+    }, [])
 
 
 
@@ -127,8 +128,9 @@ const EmployeeSetting = () => {
         const form = event.target
         const name = form.name.value
         const table_name = form.table_name.value
-
-
+        const selectedColumnsSearchs = selectedColumnsSearch.join(', ')
+        const columnListSelectedSerachArrays = columnListSelectedSerachArray.join(', ')
+        console.log(columnString)
         // Add your form submission logic here using the 'fields' state.
 
         const addValue = {
@@ -136,7 +138,9 @@ const EmployeeSetting = () => {
             table_name: table_name.toLowerCase(),
             column_name: columnString,
             created_by: userId,
-         
+            selectedColumnsSearchs,
+            columnListSelectedSerachArrays
+
         }
 
         console.log(addValue)
@@ -162,6 +166,7 @@ const EmployeeSetting = () => {
 
 
 
+
     return (
         <div class="container-fluid">
             <div class=" row ">
@@ -171,10 +176,10 @@ const EmployeeSetting = () => {
 
                             <div class=" border-primary shadow-sm border-0">
                                 <div class="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">expense Settings</h5>
+                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Employee Settings</h5>
                                     <div class="card-title font-weight-bold mb-0 card-header-color float-right">
 
-                                        <Link href={`/Admin/expense/expense_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create Expense</Link>
+                                        <Link href={`/Admin/employee/employee_create?page_group=${page_group}`} class="btn btn-sm btn-info">Create Employee</Link>
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -225,7 +230,91 @@ const EmployeeSetting = () => {
                                                     />
                                                 </div>
 
-                                               
+                                                <label class="col-form-label col-md-2"><strong>Search Properties:</strong></label>
+
+                                                <div className="col-md-4">
+
+
+                                                    <Select
+                                                        name='select'
+                                                        labelField='label'
+                                                        valueField='value'
+                                                        values={
+
+                                                            columnListSelectedSerachArrays?.map(column => ({
+                                                                label: formatString(column),
+                                                                value: column,
+                                                            }))}
+                                                        options={
+                                                            columnListSelectedSerachArray?.map(column => {
+                                                                let label = formatString(column);
+                                                                let value = column;
+                                                                if (column.startsWith("shift_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Shift (asc)";
+                                                                        value = "shift_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Shift (desc)";
+                                                                        value = "shift_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("designation_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Designation Name (asc)";
+                                                                        value = "designation_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Designation Name (desc)";
+                                                                        value = "designation_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("payroll_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Payroll Name (asc)";
+                                                                        value = "payroll_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Payroll Name (desc)";
+                                                                        value = "payroll_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("unique_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Employee Id (asc)";
+                                                                        value = "unique_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Employee Id (desc)";
+                                                                        value = "unique_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                return {
+                                                                    label: label,
+                                                                    value: value,
+                                                                };
+                                                            })
+                                                        }
+                                                        // values={
+
+                                                        //     columnListSelectedSerachArray?.map(column => ({
+                                                        //         label: formatString(column),
+                                                        //         value: column,
+                                                        //     }))
+
+                                                        // }
+                                                        onChange={brand_column_changes}
+
+                                                        multi
+
+                                                    />
+
+
+
+
+
+
+                                                </div>
 
                                             </div>
                                         </div>

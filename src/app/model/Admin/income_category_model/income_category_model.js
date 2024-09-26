@@ -37,7 +37,7 @@ const incomeCategory = {
                    users_created.full_name AS created_by,
                    users_modified.full_name AS modified_by 
             FROM income_category 
-            INNER JOIN users AS users_created ON income_category.created_by = users_created.id 
+            LEFT JOIN users AS users_created ON income_category.created_by = users_created.id 
             LEFT JOIN users AS users_modified ON income_category.modified_by = users_modified.id 
           `;
 

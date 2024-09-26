@@ -879,19 +879,21 @@ const expenceModel = {
             console.log("Search button clicked.");
 
             // Extract necessary data from request
-            const { fromDate, toDate, searchQuery, invoiceId, itemName, supplierId } = req.body;
+            const { fromDate, toDate, searchQuery, invoiceId, itemName, supplierId, multiSearch } = req.body;
 
             // Construct the base SQL query
             let sql = `
-            SELECT 
+                    SELECT 
                 expense.*, 
                 expense_item.item_name AS expense_name, 
-                expense_category.expense_category_name AS expense_category 
+                expense_category.expense_category_name AS expense_category,
+                expense_category.id AS expense_category_id -- Add this line to include the category ID
             FROM 
                 expense 
                 LEFT JOIN expense_category ON expense.expense_category = expense_category.id 
                 LEFT JOIN expense_item ON expense.id = expense_item.expense_id 
-            WHERE 1`;
+            WHERE 1
+            `;
 
 
             if (fromDate && toDate) {
@@ -913,6 +915,9 @@ const expenceModel = {
             if (itemName) {
 
                 sql += ` AND LOWER(expense_item.item_name) LIKE '%${itemName}%'`;
+            }
+            if (multiSearch && multiSearch.length > 0) {
+                sql += ` ORDER BY ${multiSearch}`; // Append convertedData to the ORDER BY clause
             }
 
             // Add expense name (item_name) search condition
@@ -1154,7 +1159,7 @@ const expenceModel = {
                 `;
 
 
-            wkhtmltopdf(html, { pageSize: 'letter'}, (err, stream) => {
+            wkhtmltopdf(html, { pageSize: 'letter' }, (err, stream) => {
                 if (err) {
                     console.error('Error generating PDF:', err);
                     res.status(500).send('Error generating PDF');

@@ -217,12 +217,64 @@ const EmployeeAll = ({ searchParams }) => {
 
     console.log(module_settings)
     const Category = module_settings.filter(moduleI => moduleI.table_name === 'employee')
+    // const columnListSelected = Category[0]?.column_name
+    // const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
     const columnListSelected = Category[0]?.column_name
+    const columnListSelectedSearch = Category[0]?.search
     const columnListSelectedArray = columnListSelected?.split(',').map(item => item.trim());
+    const columnListSelectedSerachArray = columnListSelectedSearch?.split(',').map(item => item.trim());
+    const columnListSelectedsearchAscDesc = Category[0]?.search_value
+    const columnListSelectedSerachArrays = columnListSelectedsearchAscDesc?.split(',').map(item => item.trim());
+    // console.log(Category[0]?.column_name)
+    console.log(columnListSelected)
 
-    //  Column
+    console.log(columnListSelectedArray)
+
+ 
+
+ 
 
 
+    // console.log('Column Names:', columnNames);
+
+
+
+    useEffect(() => {
+        setSelectedColumns(columnListSelectedArray)
+    }, [])
+
+
+    useEffect(() => {
+        setSelectedColumns(columnListSelectedArray)
+    }, [])
+
+    const [selectedColumnsSearch, setSelectedColumnsSerach] = useState([]);
+    useEffect(() => {
+        setSelectedColumnsSerach(columnListSelectedSerachArrays)
+    }, [])
+
+    function convertSortString(inputString) {
+        const match = inputString.match(/(.*)_\((ASC|DESC)\)/);
+
+        if (match) {
+            const fieldName = match[1];
+            const sortOrder = match[2];
+            return `${fieldName} ${sortOrder}`;
+        } else {
+            return "Invalid input format.";
+        }
+    }
+
+    const brand_column_change = (selectedItems) => {
+        setSelectedColumns(selectedItems.map((item) => item.value));
+        // brand_search(); 
+    };
+    const brand_column_changes = (selectedItems) => {
+        setSelectedColumnsSerach(selectedItems.map((item) => item.value));
+        // brand_search(); 
+    };
+
+    const multiSearch = selectedColumnsSearch?.map(convertSortString);
 
     const { data: branchAll = [] } = useQuery({
         queryKey: ['branchAll'],
@@ -303,7 +355,7 @@ const EmployeeAll = ({ searchParams }) => {
     const [shift, setShift] = useState([])
     const [payroll, setPayroll] = useState([])
     const [employee_id, setEmployeeId] = useState([])
-
+    console.log(multiSearch)
     const employee_search = () => {
         setLoading(true);
         if (itemName === '') {
@@ -311,8 +363,9 @@ const EmployeeAll = ({ searchParams }) => {
             setLoading(false);
             return
         }
+        console.log(multiSearch)
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_search`, {
-            searchQuery, itemName, employee, shift, payroll, employee_id, fromDate, toDate
+            searchQuery, itemName, employee, shift, payroll, employee_id, fromDate, toDate, multiSearch
         })
             .then(response => {
                 setSearchResults(response.data.results);
@@ -738,10 +791,10 @@ const EmployeeAll = ({ searchParams }) => {
 
                             <div class=" border-primary shadow-sm border-0">
                                 <div class=" card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Expense Search</h5>
+                                    <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Employee Search</h5>
                                     <div class="card-title font-weight-bold mb-0 card-header-color float-right">
 
-                                        <Link href={`/Admin/expense/expense_create?page_group=${page_group}`} class="btn btn-sm btn-info">Back To Create Expense</Link>
+                                        <Link href={`/Admin/employee/employee_create?page_group=${page_group}`} class="btn btn-sm btn-info">Create Employee</Link>
                                     </div>
                                 </div>
 
@@ -798,6 +851,96 @@ const EmployeeAll = ({ searchParams }) => {
                                                     />
 
                                                 </div>
+                                            </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label col-md-2"><strong>Search Properties:</strong></label>
+
+                                                <div className="col-md-10">
+
+
+                                                    <Select
+                                                        name='select'
+                                                        labelField='label'
+                                                        valueField='value'
+                                                        values={
+
+                                                            columnListSelectedSerachArrays?.map(column => ({
+                                                                label: formatString(column),
+                                                                value: column,
+                                                            }))}
+                                                        options={
+                                                            columnListSelectedSerachArray?.map(column => {
+                                                                let label = formatString(column);
+                                                                let value = column;
+                                                                if (column.startsWith("shift_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Shift (asc)";
+                                                                        value = "shift_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Shift (desc)";
+                                                                        value = "shift_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("designation_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Designation Name (asc)";
+                                                                        value = "designation_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Designation Name (desc)";
+                                                                        value = "designation_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("payroll_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Payroll Name (asc)";
+                                                                        value = "payroll_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Payroll Name (desc)";
+                                                                        value = "payroll_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                else if (column.startsWith("unique_id_")) {
+                                                                    // Check if it ends with (ASC) or (DESC)
+                                                                    if (column.endsWith("(ASC)")) {
+                                                                        label = "Employee Id (asc)";
+                                                                        value = "unique_id_(ASC)";
+                                                                    } else if (column.endsWith("(DESC)")) {
+                                                                        label = "Employee Id (desc)";
+                                                                        value = "unique_id_(DESC)";
+                                                                    }
+                                                                }
+                                                                return {
+                                                                    label: label,
+                                                                    value: value,
+                                                                };
+                                                            })
+                                                        }
+                                                        // values={
+
+                                                        //     columnListSelectedSerachArray?.map(column => ({
+                                                        //         label: formatString(column),
+                                                        //         value: column,
+                                                        //     }))
+
+                                                        // }
+                                                        onChange={brand_column_changes}
+
+                                                        multi
+
+                                                    />
+
+
+
+
+
+
+                                                </div>
+
+
                                             </div>
                                             <div className="form-group row student">
                                                 <label className="col-form-label col-md-2 font-weight-bold">Branch Name:</label>
@@ -1015,7 +1158,7 @@ const EmployeeAll = ({ searchParams }) => {
                                                     value="Download Doc"
                                                 />
                                                 <input
-                                                style={buttonStyles} 
+                                                    style={buttonStyles}
                                                     onClick={employee_list_pdf_download}
                                                     type="button" name="search" class="btn btn-sm btn-indigo pdf_btn mr-2" value="Download PDF" />
                                             </div>
@@ -1041,7 +1184,7 @@ const EmployeeAll = ({ searchParams }) => {
                                     <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">List Employee</h5>
 
                                     <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                        <Link href={`/Admin/employee/employee_create?page_group`} className="btn btn-sm btn-info">Back Employee Create</Link>
+                                        <Link href={`/Admin/employee/employee_create?page_group`} className="btn btn-sm btn-info">Employee Create</Link>
                                         {/* <Link href={`/Admin/employee/google_map`} className="btn btn-sm btn-info ml-2"><FaMapMarkerAlt></FaMapMarkerAlt> </Link> */}
                                     </div>
                                 </div>
@@ -1174,7 +1317,6 @@ const EmployeeAll = ({ searchParams }) => {
 
                                     )
 
-
                                         :
 
                                         <>
@@ -1233,7 +1375,7 @@ const EmployeeAll = ({ searchParams }) => {
                                                             pageUsers?.map((expense, index) => (
                                                                 <tr key={expense.id}>
                                                                     {selectedColumns?.map(column => (
-                                                                        <td key={column} style={['full_name', 'description'].includes(column) ? longTextStyle : {}}>
+                                                                        <td key={column} >
                                                                             {column === 'serial' ?
                                                                                 ((currentPage - 1) * dataPerPage) + (index + 1)
                                                                                 :
