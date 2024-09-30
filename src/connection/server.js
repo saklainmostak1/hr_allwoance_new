@@ -845,8 +845,14 @@ app.get("/Admin/absent_sms/absent_create_manual_attendance", AttendanceModel.abs
 );
 
 
+const AccountReportModel = require('../app/model/Admin/account_report_model/account_report_model')
 
-
+app.post("/Admin/account_report/account_report_expense", AccountReportModel.expense_search_account_report
+);
+app.post("/Admin/account_report/account_report_income", AccountReportModel.income_search_account_report
+);
+app.post("/Admin/account_report/account_report_salary", AccountReportModel.salary_search_account_report
+);
 
 
 
@@ -962,7 +968,7 @@ app.get('/absent/absent_online_entry_employee', (req, res) => {
 
               if (absent_count > 0) {
 
-                // let current_time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+                let current_time = new Date().toLocaleTimeString('en-GB', { hour12: false });
 
                 let data4 = [];
                 console.log(data4, 'data4 919')
@@ -999,6 +1005,8 @@ app.get('/absent/absent_online_entry_employee', (req, res) => {
                                     console.log(data4, '950')
                                     console.log(max_late_time, 'shift_times', '945')
                                     console.log(max_end_time, 'shift_times', '945')
+                                    console.log(current_time, 'shift_times', '945')
+                                    // (max_late_time < current_time && max_end_time > current_time
                                     if (max_late_time && max_end_time) {
                                       data4.push({
                                         user_id: user_id,
@@ -1101,27 +1109,165 @@ app.get('/absent/absent_online_entry_employee', (req, res) => {
   data_error.push({ api_exec_time: diff_seconds });
 });
 
-async function sendSms(mobile, msg) {
 
-  
 
-  const quick_api = '7ae89887eac6055a2b9adc494ca3b902';
-  const apiUrl = 'https://quicksmsapp.com/Api/sms/campaign_api';
+
+// const axios = require('axios'); // Import axios for API requests
+
+// Function to fetch API data
+// async function fetchApiData() {
+//   try {
+//     const res = await axios.get(`http://192.168.0.185:5002/Admin/sms_api/sms_api_all`);
+//     const apiData = res.data; // Axios stores response data in the 'data' property
+//     return apiData;
+//   } catch (error) {
+//     console.error('Error fetching API data:', error);
+//     return [];
+//   }
+// }
+
+// // Main function to handle the API URL construction and fetch
+// async function processApiData() {
+//   const apiData = await fetchApiData(); // Fetching API data
+
+//   // Filter apiData for entries with status_url === '1'
+//   const filteredApiData = apiData.filter(item => item.status_url === '1');
+
+//   // Check if there are any valid entries after filtering
+//   if (filteredApiData.length === 0 || !filteredApiData[0].sms_api_params || filteredApiData[0].sms_api_params.length === 0) {
+//     console.log('No valid data available');
+//     return;
+//   }
+
+//   // Use the first valid entry for further processing
+//   const apiEntry = filteredApiData[0];
+
+//   // Sort the sms_api_params based on the options field
+//   const sortedParams = apiEntry.sms_api_params.sort((a, b) => a.options - b.options);
+
+//   // Construct the query string from the sorted parameters
+//   const queryParams = sortedParams.map(param => {
+//     const key = param.options === 1 ? 'mobile' : (param.sms_key === 'number' ? 'mobile' : param.sms_key);
+//     return `${key}=${encodeURIComponent(param.sms_value)}`;
+//   }).join('&');
+
+//   // Final URL for API call
+//   const constructedUrl = `${apiEntry.main_url}${queryParams}`;
+//   console.log('Constructed API URL:', constructedUrl); // Log the constructed URL
+
+//   // Define a flag or condition to prevent automatic API call
+//   const shouldFetch = false; // Change this based on your logic
+
+//   if (shouldFetch) {
+//     // Fetching the API data
+//     try {
+//       const response = await axios.get(constructedUrl);
+//       console.log('API Response:', response.data); // Axios stores the response data in 'data'
+//     } catch (error) {
+//       console.error('Error fetching the constructed URL:', error);
+//     }
+//   }
+// }
+
+// Call the main function to execute the logic
+// processApiData();
+
+// app.get("/Admin/sms_api/sms_api_all_status_1", processApiData
+// );
+
+async function fetchApiData() {
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(`http://192.168.0.185:5002/Admin/sms_api/sms_api_all`);
+    return response.data; // Return the data fetched from the API
+  } catch (error) {
+    console.error('Error fetching API data:', error);
+    throw error; // Handle and propagate the error
+  }
+}
+
+// This function is responsible for sending the SMS
+async function sendSms(mobile, msg) {
+  try {
+    // Fetch the SMS API data
+    const apiData = await fetchApiData();
+
+    // Filter the API data for entries with status_url === '1'
+    const filteredApiData = apiData.filter(item => item.status_url === '1');
+
+    // If no valid API data is found, return or throw an error
+    if (filteredApiData.length === 0 || !filteredApiData[0].sms_api_params || filteredApiData[0].sms_api_params.length === 0) {
+      throw new Error('No valid API data found for sending SMS');
+    }
+
+    // Use the first valid entry for further processing
+    const apiEntry = filteredApiData[0];
+
+    // Sort the sms_api_params based on the options field
+    const sortedParams = apiEntry.sms_api_params.sort((a, b) => a.options - b.options);
+
+    // Construct the query string from the sorted parameters
+    const queryParams = sortedParams.map(param => {
+      const key = param.options === 1 ? 'mobile' : (param.sms_key === 'number' ? 'mobile' : param.sms_key);
+      return `${key}=${encodeURIComponent(param.sms_value)}`;
+    }).join('&');
+
+    // Construct the final URL for the API call
+    const constructedUrl = `${apiEntry.main_url}${queryParams}`;
+    const [baseUrl, paramString] = constructedUrl.split('?');
+
+    // Check if paramString is defined before attempting to split
+    const firstParam = paramString ? paramString.split('&')[0] : null;
+
+    let formattedUrl;
+    if (firstParam) {
+      // Construct the formatted URL using the base URL and the first parameter
+      formattedUrl = `${baseUrl}?${firstParam}`;
+    } else {
+      console.log('No parameters found.');
+      return;
+    }
+
+    console.log('Formatted URL:', formattedUrl);
+    // Make the API request to send the SMS
+    const response = await axios.get(formattedUrl, {
       params: {
-        quick_api,
         mobile,
         msg,
       },
     });
+
+    // Log and return the response from the SMS API
     console.log('SMS sent:', response.data);
     return response.data;
+
   } catch (error) {
+    // Handle any errors that occur during the process
     console.error('Error sending SMS:', error);
     throw error;
   }
 }
+// async function sendSms(mobile, msg) {
+
+
+//   const quick_api = '7ae89887eac6055a2b9adc494ca3b902';
+//   const apiUrl = 'https://quicksmsapp.com/Api/sms/campaign_api';
+//   try {
+//     const response = await axios.get(apiUrl, {
+//       params: {
+//         quick_api,
+//         mobile,
+//         msg,
+//       },
+//     });
+//     console.log('SMS sent:', response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error sending SMS:', error);
+//     throw error;
+//   }
+// }
+
+// app.get('/all_data', sendSms)
 
 async function teacherEmployeeAbsentSmsSubmitAuto(usersIdArr, absentDate, inserted_absent_data) {
 

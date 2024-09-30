@@ -764,6 +764,9 @@ const ExpenseList = ({ searchParams }) => {
 
     const multiSearch = selectedColumnsSearch?.map(convertSortString);
     console.log(multiSearch)
+
+
+    
     const expense_search = () => {
         setLoading(true);
         axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/expense/expense_search`, {
