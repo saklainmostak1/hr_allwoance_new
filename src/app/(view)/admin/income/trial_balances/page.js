@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
-const GeneralLedger = () => {
+const TrialBalance = () => {
 
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
@@ -320,6 +320,11 @@ const GeneralLedger = () => {
             // setLoading(false);
         }
     };
+
+
+
+
+    
     console.log(error)
 
     const [data, setData] = useState([])
@@ -585,8 +590,8 @@ const GeneralLedger = () => {
                                                     <thead>
                                                         <tr>
                                                             <th class="text-center" rowspan="2">SL</th>
-                                                            <th class="text-center" colspan="2">Income</th>
-                                                            <th class="text-center" colspan="3">Expense</th>
+                                                            <th class="text-center" colspan="2">Credit</th>
+                                                            <th class="text-center" colspan="3">Debit</th>
                                                         </tr>
                                                         <tr>
                                                             <th class="text-center">Title</th>
@@ -854,8 +859,8 @@ const GeneralLedger = () => {
                                                     <thead>
                                                         <tr>
                                                             <th className="text-center" rowSpan="2">SL</th>
-                                                            <th className="text-center" colSpan="2">Income</th>
-                                                            <th className="text-center" colSpan="3">Expense</th>
+                                                            <th className="text-center" colSpan="2">Credit</th>
+                                                            <th className="text-center" colSpan="3">Debit</th>
                                                         </tr>
                                                         <tr>
                                                             <th className="text-center">Title</th>
@@ -926,160 +931,4 @@ const GeneralLedger = () => {
     );
 };
 
-export default GeneralLedger;
-
-
-
-
-
-{/* <div class="table-responsive">
-
-    <table class="table table-bordered table-hover table-striped table-sm  ">
-
-        <thead>
-
-            <tr>
-
-                <th class="text-center" rowspan="2">SL</th>
-
-
-
-                <th class="text-center" colspan="2">Credit</th>
-
-                <th class="text-center" colspan="3">Debit</th>
-
-
-
-            </tr>
-
-            <tr>
-
-
-
-                <th class="text-center">Title</th>
-
-                <th class="text-center">Amount</th>
-
-                <th class="text-center">Title</th>
-
-                <th class="text-center" colspan="2">Amount</th>
-
-
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-
-            <tr>
-
-                <td class="text-center">1</td>
-
-
-                <td class="text-center">Admission Form Fees</td>
-
-                <td class="text-center">400.00</td>
-
-
-
-                <td class="text-center"></td>
-
-                <td class="text-center" colspan="2"></td>
-
-
-
-
-
-
-            </tr>
-
-
-
-        </tbody><tfoot>
-
-            <tr>
-
-                <th class="text-center" colspan="1"></th>
-
-                <th class="text-center">Total</th>
-
-                <th class="text-center">155750</th>
-
-                <th class="text-center">Total</th>
-
-                <th class="text-center" colspan="2">0</th>
-
-            </tr>
-
-
-
-            <tr>
-
-                <th class="text-center" colspan="4"></th>
-
-                <th class="text-center">Total Income</th>
-
-                <th class="text-center">155750</th>
-
-            </tr>
-
-
-
-            <tr>
-
-                <th class="text-center" colspan="4"></th>
-
-                <th class="text-center">Total Expense</th>
-
-                <th class="text-center">0</th>
-
-            </tr>
-
-
-
-            <tr>
-
-                <th class="text-center" colspan="4"></th>
-
-                <th class="text-center">Total Balance</th>
-
-                <th class="text-center">155750</th>
-
-            </tr>
-
-        </tfoot>
-
-
-
-    </table>
-
-</div> */}
-
-
-
-// <tfoot>
-//                                                     <tr>
-//                                                         <th class="text-center" colspan="1"></th>
-//                                                         <th class="text-center">Total</th>
-//                                                         <th class="text-center">1752750</th>
-//                                                         <th class="text-center">Total</th>
-//                                                         <th class="text-center" colspan="2">9000</th>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <th class="text-center" colspan="4"></th>
-//                                                         <th class="text-center">Total Income</th>
-//                                                         <th class="text-center">1752750</th>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <th class="text-center" colspan="4"></th>
-//                                                         <th class="text-center">Total Expense</th>
-//                                                         <th class="text-center">9000</th>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <th class="text-center" colspan="4"></th>
-//                                                         <th class="text-center">Total Balance</th>
-//                                                         <th class="text-center">1743750</th>
-//                                                     </tr>
-//                                                 </tfoot>
+export default TrialBalance;

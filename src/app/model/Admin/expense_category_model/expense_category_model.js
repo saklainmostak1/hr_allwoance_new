@@ -59,7 +59,45 @@ const expenceCategory = {
             console.log(error)
         }
     },
-
+    // expence_category_list: async (req, res) => {
+    //     try {
+    //         let data = `
+    //             SELECT expense_category.*, 
+    //                    users_created.full_name AS created_by,
+    //                    users_modified.full_name AS modified_by 
+    //             FROM expense_category 
+    //             LEFT JOIN users AS users_created ON expense_category.created_by = users_created.id 
+    //             LEFT JOIN users AS users_modified ON expense_category.modified_by = users_modified.id 
+    //         `;
+    
+    //         connection.query(data, function (error, result) {
+    //             if (error) {
+    //                 console.log(error);
+    //                 return res.status(500).send({ error: 'Database query error' });
+    //             }
+    
+    //             // Adding the additional record
+    //             const additionalRecord = {
+    //                 id: "salary",
+    //                 expense_category_name: "salary",
+    //                 created_by: null,
+    //                 created_date: "2024-03-13T11:12:59.000Z",
+    //                 modified_by: null,
+    //                 modified_date: null
+    //             };
+    
+    //             // Push the additional record into the result array
+    //             result.push(additionalRecord);
+    
+    //             // Send the modified result
+    //             res.send(result);
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //         res.status(500).send({ error: 'Server error' });
+    //     }
+    // },
+    
 
     expense_category_single: async (req, res) => {
         try {

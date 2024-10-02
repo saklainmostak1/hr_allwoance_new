@@ -35,7 +35,7 @@ const AccountReportList = () => {
                                                 </div>
 
                                                 <div class="col-md-2 col-sm-3 col-xs-6 report-card">
-                                                    <Link class="" href="" style={{ textDecoration: 'none' }}>
+                                                    <Link class="" href="/Admin/income/accounts_report?page_group=account_management" style={{ textDecoration: 'none' }}>
                                                         <div class="all-report-box zoom-card all-accounts-report text-center p-3 my-3 shadow">
                                                             <div class="images my-3">
                                                                 <img src="https://ammkbhs.xyz/web_content/img/chart.png" style={{ width: '50px' }} alt="" />
@@ -46,7 +46,7 @@ const AccountReportList = () => {
                                                     </Link>
                                                 </div>
                                                 <div class="col-md-2 col-sm-3 col-xs-6 report-card">
-                                                    <Link class="" href="" style={{ textDecoration: 'none' }}>
+                                                    <Link class="" href="/Admin/income/balance_sheet?page_group=account_management" style={{ textDecoration: 'none' }}>
                                                         <div class="all-report-box zoom-card all-accounts-report text-center p-3 my-3 shadow">
                                                             <div class="images my-3">
                                                                 <img src="https://ammkbhs.xyz/web_content/img/chart.png" style={{ width: '50px' }} alt="" />
