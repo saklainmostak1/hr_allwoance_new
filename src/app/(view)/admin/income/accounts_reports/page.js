@@ -1,3 +1,321 @@
+'use client'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+
+const AccountReports = () => {
+    const [searchResults, setSearchResults] = useState([]);
+    const [incomeSearch, setIncomeSearch] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [yearName, setYearName] = useState('');
+    const [years, setYears] = useState([]);
+    const [type, setType] = useState('daily');
+    const [formattedRows, setFormattedRows] = useState([]); // New state for formatted rows
+    const [error, setError] = useState(null);
+
+
+    useEffect(() => {
+        const startYear = 2023;
+        const currentYear = new Date().getFullYear();
+        const yearOptions = [];
+        for (let year = startYear; year <= currentYear; year++) {
+            yearOptions.push(year);
+        }
+        setYears(yearOptions);
+    }, []);
+
+    const expense_search = async () => {
+        setLoading(true);
+        if (!yearName) {
+            alert('Select Year');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_amount_account_report`, {
+                yearName,
+                type,
+            });
+
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/income_amount_account_report`, {
+                yearName,
+                type,
+            });
+
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+
+            setSearchResults(combinedResults);
+            setIncomeSearch(combinedResultsIncome);
+            formatTableRows(combinedResults, combinedResultsIncome, type); // Call to format rows
+        } catch (error) {
+            setError("An error occurred during search.");
+            setSearchResults([]);
+        } finally {
+            setLoading(false); // Ensure loading is turned off
+        }
+    };
+
+
+    const formatTableRows = (expenses, incomes, type) => {
+        const combinedData = {};
+
+        // Initialize combinedData with zero values for daily
+        const year = new Date().getFullYear();
+
+        if (type === 'daily') {
+            for (let day = 1; day <= 365; day++) {
+                const date = new Date(year, 0); // Start from January 1st
+                date.setDate(day); // Set to the respective day of the year
+                const dateKey = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+                combinedData[dateKey] = {
+                    income: 0,
+                    totalExpense: 0,
+                    salaryExpense: 0,
+                };
+            }
+        } else if (type === 'monthly') {
+            // List of all months in the year
+            const allMonths = [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ];
+
+            // Initialize combinedData with all months and zeros for monthly
+            allMonths.forEach((month) => {
+                const monthKey = `${month}-${year}`; // Format Mon-YYYY
+                combinedData[monthKey] = {
+                    income: 0,
+                    totalExpense: 0,
+                    salaryExpense: 0,
+                };
+            });
+        }
+
+        // Process expenses
+        expenses.forEach(expense => {
+            const { created_date, sub_total_expense, expense_category } = expense;
+            const expenseDate = new Date(created_date);
+
+            let dateKey;
+            if (type === 'daily') {
+                dateKey = `${expenseDate.getDate().toString().padStart(2, '0')}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}-${expenseDate.getFullYear()}`; // DD-MM-YYYY
+            } else {
+                dateKey = `${expenseDate.toLocaleString('default', { month: 'short' })}-${expenseDate.getFullYear()}`; // Mon-YYYY
+            }
+
+            if (!combinedData[dateKey]) {
+                combinedData[dateKey] = {
+                    income: 0,
+                    totalExpense: 0,
+                    salaryExpense: 0,
+                };
+            }
+            if (expense_category === "Salary") {
+                combinedData[dateKey].salaryExpense += sub_total_expense;
+            } else {
+                combinedData[dateKey].totalExpense += sub_total_expense;
+            }
+        });
+
+        // Process incomes
+        incomes.forEach(income => {
+            const { created_date, sub_total_income } = income;
+            const incomeDate = new Date(created_date);
+
+            let dateKey;
+            if (type === 'daily') {
+                dateKey = `${incomeDate.getDate().toString().padStart(2, '0')}-${(incomeDate.getMonth() + 1).toString().padStart(2, '0')}-${incomeDate.getFullYear()}`; // DD-MM-YYYY
+            } else {
+                dateKey = `${incomeDate.toLocaleString('default', { month: 'short' })}-${incomeDate.getFullYear()}`; // Mon-YYYY
+            }
+
+            if (!combinedData[dateKey]) {
+                combinedData[dateKey] = {
+                    income: 0,
+                    totalExpense: 0,
+                    salaryExpense: 0,
+                };
+            }
+            combinedData[dateKey].income += sub_total_income;
+        });
+
+        // Create formatted rows, ensuring correct order
+        const tableRows = Object.keys(combinedData).sort((a, b) => {
+            if (type === 'daily') {
+                const [dayA, monthA, yearA] = a.split('-').map(Number);
+                const [dayB, monthB, yearB] = b.split('-').map(Number);
+                return yearA - yearB || monthA - monthB || dayA - dayB; // Sort by year, month, then day
+            } else { // Monthly
+                const [monthA, yearA] = a.split('-');
+                const [monthB, yearB] = b.split('-');
+                const monthIndexA = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthA);
+                const monthIndexB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthB);
+                return yearA - yearB || monthIndexA - monthIndexB; // Sort by year and month index
+            }
+        }).map((date, index) => {
+            const data = combinedData[date];
+            const total = data.income - (data.totalExpense + data.salaryExpense);
+            
+  
+
+            return (
+                <tr key={date}>
+                    <td>{index + 1}</td>
+                    <td>{date}</td> {/* Display formatted date or month */}
+                    <td>{0}</td> {/* Opening balance, set to 0 */}
+                    <td>{data.income.toFixed(2)}</td>
+                    <td>{data.totalExpense.toFixed(2)}</td>
+                    <td>{data.salaryExpense.toFixed(2)}</td>
+                    <td>{total.toFixed(2)}</td>
+                </tr>
+            );
+        });
+
+        setFormattedRows(tableRows); // Update formatted rows state
+    };
+
+
+
+
+
+    return (
+        <div className="container-fluid">
+            <div className="row">
+                <div className='col-12 p-4'>
+                    <div className='card mb-4'>
+                        <div className="body-content bg-light">
+                            <div className="border-primary shadow-sm border-0">
+                                <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
+                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Search</h5>
+                                </div>
+                                <div className="card-body">
+                                    <form>
+                                        <div className="col-md-10 offset-md-1">
+                                            <div className="form-group row student">
+                                                <label className="col-form-label col-md-2 font-weight-bold">Year:</label>
+                                                <div className="col-md-4">
+                                                    <select
+                                                        required
+                                                        value={yearName}
+                                                        onChange={(e) => setYearName(e.target.value)}
+                                                        name="year"
+                                                        className="form-control form-control-sm mb-2"
+                                                        id="year"
+                                                    >
+                                                        <option value="">Select Year</option>
+                                                        {years.map(year => (
+                                                            <option key={year} value={year}>{year}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <label className="col-form-label col-md-2 font-weight-bold">Type:</label>
+                                                <div className="col-md-4">
+                                                    <select name="type"
+                                                        value={type}
+                                                        onChange={(e) => setType(e.target.value)}
+                                                        className="form-control form-control-sm type">
+                                                        {/* <option value="">Select Option</option> */}
+                                                        <option value="daily">Daily</option>
+                                                        <option value="monthly">Monthly</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="form-group row">
+                                                <div className="offset-md-2 col-md-10 float-left">
+                                                    <input
+                                                        type="button"
+                                                        name="search"
+                                                        className="btn btn-sm btn-info search_btn mr-2"
+                                                        value="Search"
+                                                        onClick={expense_search}
+                                                    />
+                                                    <input
+                                                        type="button"
+                                                        name="print"
+                                                        className="btn btn-sm btn-success print_btn mr-2"
+                                                        value="Print"
+                                                    />
+                                                    <input
+                                                        type="button"
+                                                        name="download_pdf"
+                                                        className="btn btn-sm btn-secondary excel_btn mr-2"
+                                                        value="Download PDF"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="">
+                        {loading ? (
+                            <div className='text-center'>
+                                <FontAwesomeIcon style={{ height: '33px', width: '33px' }} icon={faSpinner} spin />
+                            </div>
+                        ) : (
+                            (searchResults.length > 0 || incomeSearch.length > 0) ? (
+                                <div className='card mb-4'>
+                                    <div className="body-content bg-light">
+                                        <div className="border-primary shadow-sm border-0">
+                                            <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
+                                                <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Account Report</h5>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="table-responsive">
+                                                    <table className="table table-bordered table-hover table-striped table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>SL No.</th>
+                                                                <th>Transaction Date</th>
+                                                                <th>Opening Balance</th>
+                                                                <th>Total Income</th>
+                                                                <th>Total Expense</th>
+                                                                <th>Salary</th>
+                                                                <th>Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {formattedRows.length > 0 ? formattedRows : (
+                                                                <tr>
+                                                                    <td colSpan="7">No data available</td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className='alert alert-danger'>No records found</div>
+                            )
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AccountReports;
+
+
+
+
+
+
+
+
+
+
+
 // 'use client'
 // import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -515,328 +833,6 @@
 // };
 
 // export default AccountReports;
-
-
-
-'use client'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-
-const AccountReports = () => {
-    const [searchResults, setSearchResults] = useState([]);
-    const [incomeSearch, setIncomeSearch] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [yearName, setYearName] = useState('');
-    const [years, setYears] = useState([]);
-    const [type, setType] = useState('daily');
-    const [formattedRows, setFormattedRows] = useState([]); // New state for formatted rows
-    const [error, setError] = useState(null);
-
-
-    useEffect(() => {
-        const startYear = 2023;
-        const currentYear = new Date().getFullYear();
-        const yearOptions = [];
-        for (let year = startYear; year <= currentYear; year++) {
-            yearOptions.push(year);
-        }
-        setYears(yearOptions);
-    }, []);
-
-    const expense_search = async () => {
-        setLoading(true);
-        if (!yearName) {
-            alert('Select Year');
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_amount_account_report`, {
-                yearName,
-                type,
-            });
-
-            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/income_amount_account_report`, {
-                yearName,
-                type,
-            });
-
-            const combinedResults = expenseResponse.data.results;
-            const combinedResultsIncome = incomeResponse.data.results;
-
-            setSearchResults(combinedResults);
-            setIncomeSearch(combinedResultsIncome);
-            formatTableRows(combinedResults, combinedResultsIncome, type); // Call to format rows
-        } catch (error) {
-            setError("An error occurred during search.");
-            setSearchResults([]);
-        } finally {
-            setLoading(false); // Ensure loading is turned off
-        }
-    };
-
-
-    const formatTableRows = (expenses, incomes, type) => {
-        const combinedData = {};
-
-        // Initialize combinedData with zero values for daily
-        const year = new Date().getFullYear();
-
-        if (type === 'daily') {
-            for (let day = 1; day <= 365; day++) {
-                const date = new Date(year, 0); // Start from January 1st
-                date.setDate(day); // Set to the respective day of the year
-                const dateKey = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
-                combinedData[dateKey] = {
-                    income: 0,
-                    totalExpense: 0,
-                    salaryExpense: 0,
-                };
-            }
-        } else if (type === 'monthly') {
-            // List of all months in the year
-            const allMonths = [
-                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-            ];
-
-            // Initialize combinedData with all months and zeros for monthly
-            allMonths.forEach((month) => {
-                const monthKey = `${month}-${year}`; // Format Mon-YYYY
-                combinedData[monthKey] = {
-                    income: 0,
-                    totalExpense: 0,
-                    salaryExpense: 0,
-                };
-            });
-        }
-
-        // Process expenses
-        expenses.forEach(expense => {
-            const { created_date, sub_total_expense, expense_category } = expense;
-            const expenseDate = new Date(created_date);
-
-            let dateKey;
-            if (type === 'daily') {
-                dateKey = `${expenseDate.getDate().toString().padStart(2, '0')}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}-${expenseDate.getFullYear()}`; // DD-MM-YYYY
-            } else {
-                dateKey = `${expenseDate.toLocaleString('default', { month: 'short' })}-${expenseDate.getFullYear()}`; // Mon-YYYY
-            }
-
-            if (!combinedData[dateKey]) {
-                combinedData[dateKey] = {
-                    income: 0,
-                    totalExpense: 0,
-                    salaryExpense: 0,
-                };
-            }
-            if (expense_category === "Salary") {
-                combinedData[dateKey].salaryExpense += sub_total_expense;
-            } else {
-                combinedData[dateKey].totalExpense += sub_total_expense;
-            }
-        });
-
-        // Process incomes
-        incomes.forEach(income => {
-            const { created_date, sub_total_income } = income;
-            const incomeDate = new Date(created_date);
-
-            let dateKey;
-            if (type === 'daily') {
-                dateKey = `${incomeDate.getDate().toString().padStart(2, '0')}-${(incomeDate.getMonth() + 1).toString().padStart(2, '0')}-${incomeDate.getFullYear()}`; // DD-MM-YYYY
-            } else {
-                dateKey = `${incomeDate.toLocaleString('default', { month: 'short' })}-${incomeDate.getFullYear()}`; // Mon-YYYY
-            }
-
-            if (!combinedData[dateKey]) {
-                combinedData[dateKey] = {
-                    income: 0,
-                    totalExpense: 0,
-                    salaryExpense: 0,
-                };
-            }
-            combinedData[dateKey].income += sub_total_income;
-        });
-
-        // Create formatted rows, ensuring correct order
-        const tableRows = Object.keys(combinedData).sort((a, b) => {
-            if (type === 'daily') {
-                const [dayA, monthA, yearA] = a.split('-').map(Number);
-                const [dayB, monthB, yearB] = b.split('-').map(Number);
-                return yearA - yearB || monthA - monthB || dayA - dayB; // Sort by year, month, then day
-            } else { // Monthly
-                const [monthA, yearA] = a.split('-');
-                const [monthB, yearB] = b.split('-');
-                const monthIndexA = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthA);
-                const monthIndexB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthB);
-                return yearA - yearB || monthIndexA - monthIndexB; // Sort by year and month index
-            }
-        }).map((date, index) => {
-            const data = combinedData[date];
-            const total = data.income - (data.totalExpense + data.salaryExpense);
-            
-  
-
-            return (
-                <tr key={date}>
-                    <td>{index + 1}</td>
-                    <td>{date}</td> {/* Display formatted date or month */}
-                    <td>{0}</td> {/* Opening balance, set to 0 */}
-                    <td>{data.income.toFixed(2)}</td>
-                    <td>{data.totalExpense.toFixed(2)}</td>
-                    <td>{data.salaryExpense.toFixed(2)}</td>
-                    <td>{total.toFixed(2)}</td>
-                </tr>
-            );
-        });
-
-        setFormattedRows(tableRows); // Update formatted rows state
-    };
-
-
-
-
-
-    return (
-        <div className="container-fluid">
-            <div className="row">
-                <div className='col-12 p-4'>
-                    <div className='card mb-4'>
-                        <div className="body-content bg-light">
-                            <div className="border-primary shadow-sm border-0">
-                                <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Search</h5>
-                                </div>
-                                <div className="card-body">
-                                    <form>
-                                        <div className="col-md-10 offset-md-1">
-                                            <div className="form-group row student">
-                                                <label className="col-form-label col-md-2 font-weight-bold">Year:</label>
-                                                <div className="col-md-4">
-                                                    <select
-                                                        required
-                                                        value={yearName}
-                                                        onChange={(e) => setYearName(e.target.value)}
-                                                        name="year"
-                                                        className="form-control form-control-sm mb-2"
-                                                        id="year"
-                                                    >
-                                                        <option value="">Select Year</option>
-                                                        {years.map(year => (
-                                                            <option key={year} value={year}>{year}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                <label className="col-form-label col-md-2 font-weight-bold">Type:</label>
-                                                <div className="col-md-4">
-                                                    <select name="type"
-                                                        value={type}
-                                                        onChange={(e) => setType(e.target.value)}
-                                                        className="form-control form-control-sm type">
-                                                        {/* <option value="">Select Option</option> */}
-                                                        <option value="daily">Daily</option>
-                                                        <option value="monthly">Monthly</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="form-group row">
-                                                <div className="offset-md-2 col-md-10 float-left">
-                                                    <input
-                                                        type="button"
-                                                        name="search"
-                                                        className="btn btn-sm btn-info search_btn mr-2"
-                                                        value="Search"
-                                                        onClick={expense_search}
-                                                    />
-                                                    <input
-                                                        type="button"
-                                                        name="print"
-                                                        className="btn btn-sm btn-success print_btn mr-2"
-                                                        value="Print"
-                                                    />
-                                                    <input
-                                                        type="button"
-                                                        name="download_pdf"
-                                                        className="btn btn-sm btn-secondary excel_btn mr-2"
-                                                        value="Download PDF"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="">
-                        {loading ? (
-                            <div className='text-center'>
-                                <FontAwesomeIcon style={{ height: '33px', width: '33px' }} icon={faSpinner} spin />
-                            </div>
-                        ) : (
-                            (searchResults.length > 0 || incomeSearch.length > 0) ? (
-                                <div className='card mb-4'>
-                                    <div className="body-content bg-light">
-                                        <div className="border-primary shadow-sm border-0">
-                                            <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                                <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Account Report</h5>
-                                            </div>
-                                            <div className="card-body">
-                                                <div className="table-responsive">
-                                                    <table className="table table-bordered table-hover table-striped table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>SL No.</th>
-                                                                <th>Transaction Date</th>
-                                                                <th>Opening Balance</th>
-                                                                <th>Total Income</th>
-                                                                <th>Total Expense</th>
-                                                                <th>Salary</th>
-                                                                <th>Total</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {formattedRows.length > 0 ? formattedRows : (
-                                                                <tr>
-                                                                    <td colSpan="7">No data available</td>
-                                                                </tr>
-                                                            )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className='alert alert-danger'>No records found</div>
-                            )
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default AccountReports;
-
-
-
-
-
-
-
-
-
-
-
-
 
     // const formatTableRows = (expenses, incomes) => {
     //     const combinedData = {};
