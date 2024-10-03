@@ -348,6 +348,8 @@ const AccountReportModel = {
         try {
             // Destructure the necessary parameters from the request body
             const {
+                totalExpensess,
+                totalIncomes,
                 expenseCategorySubTotal,
                 incomeCategorys,
                 incomeCategorySubTotal,
@@ -356,7 +358,7 @@ const AccountReportModel = {
                 totalExpense,
                 orientation,
                 selectedPrintSize,
-                fontSize
+                fontSize,
             } = req.body;
 
 
@@ -466,24 +468,24 @@ const AccountReportModel = {
                             <tr>
                                 <th colspan="1"></th>
                                 <th>Total</th>
-                                <th>${totalIncome}</th>
+                                <th>${totalIncome ? totalIncome : totalIncomes}</th>
                                 <th>Total</th>
-                                <th colspan="2">${totalExpense}</th>
+                                <th colspan="2">${totalExpense ? totalExpense : totalExpensess}</th>
                             </tr>
                             <tr>
                                 <th colspan="4"></th>
                                 <th>Total Income</th>
-                                <th>${totalIncome}</th>
+                                <th>${totalIncome ? totalIncome : totalIncomes}</th>
                             </tr>
                             <tr>
                                 <th colspan="4"></th>
                                 <th>Total Expense</th>
-                                <th>${totalExpense}</th>
+                                <th>${totalExpense ? totalExpense : totalExpensess}</th>
                             </tr>
                             <tr>
                                 <th colspan="4"></th>
                                 <th>Total Balance</th>
-                                <th>${totalIncome - totalExpense}</th>
+                                <th>${(totalIncome - totalExpense) ? totalIncome - totalExpense :(totalIncomes - totalExpensess) }</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -592,7 +594,7 @@ const AccountReportModel = {
     //                 <p>Collected By:</p>
     //                 <p>Date: </p>
     //             </div>
-               
+
 
     //             <div class='container'>
     //                 <h3 style="text-decoration: underline;">Financial Overview</h3>
@@ -640,7 +642,7 @@ const AccountReportModel = {
     //                 </tfoot>
     //             </table>
     //         </body>
-           
+
     //         </html>`;
     //         const pageSize = selectedPrintSize || 'A4';
     //         const pageOrientation = orientation || 'portrait';
@@ -663,6 +665,8 @@ const AccountReportModel = {
     general_ledgers_pdf: async (req, res) => {
         try {
             const {
+                totalExpensess,
+                totalIncomes,
                 expenseCategorySubTotal,
                 incomeCategorys,
                 incomeCategorySubTotal,
@@ -671,16 +675,14 @@ const AccountReportModel = {
                 totalExpense,
                 orientation,
                 selectedPrintSize,
-                fontSize
+                fontSize,
+                
             } = req.body;
-    
-            // Validate required fields
-            if (!totalIncome || !totalExpense || !incomeCategorys || !expenseCategorys) {
-                return res.status(400).send('Required data is missing');
-            }
-    
+
+         
+
             let financialTableRows = '';
-    
+
             // Handle expense subtotals
             Object.keys(expenseCategorySubTotal).forEach((categoryId, index) => {
                 financialTableRows += '<tr>';
@@ -691,7 +693,7 @@ const AccountReportModel = {
                 financialTableRows += `<td class="text-center">${expenseCategorySubTotal[categoryId] || ''}</td>`;
                 financialTableRows += '</tr>';
             });
-    
+
             // Handle unmatched income categories
             Object.keys(incomeCategorySubTotal).filter(categoryId => !expenseCategorySubTotal[categoryId]).forEach((categoryId, index) => {
                 financialTableRows += '<tr>';
@@ -701,10 +703,10 @@ const AccountReportModel = {
                 financialTableRows += '<td class="text-center"></td><td class="text-center"></td>';
                 financialTableRows += '</tr>';
             });
-    
+
             const pageSize = selectedPrintSize || 'A4';
             const pageOrientation = orientation || 'portrait';
-    
+
             // HTML structure for the print view
             const html = `
             <html lang="en">
@@ -780,33 +782,33 @@ const AccountReportModel = {
                         ${financialTableRows}
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <th colspan="1"></th>
-                            <th>Total</th>
-                            <th>${totalIncome}</th>
-                            <th>Total</th>
-                            <th colspan="2">${totalExpense}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="4"></th>
-                            <th>Total Income</th>
-                            <th>${totalIncome}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="4"></th>
-                            <th>Total Expense</th>
-                            <th>${totalExpense}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="4"></th>
-                            <th>Total Balance</th>
-                            <th>${totalIncome - totalExpense}</th>
-                        </tr>
+                         <tr>
+                                <th colspan="1"></th>
+                                <th>Total</th>
+                                <th>${totalIncome ? totalIncome : totalIncomes}</th>
+                                <th>Total</th>
+                                <th colspan="2">${totalExpense ? totalExpense : totalExpensess}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="4"></th>
+                                <th>Total Income</th>
+                                <th>${totalIncome ? totalIncome : totalIncomes}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="4"></th>
+                                <th>Total Expense</th>
+                                <th>${totalExpense ? totalExpense : totalExpensess}</th>
+                            </tr>
+                            <tr>
+                                <th colspan="4"></th>
+                                <th>Total Balance</th>
+                                <th>${(totalIncome - totalExpense) ? totalIncome - totalExpense :(totalIncomes - totalExpensess) }</th>
+                            </tr>
                     </tfoot>
                 </table>
             </body>
             </html>`;
-    
+
             wkhtmltopdf(html, { pageSize: pageSize, orientation: pageOrientation }, (err, stream) => {
                 if (err) {
                     console.error('Error generating PDF:', err);
@@ -829,13 +831,13 @@ const AccountReportModel = {
             const {
                 orientation, selectedPrintSize, fontSize, incomeSearch, searchResults, totals, account_head
             } = req.body;
-    
+
             // Generate the financial table rows
             let financialTableRows = '';
-    
+
             if (Object.keys(searchResults).length > 0 || Object.keys(incomeSearch).length > 0) {
                 let totalAmountSum = 0;
-    
+
                 // Render asset rows
                 financialTableRows += `
                     <thead>
@@ -849,23 +851,23 @@ const AccountReportModel = {
                             <th>Asset</th>
                             <th></th>
                         </tr>`;
-    
+
                 // Render accounts
                 account_head.forEach(account => {
                     const expenseAmount = searchResults[account.id] || 0;
                     const incomeAmount = incomeSearch[account.id] || 0;
                     // const totalAmount = expenseAmount + incomeAmount;
-                    const totalAmount = incomeAmount - expenseAmount ;
-    
+                    const totalAmount = incomeAmount - expenseAmount;
+
                     totalAmountSum += totalAmount;
-    
+
                     financialTableRows += `
                         <tr>
                             <th>${account.account_head_name}</th>
                             <th>${totalAmount.toLocaleString()}</th>
                         </tr>`;
                 });
-    
+
                 financialTableRows += `
                         <tr class="report-bg">
                             <td>Subtotal</td>
@@ -915,7 +917,7 @@ const AccountReportModel = {
             } else {
                 // If there are no search results or income search results, use totals
                 const totalAmountSum = totals.totalAmountSum || 0;
-    
+
                 financialTableRows += `
                     <thead>
                         <tr class="report-bg w-100">
@@ -928,7 +930,7 @@ const AccountReportModel = {
                             <th>Asset</th>
                             <th></th>
                         </tr>`;
-    
+
                 totals.accountRows.forEach(account => {
                     financialTableRows += `
                         <tr>
@@ -936,7 +938,7 @@ const AccountReportModel = {
                             <th>${account.totalAmount.toLocaleString()}</th>
                         </tr>`;
                 });
-    
+
                 financialTableRows += `
                         <tr class="report-bg">
                             <td>Subtotal</td>
@@ -984,7 +986,7 @@ const AccountReportModel = {
                         </tr>
                     </tbody>`;
             }
-    
+
             // HTML structure for the print view
             const pageSize = selectedPrintSize || 'A4';
             const pageOrientation = orientation || 'portrait';
@@ -1051,14 +1053,14 @@ const AccountReportModel = {
                     window.print();
                 </script>
                 </html>`;
-    
+
             res.send(html); // Send the generated HTML as response
         } catch (error) {
             console.error('Error in balance_sheet_print:', error);
             res.status(500).send('Error generating print view');
         }
     },
-    
+
     balance_sheet_pdf: async (req, res) => {
         try {
             const {
@@ -1090,7 +1092,7 @@ const AccountReportModel = {
                     const expenseAmount = searchResults[account.id] || 0;
                     const incomeAmount = incomeSearch[account.id] || 0;
                     // const totalAmount = expenseAmount + incomeAmount;
-                    const totalAmount = incomeAmount - expenseAmount ;
+                    const totalAmount = incomeAmount - expenseAmount;
 
                     totalAmountSum += totalAmount;
 
@@ -1329,12 +1331,12 @@ const AccountReportModel = {
     //                 LEFT JOIN account_head ON income.paid_by = account_head.id
     //             WHERE 1
     //         `
-            
+
     //         if (fromDate && toDate) {
     //             sql += ` AND income.income_date BETWEEN '${fromDate}' AND '${toDate}'`;
     //         }
 
-            
+
     //         console.log("SQL Query:", sql);
 
     //         // Execute the constructed SQL query
@@ -1357,10 +1359,10 @@ const AccountReportModel = {
     income_amount_account_report: async (req, res) => {
         try {
             console.log("Search button clicked.");
-    
+
             // Extract necessary data from request
-            const { yearName, type} = req.body;
-    
+            const { yearName, type } = req.body;
+
             // Construct the base SQL query
             let sql = `
                 SELECT 
@@ -1379,18 +1381,18 @@ const AccountReportModel = {
                     LEFT JOIN account_head ON income.paid_by = account_head.id
                 WHERE YEAR(income.income_date) = '${yearName}'
             `;
-    
-          
-    
+
+
+
             // Modify the query based on the 'type' (daily or monthly)
             if (type === "daily") {
                 sql += ` GROUP BY DATE(income.income_date)`; // Group by day for daily type
             } else if (type === "monthly") {
                 sql += ` GROUP BY MONTH(income.income_date)`; // Group by month for monthly type
             }
-    
+
             console.log("SQL Query:", sql);
-    
+
             // Execute the constructed SQL query
             connection.query(sql, (error, results, fields) => {
                 if (error) {
@@ -1406,7 +1408,7 @@ const AccountReportModel = {
             res.status(500).json({ error: "An error occurred." });
         }
     },
-    
+
     // expense_amount_account_report: async (req, res) => {
     //     try {
     //         const {
@@ -1447,16 +1449,16 @@ const AccountReportModel = {
     //                 salary
     //             LEFT JOIN users ON users.id = salary.user_id
     //             WHERE 1 = 1
-                
+
     //         `;
 
     //         let sqlParams = [];
     //         let salarySqlParams = [];
 
-          
+
 
     //         // Add search filters
-           
+
 
     //         // Combine both SQL queries using UNION ALL
     //         let combinedSql = `
@@ -1480,11 +1482,11 @@ const AccountReportModel = {
     //         res.status(500).json({ error: "An error occurred." });
     //     }
     // },
-    
+
     expense_amount_account_report: async (req, res) => {
         try {
-            const { yearName, type} = req.body;
-    
+            const { yearName, type } = req.body;
+
             // Expense SQL Query
             let expenseSql = `
                 SELECT 
@@ -1503,7 +1505,7 @@ const AccountReportModel = {
                     LEFT JOIN account_head ON expense.paid_by = account_head.id
                 WHERE YEAR(expense.expense_date) = '${yearName}'
             `;
-    
+
             // Salary SQL Query
             let salarySql = `
                 SELECT 
@@ -1520,9 +1522,9 @@ const AccountReportModel = {
                 LEFT JOIN users ON users.id = salary.user_id
                 WHERE YEAR(salary.salary_date) = '${yearName}'
             `;
-    
+
             // Add date range filter if provided
-         
+
             // Modify the query based on the 'type' (daily or monthly)
             if (type === "daily") {
                 expenseSql += ` GROUP BY DATE(expense.expense_date)`; // Group by day for daily type
@@ -1531,16 +1533,16 @@ const AccountReportModel = {
                 expenseSql += ` GROUP BY MONTH(expense.expense_date)`; // Group by month for monthly type
                 salarySql += ` GROUP BY MONTH(salary.salary_date)`;   // Group by month for monthly type
             }
-    
+
             // Combine both SQL queries using UNION ALL
             let combinedSql = `
                 (${expenseSql})
                 UNION ALL
                 (${salarySql})
             `;
-    
+
             console.log("Combined SQL Query:", combinedSql);
-    
+
             // Execute the combined query
             connection.query(combinedSql, (error, results) => {
                 if (error) {
@@ -1556,10 +1558,373 @@ const AccountReportModel = {
             res.status(500).json({ error: "An error occurred." });
         }
     },
-    
-   
-    
-    
+
+
+
+
+    accounts_report_print: async (req, res) => {
+        try {
+            // Destructure the necessary parameters from the request body
+            const { orientation, selectedPrintSize, fontSize, expenses, incomes, type, yearName } = req.body;
+
+            // Helper function to format table rows based on type (daily/monthly)
+            const formatTableRows = (expenses, incomes, type) => {
+                const combinedData = {};
+                const year = yearName;
+
+                // Initialize combinedData with zero values based on type
+                if (type === 'daily') {
+                    for (let day = 1; day <= 365; day++) {
+                        const date = new Date(year, 0);
+                        date.setDate(day);
+                        const dateKey = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                } else if (type === 'monthly') {
+                    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    allMonths.forEach((month) => {
+                        const monthKey = `${month}-${year}`; // Format Mon-YYYY
+                        combinedData[monthKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    });
+                }
+
+                // Process expenses
+                expenses.forEach(expense => {
+                    const { created_date, sub_total_expense, expense_category } = expense;
+                    const expenseDate = new Date(created_date);
+                    const dateKey = type === 'daily'
+                        ? `${expenseDate.getDate().toString().padStart(2, '0')}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}-${expenseDate.getFullYear()}` // DD-MM-YYYY
+                        : `${expenseDate.toLocaleString('default', { month: 'short' })}-${expenseDate.getFullYear()}`; // Mon-YYYY
+
+                    if (!combinedData[dateKey]) {
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                    if (expense_category === "Salary") {
+                        combinedData[dateKey].salaryExpense += sub_total_expense;
+                    } else {
+                        combinedData[dateKey].totalExpense += sub_total_expense;
+                    }
+                });
+
+                // Process incomes
+                incomes.forEach(income => {
+                    const { created_date, sub_total_income } = income;
+                    const incomeDate = new Date(created_date);
+                    const dateKey = type === 'daily'
+                        ? `${incomeDate.getDate().toString().padStart(2, '0')}-${(incomeDate.getMonth() + 1).toString().padStart(2, '0')}-${incomeDate.getFullYear()}` // DD-MM-YYYY
+                        : `${incomeDate.toLocaleString('default', { month: 'short' })}-${incomeDate.getFullYear()}`; // Mon-YYYY
+
+                    if (!combinedData[dateKey]) {
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                    combinedData[dateKey].income += sub_total_income;
+                });
+
+                // Generate table rows and calculate balances
+                let previousBalance = 0; // Starting balance
+                let financialTableRows = ''; // Initialize rows string
+
+                Object.keys(combinedData).sort((a, b) => {
+                    if (type === 'daily') {
+                        const [dayA, monthA, yearA] = a.split('-').map(Number);
+                        const [dayB, monthB, yearB] = b.split('-').map(Number);
+                        return yearA - yearB || monthA - monthB || dayA - dayB;
+                    } else {
+                        const [monthA, yearA] = a.split('-');
+                        const [monthB, yearB] = b.split('-');
+                        const monthIndexA = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthA);
+                        const monthIndexB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthB);
+                        return yearA - yearB || monthIndexA - monthIndexB;
+                    }
+                }).forEach((date, index) => {
+                    const data = combinedData[date];
+                    const total = data.income - (data.totalExpense + data.salaryExpense);
+                    const openingBalance = previousBalance;
+                    const closingBalance = openingBalance + total;
+
+                    previousBalance = closingBalance;
+
+                    // Add table row HTML
+                    financialTableRows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${date}</td>
+                            <td>${openingBalance.toFixed(2)}</td>
+                            <td>${data.income.toFixed(2)}</td>
+                            <td>${data.totalExpense.toFixed(2)}</td>
+                            <td>${data.salaryExpense.toFixed(2)}</td>
+                            <td>${total.toFixed(2)}</td>
+                        </tr>`;
+                });
+
+                return financialTableRows;
+            };
+
+            // Generate financial table rows
+            const financialTableRows = formatTableRows(expenses, incomes, type);
+
+            // HTML structure for the print view
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+            const html = `
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Financial Report</title>
+                    <style>
+                        @page {
+                            size: ${pageSize} ${pageOrientation};
+                            margin: 20mm;
+                        }
+                        * {
+                            font-family: 'Nikosh', sans-serif !important;
+                            font-size: ${fontSize || '12px'};
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        th, td {
+                            padding: 8px;
+                            text-align: left;
+                            border: 1px solid #ddd;
+                        }
+                        th {
+                            background-color: #f2f2f2;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Pathshala School & College Financial Overview</h2>
+                        <h3>GA-75/A, Middle Badda, Dhaka-1212</h3>
+                        <p>Phone: 01977379479, Mobile: 01977379479</p>
+                        <p>Email: pathshala@urbanitsolution.com</p>
+                    </div>
+                    <div class="container2">
+                        <p>Receipt No: 829</p>
+                        <p>Collected By:</p>
+                        <p>Date: </p>
+                    </div>
+                    <div class="container">
+                        <h3 style="text-decoration: underline;">Financial Overview</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SL No.</th>
+                                <th>Transaction Date</th>
+                                <th>Opening Balance</th>
+                                <th>Total Income</th>
+                                <th>Total Expense</th>
+                                <th>Salary</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${financialTableRows}
+                        </tbody>
+                    </table>
+                </body>
+                <script>
+                    window.print();
+                </script>
+                </html>`;
+
+            res.send(html); // Send the generated HTML as response
+        } catch (error) {
+            console.error('Error in accounts_report_print:', error);
+            res.status(500).send('Error generating print view');
+        }
+    },
+
+
+    accounts_report_pdf: async (req, res) => {
+        try {
+            const { orientation, selectedPrintSize, fontSize, expenses, incomes, type, yearName } = req.body;
+
+            // Helper function to format table rows based on type (daily/monthly)
+            const formatTableRows = (expenses, incomes, type) => {
+                const combinedData = {};
+                const year = yearName;
+
+                // Initialize combinedData with zero values based on type
+                if (type === 'daily') {
+                    for (let day = 1; day <= 365; day++) {
+                        const date = new Date(year, 0);
+                        date.setDate(day);
+                        const dateKey = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                } else if (type === 'monthly') {
+                    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    allMonths.forEach((month) => {
+                        const monthKey = `${month}-${year}`; // Format Mon-YYYY
+                        combinedData[monthKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    });
+                }
+
+                // Process expenses
+                expenses.forEach(expense => {
+                    const { created_date, sub_total_expense, expense_category } = expense;
+                    const expenseDate = new Date(created_date);
+                    const dateKey = type === 'daily'
+                        ? `${expenseDate.getDate().toString().padStart(2, '0')}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}-${expenseDate.getFullYear()}` // DD-MM-YYYY
+                        : `${expenseDate.toLocaleString('default', { month: 'short' })}-${expenseDate.getFullYear()}`; // Mon-YYYY
+
+                    if (!combinedData[dateKey]) {
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                    if (expense_category === "Salary") {
+                        combinedData[dateKey].salaryExpense += sub_total_expense;
+                    } else {
+                        combinedData[dateKey].totalExpense += sub_total_expense;
+                    }
+                });
+
+                // Process incomes
+                incomes.forEach(income => {
+                    const { created_date, sub_total_income } = income;
+                    const incomeDate = new Date(created_date);
+                    const dateKey = type === 'daily'
+                        ? `${incomeDate.getDate().toString().padStart(2, '0')}-${(incomeDate.getMonth() + 1).toString().padStart(2, '0')}-${incomeDate.getFullYear()}` // DD-MM-YYYY
+                        : `${incomeDate.toLocaleString('default', { month: 'short' })}-${incomeDate.getFullYear()}`; // Mon-YYYY
+
+                    if (!combinedData[dateKey]) {
+                        combinedData[dateKey] = { income: 0, totalExpense: 0, salaryExpense: 0 };
+                    }
+                    combinedData[dateKey].income += sub_total_income;
+                });
+
+                // Generate table rows and calculate balances
+                let previousBalance = 0; // Starting balance
+                let financialTableRows = ''; // Initialize rows string
+
+                Object.keys(combinedData).sort((a, b) => {
+                    if (type === 'daily') {
+                        const [dayA, monthA, yearA] = a.split('-').map(Number);
+                        const [dayB, monthB, yearB] = b.split('-').map(Number);
+                        return yearA - yearB || monthA - monthB || dayA - dayB;
+                    } else {
+                        const [monthA, yearA] = a.split('-');
+                        const [monthB, yearB] = b.split('-');
+                        const monthIndexA = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthA);
+                        const monthIndexB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthB);
+                        return yearA - yearB || monthIndexA - monthIndexB;
+                    }
+                }).forEach((date, index) => {
+                    const data = combinedData[date];
+                    const total = data.income - (data.totalExpense + data.salaryExpense);
+                    const openingBalance = previousBalance;
+                    const closingBalance = openingBalance + total;
+
+                    previousBalance = closingBalance;
+
+                    // Add table row HTML
+                    financialTableRows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${date}</td>
+                            <td>${openingBalance.toFixed(2)}</td>
+                            <td>${data.income.toFixed(2)}</td>
+                            <td>${data.totalExpense.toFixed(2)}</td>
+                            <td>${data.salaryExpense.toFixed(2)}</td>
+                            <td>${total.toFixed(2)}</td>
+                        </tr>`;
+                });
+
+                return financialTableRows;
+            };
+
+            // Generate financial table rows
+            const financialTableRows = formatTableRows(expenses, incomes, type);
+
+            // HTML structure for the print view
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+            const html = `
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Financial Report</title>
+                <style>
+                    @page {
+                        size: ${pageSize} ${pageOrientation};
+                        margin: 20mm;
+                    }
+                    * {
+                        font-family: 'Nikosh', sans-serif !important;
+                        font-size: ${fontSize || '12px'};
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 8px;
+                        text-align: left;
+                        border: 1px solid #ddd;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Pathshala School & College Financial Overview</h2>
+                    <h3>GA-75/A, Middle Badda, Dhaka-1212</h3>
+                    <p>Phone: 01977379479, Mobile: 01977379479</p>
+                    <p>Email: pathshala@urbanitsolution.com</p>
+                </div>
+                <div class="container2">
+                    <p>Receipt No: 829</p>
+                    <p>Collected By:</p>
+                    <p>Date: </p>
+                </div>
+                <div class="container">
+                    <h3 style="text-decoration: underline;">Financial Overview</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SL No.</th>
+                            <th>Transaction Date</th>
+                            <th>Opening Balance</th>
+                            <th>Total Income</th>
+                            <th>Total Expense</th>
+                            <th>Salary</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${financialTableRows}
+                    </tbody>
+                </table>
+            </body>
+        
+            </html>`;
+
+            wkhtmltopdf(html, { pageSize: pageSize, orientation: pageOrientation }, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    console.error('Error details:', err.stderr); // Log additional details from stderr
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
+        } catch (error) {
+            console.error('Error in general_ledgers_pdf:', error);
+            res.status(500).send('Error generating PDF');
+        }
+    },
+
+
+
+
 
 }
 module.exports = AccountReportModel

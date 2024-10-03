@@ -153,8 +153,324 @@ const TrialBalance = () => {
     }, 0);
 
 
+    // const general_ledgers_print = async () => {
+    //     try {
+
+    //         // const extraColumnValue = parseInt(document.getElementById('extra_column').value);
+    //         const selectedLayout = document.getElementById('print_layout').value;
+    //         const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+
+    //         const selectedPrintSize = document.getElementById('print_size').value;
+    //         const selectedZoom = document.querySelector('.zoom_size').value;
+
+    //         // Convert zoom value to a numeric multiplier
+    //         let zoomMultiplier = 100; // Default zoom multiplier
+    //         if (selectedZoom !== '') {
+    //             zoomMultiplier = parseFloat(selectedZoom) / 100;
+    //         }
+    //         // Set the page dimensions based on the selected print size
+    //         let pageWidth, pageHeight;
+    //         switch (selectedPrintSize) {
+    //             case 'A4':
+    //                 pageWidth = 210 * zoomMultiplier;
+    //                 pageHeight = 297 * zoomMultiplier;
+    //                 break;
+    //             case 'A3':
+    //                 pageWidth = 297 * zoomMultiplier;
+    //                 pageHeight = 420 * zoomMultiplier;
+    //                 break;
+    //             case 'legal':
+    //                 pageWidth = 216 * zoomMultiplier; // Width for Legal size
+    //                 pageHeight = 356 * zoomMultiplier; // Height for Legal size
+    //                 break;
+    //             default:
+    //                 // Default to A4 size
+    //                 pageWidth = 210 * zoomMultiplier;
+    //                 pageHeight = 297 * zoomMultiplier;
+    //                 break;
+    //         }
+
+
+
+    //         // Get the selected font size value
+    //         const selectedFontSize = document.querySelector('.font_size').value;
+
+    //         // Get the numeric part of the selected font size value
+    //         const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+
+    //         // Get the value of the extra column input field
+    //         // const extraColumnValue = parseInt(document.getElementById('extra_column').value);
+
+
+    //         console.log(searchResults);
+
+    //         const printWindow = window.open('', '_blank');
+    //         printWindow.document.open();
+
+    //         const html = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/general_ledgers_print`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+    //                 incomeCategorys,
+    //                 incomeCategorySubTotal,
+    //                 expenseCategorys,
+    //                 totalIncome,
+    //                 totalExpense,
+    //                 orientation,
+    //                 selectedPrintSize,
+    //                 fontSize
+    //             }),
+    //         });
+
+    //         const htmlText = await html.text();
+
+    //         printWindow.document.write(htmlText);
+    //         printWindow.document.close(); // Ensure the document is completely loaded before printing
+    //         printWindow.focus();
+    //     } catch (error) {
+    //         console.error('Error generating print view:', error.message);
+    //     }
+    // };
+
+
+    // const general_ledgers_pdf = async () => {
+
+
+
+    //     const selectedLayout = document.getElementById('print_layout').value;
+    //     const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+
+    //     const selectedPrintSize = document.getElementById('print_size').value;
+    //     const selectedZoom = document.querySelector('.zoom_size').value;
+
+    //     // Convert zoom value to a numeric multiplier
+    //     let zoomMultiplier = 100; // Default zoom multiplier
+    //     if (selectedZoom !== '') {
+    //         zoomMultiplier = parseFloat(selectedZoom) / 100;
+    //     }
+    //     // Set the page dimensions based on the selected print size
+    //     let pageWidth, pageHeight;
+    //     switch (selectedPrintSize) {
+    //         case 'A4':
+    //             pageWidth = 210 * zoomMultiplier;
+    //             pageHeight = 297 * zoomMultiplier;
+    //             break;
+    //         case 'A3':
+    //             pageWidth = 297 * zoomMultiplier;
+    //             pageHeight = 420 * zoomMultiplier;
+    //             break;
+    //         case 'legal':
+    //             pageWidth = 216 * zoomMultiplier; // Width for Legal size
+    //             pageHeight = 356 * zoomMultiplier; // Height for Legal size
+    //             break;
+    //         default:
+    //             // Default to A4 size
+    //             pageWidth = 210 * zoomMultiplier;
+    //             pageHeight = 297 * zoomMultiplier;
+    //             break;
+    //     }
+    //     const selectedFontSize = document.querySelector('.font_size').value;
+
+    //     // Get the numeric part of the selected font size value
+    //     const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+    //     console.log(searchResults)
+
+    //     try {
+    //         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/general_ledgers_pdf`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+    //                 incomeCategorys,
+    //                 incomeCategorySubTotal,
+    //                 expenseCategorys,
+    //                 totalIncome,
+    //                 totalExpense,
+    //                 orientation,
+    //                 selectedPrintSize,
+    //                 fontSize
+    //             }),
+
+    //             // If you need to send any data with the request, you can include it here
+    //             // body: JSON.stringify({ /* your data */ }),
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error('Error generating PDF In Period');
+    //         }
+
+
+    //         // If you want to download the PDF automatically
+    //         const blob = await response.blob();
+    //         const url = window.URL.createObjectURL(new Blob([blob]));
+    //         const a = document.createElement('a');
+    //         a.href = url;
+    //         a.download = 'attendance_pdf.pdf';
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         a.remove();
+    //     } catch (error) {
+    //         setError(error.message);
+    //     } finally {
+    //         // setLoading(false);
+    //     }
+    // };
+
+
+
+
+
+    // console.log(error)
+
+    // const [data, setData] = useState([])
+    // useEffect(() => {
+    //     fetch(`http://192.168.0.185:5002/api/account_report`)
+    //     .then(res => res.json())
+    //     .then(data => setData(data))
+    // },[])
+
+    // const processedIncome = data?.incomeSearch?.map(income => ({
+    //     title: income.income_name,
+    //     amount: income.amount,
+    //     categoryId: income.income_category_id,
+    //     subTotal: incomeCategorySubTotal[income.income_category_id] || 0,
+    // }));
+
+    // // Process the expense data
+    // const processedExpenses = data?.searchResults?.map(expense => ({
+    //     title: expense.expense_name,
+    //     amount: expense.sub_total,
+    //     categoryId: expense.expense_category_id,
+    //     subTotal: expenseCategorySubTotal[expense.expense_category_id] || 0,
+    // }));
+
+    // // Calculate total income and expense
+    // const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
+    // const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
+    // const totalBalance = totalIncomes - totalExpenses;
+
+
+
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        fetch(`http://192.168.0.185:5002/api/account_report`)
+            .then(res => res.json())
+            .then(data => setData(data))
+            .catch(error => console.error("Error fetching data:", error));
+    }, []);
+
+    // Process income data
+    const processedIncome = (() => {
+        if (!Array.isArray(data?.incomeSearch)) return []; // Ensure incomeSearch is an array
+
+        const groupedIncome = data.incomeSearch.reduce((acc, income) => {
+            const { income_category_id, income_category, sub_total } = income;
+
+            if (!acc[income_category_id]) {
+                acc[income_category_id] = {
+                    title: income_category,
+                    amount: 0,
+                    categoryId: income_category_id,
+                    subTotal: 0,
+                };
+            }
+
+            acc[income_category_id].amount += sub_total; // Sum the amounts for the same category
+            acc[income_category_id].subTotal += incomeCategorySubTotal[income_category_id] || 0; // Sum the subTotals
+
+            return acc;
+        }, {});
+
+        // Convert the grouped income object back to an array
+        return Object.values(groupedIncome);
+    })();
+
+    // Process the expense data
+    const processedExpenses = (() => {
+        if (!Array.isArray(data?.searchResults)) return []; // Ensure searchResults is an array
+
+        const groupedExpenses = data.searchResults.reduce((acc, expense) => {
+            const { expense_category_id, expense_category, sub_total } = expense;
+
+            if (!acc[expense_category_id]) {
+                acc[expense_category_id] = {
+                    title: expense_category,
+                    amount: 0,
+                    categoryId: expense_category_id,
+                    subTotal: 0,
+                };
+            }
+
+            acc[expense_category_id].amount += sub_total; // Sum the amounts for the same category
+            acc[expense_category_id].subTotal += expenseCategorySubTotal[expense_category_id] || 0; // Sum the subTotals
+
+            return acc;
+        }, {});
+
+        // Convert the grouped expenses object back to an array
+        return Object.values(groupedExpenses);
+    })();
+
+    // Calculate total income and expense
+    const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
+    const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
+    const totalBalance = totalIncomes - totalExpenses;
+    console.log(totalIncomes)
+    console.log(totalExpenses)
+
+
     const general_ledgers_print = async () => {
         try {
+
+
+
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+                fromDate, toDate, expenseCategory
+            });
+
+            // Make the second request for income search
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+                fromDate, toDate, incomeCategory
+            });
+
+            // Combine results from both searches
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+
+
+
+            const sortedResults = combinedResults; // Sort if necessary
+            const sortedResultIncome = combinedResultsIncome; // Sort if necessary
+            setSearchResults(sortedResults);
+            setIncomeSearch(sortedResultIncome)
+
+
+            const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+            const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+
+            setSubTotalIncome(sub_totalIncome)
+            setSubTotal(sub_total);
+
+            const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
+                const { expense_category_id, sub_total } = result;
+                acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+            // Income Category-wise Subtotals
+            const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
+                const { income_category_id, sub_total } = result;
+                acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+
 
             // const extraColumnValue = parseInt(document.getElementById('extra_column').value);
             const selectedLayout = document.getElementById('print_layout').value;
@@ -213,15 +529,16 @@ const TrialBalance = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal: expenseCategoryWiseSubTotal,
                     incomeCategorys,
-                    incomeCategorySubTotal,
+                    incomeCategorySubTotal: incomeCategoryWiseSubTotal,
                     expenseCategorys,
                     totalIncome,
                     totalExpense,
                     orientation,
                     selectedPrintSize,
-                    fontSize
+                    fontSize,
+                    totalExpensess: totalExpenses, totalIncomes
                 }),
             });
 
@@ -279,21 +596,66 @@ const TrialBalance = () => {
         console.log(searchResults)
 
         try {
+
+
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+                fromDate, toDate, expenseCategory
+            });
+
+            // Make the second request for income search
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+                fromDate, toDate, incomeCategory
+            });
+
+            // Combine results from both searches
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+
+
+
+            const sortedResults = combinedResults; // Sort if necessary
+            const sortedResultIncome = combinedResultsIncome; // Sort if necessary
+            setSearchResults(sortedResults);
+            setIncomeSearch(sortedResultIncome)
+
+
+            const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+            const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+
+            setSubTotalIncome(sub_totalIncome)
+            setSubTotal(sub_total);
+
+            const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
+                const { expense_category_id, sub_total } = result;
+                acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+            // Income Category-wise Subtotals
+            const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
+                const { income_category_id, sub_total } = result;
+                acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/general_ledgers_pdf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal: expenseCategoryWiseSubTotal,
                     incomeCategorys,
-                    incomeCategorySubTotal,
+                    incomeCategorySubTotal: incomeCategoryWiseSubTotal,
                     expenseCategorys,
                     totalIncome,
                     totalExpense,
                     orientation,
                     selectedPrintSize,
-                    fontSize
+                    fontSize,
+                    totalExpensess: totalExpenses, totalIncomes
                 }),
 
                 // If you need to send any data with the request, you can include it here
@@ -320,39 +682,6 @@ const TrialBalance = () => {
             // setLoading(false);
         }
     };
-
-
-
-
-    
-    console.log(error)
-
-    const [data, setData] = useState([])
-    useEffect(() => {
-        fetch(`http://192.168.0.185:5002/api/account_report`)
-        .then(res => res.json())
-        .then(data => setData(data))
-    },[])
-
-    const processedIncome = data?.incomeSearch?.map(income => ({
-        title: income.income_name,
-        amount: income.amount,
-        categoryId: income.income_category_id,
-        subTotal: incomeCategorySubTotal[income.income_category_id] || 0,
-    }));
-
-    // Process the expense data
-    const processedExpenses = data?.searchResults?.map(expense => ({
-        title: expense.expense_name,
-        amount: expense.sub_total,
-        categoryId: expense.expense_category_id,
-        subTotal: expenseCategorySubTotal[expense.expense_category_id] || 0,
-    }));
-
-    // Calculate total income and expense
-    const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
-    const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
-    const totalBalance = totalIncomes - totalExpenses;
 
     return (
         <div className="container-fluid">

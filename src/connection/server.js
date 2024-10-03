@@ -865,6 +865,10 @@ app.post("/Admin/account_report/income_amount_account_report", AccountReportMode
 );
 app.post("/Admin/account_report/expense_amount_account_report", AccountReportModel.expense_amount_account_report
 );
+app.post("/Admin/account_report/accounts_report_print", AccountReportModel.accounts_report_print
+);
+app.post("/Admin/account_report/accounts_report_pdf", AccountReportModel.accounts_report_pdf
+);
 
 
 
@@ -874,80 +878,80 @@ app.get('/account_report_combined', async (req, res) => {
   const toDate = req.query.toDate || new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 
   try {
-      // Make the request for expense search
-      const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
-          fromDate,
-          toDate
-      });
+    // Make the request for expense search
+    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
+      fromDate,
+      toDate
+    });
 
-      // Make the request for income search
-      const incomeResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_income`, {
-          fromDate,
-          toDate
-      });
+    // Make the request for income search
+    const incomeResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_income`, {
+      fromDate,
+      toDate
+    });
 
-      // Fetch account head data
-      const accountHeadResponse = await axios.get(`http://192.168.0.185:5002/Admin/account_head/account_head_list`);
+    // Fetch account head data
+    const accountHeadResponse = await axios.get(`http://192.168.0.185:5002/Admin/account_head/account_head_list`);
 
-      // Combine results from both searches
-      const combinedExpenseResults = expenseResponse.data.results || [];
-      const combinedIncomeResults = incomeResponse.data.results || [];
-      const accountHeadList = accountHeadResponse.data || [];
+    // Combine results from both searches
+    const combinedExpenseResults = expenseResponse.data.results || [];
+    const combinedIncomeResults = incomeResponse.data.results || [];
+    const accountHeadList = accountHeadResponse.data || [];
 
-      if (combinedExpenseResults.length === 0 && combinedIncomeResults.length === 0) {
-          return res.status(200).json({ message: 'Nothing found!', results: [] });
+    if (combinedExpenseResults.length === 0 && combinedIncomeResults.length === 0) {
+      return res.status(200).json({ message: 'Nothing found!', results: [] });
+    }
+
+    // Group by 'paid_by' for expense results
+    const expenseByPaidBy = combinedExpenseResults.reduce((acc, result) => {
+      if (!acc[result.paid_by]) {
+        acc[result.paid_by] = 0;
       }
+      acc[result.paid_by] += result.sub_total;
+      return acc;
+    }, {});
 
-      // Group by 'paid_by' for expense results
-      const expenseByPaidBy = combinedExpenseResults.reduce((acc, result) => {
-          if (!acc[result.paid_by]) {
-              acc[result.paid_by] = 0;
-          }
-          acc[result.paid_by] += result.sub_total;
-          return acc;
-      }, {});
+    // Group by 'paid_by' for income results
+    const incomeByPaidBy = combinedIncomeResults.reduce((acc, result) => {
+      if (!acc[result.paid_by]) {
+        acc[result.paid_by] = 0;
+      }
+      acc[result.paid_by] += result.sub_total;
+      return acc;
+    }, {});
 
-      // Group by 'paid_by' for income results
-      const incomeByPaidBy = combinedIncomeResults.reduce((acc, result) => {
-          if (!acc[result.paid_by]) {
-              acc[result.paid_by] = 0;
-          }
-          acc[result.paid_by] += result.sub_total;
-          return acc;
-      }, {});
+    // Calculate the total sub_totals for both expense and income
+    const subTotalExpense = Object.values(expenseByPaidBy).reduce((sum, value) => sum + value, 0);
+    const subTotalIncome = Object.values(incomeByPaidBy).reduce((sum, value) => sum + value, 0);
 
-      // Calculate the total sub_totals for both expense and income
-      const subTotalExpense = Object.values(expenseByPaidBy).reduce((sum, value) => sum + value, 0);
-      const subTotalIncome = Object.values(incomeByPaidBy).reduce((sum, value) => sum + value, 0);
+    let totalAmountSum = 0;
 
-      let totalAmountSum = 0;
+    // Map over account head list and calculate total amounts
+    const accountRows = accountHeadList.map((account) => {
+      const expenseAmount = expenseByPaidBy[account.id] || 0;
+      const incomeAmount = incomeByPaidBy[account.id] || 0;
+      // const totalAmount = expenseAmount + incomeAmount;
+      const totalAmount = incomeAmount - expenseAmount;
 
-      // Map over account head list and calculate total amounts
-      const accountRows = accountHeadList.map((account) => {
-          const expenseAmount = expenseByPaidBy[account.id] || 0;
-          const incomeAmount = incomeByPaidBy[account.id] || 0;
-          // const totalAmount = expenseAmount + incomeAmount;
-          const totalAmount = incomeAmount - expenseAmount ;
+      totalAmountSum += totalAmount;
 
-          totalAmountSum += totalAmount;
+      return {
+        account_head_name: account.account_head_name,
+        totalAmount: totalAmount.toLocaleString(),
+      };
+    });
 
-          return {
-              account_head_name: account.account_head_name,
-              totalAmount: totalAmount.toLocaleString(),
-          };
-      });
-
-      // Send the final response
-      res.status(200).json({
-          totalAmountSum,
-          accountRows,
-          subTotalExpense,
-          subTotalIncome,
-      });
+    // Send the final response
+    res.status(200).json({
+      totalAmountSum,
+      accountRows,
+      subTotalExpense,
+      subTotalIncome,
+    });
 
   } catch (error) {
-      console.error("An error occurred:", error);
-      res.status(500).json({ error: "An error occurred while processing data." });
+    console.error("An error occurred:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
   }
 });
 
@@ -957,51 +961,51 @@ app.get('/api/account_report', async (req, res) => {
   const fromDate = req.query.fromDate || new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
   const toDate = req.query.toDate || new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
   try {
-      // Make the first request for expense search
-      const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
-          fromDate, toDate
+    // Make the first request for expense search
+    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
+      fromDate, toDate
+    });
+
+    // Make the second request for income search
+    const incomeResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_income`, {
+      fromDate, toDate
+    });
+
+    // Combine results from both searches
+    const combinedResults = expenseResponse.data.results;
+    const combinedResultsIncome = incomeResponse.data.results;
+
+    if (combinedResults.length === 0 && combinedResultsIncome.length === 0) {
+      return res.status(404).json({ message: 'Nothing found!' });
+    } else {
+      const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+      const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+
+      // Category-wise subtotals
+      const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
+        const { expense_category_id, sub_total } = result;
+        acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
+        return acc;
+      }, {});
+
+      const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
+        const { income_category_id, sub_total } = result;
+        acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
+        return acc;
+      }, {});
+
+      res.json({
+        searchResults: combinedResults,
+        incomeSearch: combinedResultsIncome,
+        subTotal: sub_total,
+        subTotalIncome: sub_totalIncome,
+        expenseCategorySubTotal: expenseCategoryWiseSubTotal,
+        incomeCategorySubTotal: incomeCategoryWiseSubTotal,
       });
-
-      // Make the second request for income search
-      const incomeResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_income`, {
-          fromDate, toDate
-      });
-
-      // Combine results from both searches
-      const combinedResults = expenseResponse.data.results;
-      const combinedResultsIncome = incomeResponse.data.results;
-
-      if (combinedResults.length === 0 && combinedResultsIncome.length === 0) {
-          return res.status(404).json({ message: 'Nothing found!' });
-      } else {
-          const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
-          const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
-
-          // Category-wise subtotals
-          const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
-              const { expense_category_id, sub_total } = result;
-              acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
-              return acc;
-          }, {});
-
-          const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
-              const { income_category_id, sub_total } = result;
-              acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
-              return acc;
-          }, {});
-
-          res.json({
-              searchResults: combinedResults,
-              incomeSearch: combinedResultsIncome,
-              subTotal: sub_total,
-              subTotalIncome: sub_totalIncome,
-              expenseCategorySubTotal: expenseCategoryWiseSubTotal,
-              incomeCategorySubTotal: incomeCategoryWiseSubTotal,
-          });
-      }
+    }
   } catch (error) {
-      console.error("Error during search:", error);
-      res.status(500).json({ message: "An error occurred during search." });
+    console.error("Error during search:", error);
+    res.status(500).json({ message: "An error occurred during search." });
   }
 });
 

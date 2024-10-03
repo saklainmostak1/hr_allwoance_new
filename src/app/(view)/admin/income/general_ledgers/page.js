@@ -153,8 +153,153 @@ const GeneralLedger = () => {
     }, 0);
 
 
+
+
+
+    console.log(error)
+
+    // const [data, setData] = useState([])
+    // useEffect(() => {
+    //     fetch(`http://192.168.0.185:5002/api/account_report`)
+    //         .then(res => res.json())
+    //         .then(data => setData(data))
+    // }, [])
+
+    // const processedIncome = data?.incomeSearch?.map(income => ({
+    //     title: income.income_category,
+    //     amount: income.amount,
+    //     categoryId: income.income_category_id,
+    //     subTotal: incomeCategorySubTotal[income.income_category_id] || 0,
+    // }));
+
+    // // Process the expense data
+    // const processedExpenses = data?.searchResults?.map(expense => ({
+    //     title: expense.expense_category,
+    //     amount: expense.sub_total,
+    //     categoryId: expense.expense_category_id,
+    //     subTotal: expenseCategorySubTotal[expense.expense_category_id] || 0,
+    // }));
+
+    // // Calculate total income and expense
+    // const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
+    // const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
+    // const totalBalance = totalIncomes - totalExpenses;
+
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        fetch(`http://192.168.0.185:5002/api/account_report`)
+            .then(res => res.json())
+            .then(data => setData(data))
+            .catch(error => console.error("Error fetching data:", error));
+    }, []);
+
+    // Process income data
+    const processedIncome = (() => {
+        if (!Array.isArray(data?.incomeSearch)) return []; // Ensure incomeSearch is an array
+
+        const groupedIncome = data.incomeSearch.reduce((acc, income) => {
+            const { income_category_id, income_category, sub_total } = income;
+
+            if (!acc[income_category_id]) {
+                acc[income_category_id] = {
+                    title: income_category,
+                    amount: 0,
+                    categoryId: income_category_id,
+                    subTotal: 0,
+                };
+            }
+
+            acc[income_category_id].amount += sub_total; // Sum the amounts for the same category
+            acc[income_category_id].subTotal += incomeCategorySubTotal[income_category_id] || 0; // Sum the subTotals
+
+            return acc;
+        }, {});
+
+        // Convert the grouped income object back to an array
+        return Object.values(groupedIncome);
+    })();
+
+    // Process the expense data
+    const processedExpenses = (() => {
+        if (!Array.isArray(data?.searchResults)) return []; // Ensure searchResults is an array
+
+        const groupedExpenses = data.searchResults.reduce((acc, expense) => {
+            const { expense_category_id, expense_category, sub_total } = expense;
+
+            if (!acc[expense_category_id]) {
+                acc[expense_category_id] = {
+                    title: expense_category,
+                    amount: 0,
+                    categoryId: expense_category_id,
+                    subTotal: 0,
+                };
+            }
+
+            acc[expense_category_id].amount += sub_total; // Sum the amounts for the same category
+            acc[expense_category_id].subTotal += expenseCategorySubTotal[expense_category_id] || 0; // Sum the subTotals
+
+            return acc;
+        }, {});
+
+        // Convert the grouped expenses object back to an array
+        return Object.values(groupedExpenses);
+    })();
+
+    // Calculate total income and expense
+    const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
+    const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
+    const totalBalance = totalIncomes - totalExpenses;
+    console.log(totalIncomes)
+    console.log(totalExpenses)
+
+
     const general_ledgers_print = async () => {
         try {
+
+
+
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+                fromDate, toDate, expenseCategory
+            });
+
+            // Make the second request for income search
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+                fromDate, toDate, incomeCategory
+            });
+
+            // Combine results from both searches
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+
+
+
+            const sortedResults = combinedResults; // Sort if necessary
+            const sortedResultIncome = combinedResultsIncome; // Sort if necessary
+            setSearchResults(sortedResults);
+            setIncomeSearch(sortedResultIncome)
+
+
+            const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+            const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+
+            setSubTotalIncome(sub_totalIncome)
+            setSubTotal(sub_total);
+
+            const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
+                const { expense_category_id, sub_total } = result;
+                acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+            // Income Category-wise Subtotals
+            const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
+                const { income_category_id, sub_total } = result;
+                acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+
 
             // const extraColumnValue = parseInt(document.getElementById('extra_column').value);
             const selectedLayout = document.getElementById('print_layout').value;
@@ -213,15 +358,16 @@ const GeneralLedger = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal: expenseCategoryWiseSubTotal,
                     incomeCategorys,
-                    incomeCategorySubTotal,
+                    incomeCategorySubTotal: incomeCategoryWiseSubTotal,
                     expenseCategorys,
                     totalIncome,
                     totalExpense,
                     orientation,
                     selectedPrintSize,
-                    fontSize
+                    fontSize,
+                    totalExpensess: totalExpenses,totalIncomes
                 }),
             });
 
@@ -238,7 +384,7 @@ const GeneralLedger = () => {
 
     const general_ledgers_pdf = async () => {
 
-
+       
 
         const selectedLayout = document.getElementById('print_layout').value;
         const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
@@ -279,21 +425,66 @@ const GeneralLedger = () => {
         console.log(searchResults)
 
         try {
+
+
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+                fromDate, toDate, expenseCategory
+            });
+
+            // Make the second request for income search
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+                fromDate, toDate, incomeCategory
+            });
+
+            // Combine results from both searches
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+
+
+
+            const sortedResults = combinedResults; // Sort if necessary
+            const sortedResultIncome = combinedResultsIncome; // Sort if necessary
+            setSearchResults(sortedResults);
+            setIncomeSearch(sortedResultIncome)
+
+
+            const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+            const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+
+            setSubTotalIncome(sub_totalIncome)
+            setSubTotal(sub_total);
+
+            const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
+                const { expense_category_id, sub_total } = result;
+                acc[expense_category_id] = (acc[expense_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+            // Income Category-wise Subtotals
+            const incomeCategoryWiseSubTotal = combinedResultsIncome.reduce((acc, result) => {
+                const { income_category_id, sub_total } = result;
+                acc[income_category_id] = (acc[income_category_id] || 0) + sub_total;
+                return acc;
+            }, {});
+
+
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/general_ledgers_pdf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal,
+                    orientation, selectedPrintSize, fontSize, expenseCategorySubTotal: expenseCategoryWiseSubTotal,
                     incomeCategorys,
-                    incomeCategorySubTotal,
+                    incomeCategorySubTotal: incomeCategoryWiseSubTotal,
                     expenseCategorys,
                     totalIncome,
                     totalExpense,
                     orientation,
                     selectedPrintSize,
-                    fontSize
+                    fontSize,
+                    totalExpensess: totalExpenses,totalIncomes
                 }),
 
                 // If you need to send any data with the request, you can include it here
@@ -320,34 +511,7 @@ const GeneralLedger = () => {
             // setLoading(false);
         }
     };
-    console.log(error)
 
-    const [data, setData] = useState([])
-    useEffect(() => {
-        fetch(`http://192.168.0.185:5002/api/account_report`)
-        .then(res => res.json())
-        .then(data => setData(data))
-    },[])
-
-    const processedIncome = data?.incomeSearch?.map(income => ({
-        title: income.income_name,
-        amount: income.amount,
-        categoryId: income.income_category_id,
-        subTotal: incomeCategorySubTotal[income.income_category_id] || 0,
-    }));
-
-    // Process the expense data
-    const processedExpenses = data?.searchResults?.map(expense => ({
-        title: expense.expense_name,
-        amount: expense.sub_total,
-        categoryId: expense.expense_category_id,
-        subTotal: expenseCategorySubTotal[expense.expense_category_id] || 0,
-    }));
-
-    // Calculate total income and expense
-    const totalIncomes = processedIncome?.reduce((sum, income) => sum + income.amount, 0);
-    const totalExpenses = processedExpenses?.reduce((sum, expense) => sum + expense.amount, 0);
-    const totalBalance = totalIncomes - totalExpenses;
 
     return (
         <div className="container-fluid">
