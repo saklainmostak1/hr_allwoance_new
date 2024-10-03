@@ -83,7 +83,7 @@ const GeneralLedger = () => {
 
         try {
             // Make the first request for expense search
-            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_search_account_reports`, {
                 fromDate, toDate, expenseCategory
             });
 
@@ -259,7 +259,7 @@ const GeneralLedger = () => {
 
 
 
-            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_search_account_reports`, {
                 fromDate, toDate, expenseCategory
             });
 
@@ -276,15 +276,15 @@ const GeneralLedger = () => {
 
             const sortedResults = combinedResults; // Sort if necessary
             const sortedResultIncome = combinedResultsIncome; // Sort if necessary
-            setSearchResults(sortedResults);
-            setIncomeSearch(sortedResultIncome)
+            // setSearchResults(sortedResults);
+            // setIncomeSearch(sortedResultIncome)
 
 
             const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
             const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
 
-            setSubTotalIncome(sub_totalIncome)
-            setSubTotal(sub_total);
+            // setSubTotalIncome(sub_totalIncome)
+            // setSubTotal(sub_total);
 
             const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
                 const { expense_category_id, sub_total } = result;
@@ -427,7 +427,7 @@ const GeneralLedger = () => {
         try {
 
 
-            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_search_account_reports`, {
                 fromDate, toDate, expenseCategory
             });
 
@@ -444,15 +444,15 @@ const GeneralLedger = () => {
 
             const sortedResults = combinedResults; // Sort if necessary
             const sortedResultIncome = combinedResultsIncome; // Sort if necessary
-            setSearchResults(sortedResults);
-            setIncomeSearch(sortedResultIncome)
+            // setSearchResults(sortedResults);
+            // setIncomeSearch(sortedResultIncome)
 
 
             const sub_total = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
             const sub_totalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
 
-            setSubTotalIncome(sub_totalIncome)
-            setSubTotal(sub_total);
+            // setSubTotalIncome(sub_totalIncome)
+            // setSubTotal(sub_total);
 
             const expenseCategoryWiseSubTotal = combinedResults.reduce((acc, result) => {
                 const { expense_category_id, sub_total } = result;

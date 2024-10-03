@@ -64,7 +64,7 @@ const SheetBalances = () => {
 
     //     try {
     //         // Make the first request for expense search
-    //         const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+    //         const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_search_account_reports`, {
     //             fromDate, toDate
     //         });
 
@@ -109,7 +109,7 @@ const SheetBalances = () => {
 
         try {
             // Make the first request for expense search
-            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/expense_search_account_reports`, {
                 fromDate, toDate
             });
 

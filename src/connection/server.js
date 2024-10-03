@@ -849,6 +849,8 @@ const AccountReportModel = require('../app/model/Admin/account_report_model/acco
 
 app.post("/Admin/account_report/account_report_expense", AccountReportModel.expense_search_account_report
 );
+app.post("/Admin/account_report/expense_search_account_reports", AccountReportModel.expense_search_account_reports
+);
 app.post("/Admin/account_report/account_report_income", AccountReportModel.income_search_account_report
 );
 app.post("/Admin/account_report/account_report_salary", AccountReportModel.salary_search_account_report
@@ -879,7 +881,7 @@ app.get('/account_report_combined', async (req, res) => {
 
   try {
     // Make the request for expense search
-    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
+    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/expense_search_account_reports`, {
       fromDate,
       toDate
     });
@@ -962,7 +964,7 @@ app.get('/api/account_report', async (req, res) => {
   const toDate = req.query.toDate || new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
   try {
     // Make the first request for expense search
-    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/account_report_expense`, {
+    const expenseResponse = await axios.post(`http://192.168.0.185:5002/Admin/account_report/expense_search_account_reports`, {
       fromDate, toDate
     });
 

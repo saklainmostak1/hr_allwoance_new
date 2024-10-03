@@ -19,84 +19,84 @@ const formatString = (str) => {
 const AccountReportModel = {
 
 
-    // expense_search_account_report: async (req, res) => {
-    //     try {
-    //         console.log("Search button clicked.");
-
-    //         // Extract necessary data from request
-    //         const { fromDate, toDate, searchQuery, invoiceId, itemName, supplierId, multiSearch, paidBy, expenseCategory } = req.body;
-
-    //         // Construct the base SQL query
-    //         let sql = `
-    //                 SELECT 
-    //             expense.*, 
-    //             expense_item.item_name AS expense_name, 
-    //             expense_category.expense_category_name AS expense_category,
-    //             expense_category.id AS expense_category_id, -- Add this line to include the category ID
-    //              account_head.account_head_name AS account_head_name
-    //         FROM 
-    //             expense 
-    //             LEFT JOIN expense_category ON expense.expense_category = expense_category.id 
-    //             LEFT JOIN expense_item ON expense.id = expense_item.expense_id 
-    //              LEFT JOIN account_head ON expense.paid_by = account_head.id
-    //         WHERE 1
-    //         `;
-
-
-    //         if (fromDate && toDate) {
-    //             sql += ` AND expense.created_date BETWEEN '${fromDate}' AND '${toDate}'`;
-    //         }
-
-    //         if (searchQuery) {
-    //             sql += ` AND expense.expense_category = ${searchQuery}`;
-    //         }
-
-    //         if (supplierId) {
-    //             sql += ` AND expense.supplier_id LIKE '%${supplierId}%'`;
-    //         }
-    //         if (expenseCategory) {
-    //             sql += ` AND expense_category.id LIKE '%${expenseCategory}%'`;
-    //         }
-    //         if (paidBy) {
-    //             sql += ` AND expense.paid_by LIKE '%${paidBy}%'`;
-    //         }
-    //         // Add invoice ID condition
-    //         if (invoiceId && invoiceId !== '') {
-    //             sql += ` AND expense.voucher_id LIKE '%${invoiceId}%'`;
-    //         }
-
-    //         if (itemName) {
-
-    //             sql += ` AND LOWER(expense_item.item_name) LIKE '%${itemName}%'`;
-    //         }
-    //         if (multiSearch && multiSearch.length > 0) {
-    //             sql += ` ORDER BY ${multiSearch}`; // Append convertedData to the ORDER BY clause
-    //         }
-
-    //         // Add expense name (item_name) search condition
-
-
-
-    //         console.log("SQL Query:", sql);
-
-    //         // Execute the constructed SQL query
-    //         connection.query(sql, (error, results, fields) => {
-    //             if (error) {
-    //                 console.error("Error occurred during search:", error);
-    //                 res.status(500).json({ error: "An error occurred during search." });
-    //             } else {
-    //                 console.log("Search results:", results);
-    //                 res.status(200).json({ results });
-    //             }
-    //         });
-    //     } catch (error) {
-    //         console.error("An error occurred:", error);
-    //         res.status(500).json({ error: "An error occurred." });
-    //     }
-    // },
-
-
     expense_search_account_report: async (req, res) => {
+        try {
+            console.log("Search button clicked.");
+
+            // Extract necessary data from request
+            const { fromDate, toDate, searchQuery, invoiceId, itemName, supplierId, multiSearch, paidBy, expenseCategory } = req.body;
+
+            // Construct the base SQL query
+            let sql = `
+                    SELECT 
+                expense.*, 
+                expense_item.item_name AS expense_name, 
+                expense_category.expense_category_name AS expense_category,
+                expense_category.id AS expense_category_id, -- Add this line to include the category ID
+                 account_head.account_head_name AS account_head_name
+            FROM 
+                expense 
+                LEFT JOIN expense_category ON expense.expense_category = expense_category.id 
+                LEFT JOIN expense_item ON expense.id = expense_item.expense_id 
+                 LEFT JOIN account_head ON expense.paid_by = account_head.id
+            WHERE 1
+            `;
+
+
+            if (fromDate && toDate) {
+                sql += ` AND expense.created_date BETWEEN '${fromDate}' AND '${toDate}'`;
+            }
+
+            if (searchQuery) {
+                sql += ` AND expense.expense_category = ${searchQuery}`;
+            }
+
+            if (supplierId) {
+                sql += ` AND expense.supplier_id LIKE '%${supplierId}%'`;
+            }
+            if (expenseCategory) {
+                sql += ` AND expense_category.id LIKE '%${expenseCategory}%'`;
+            }
+            if (paidBy) {
+                sql += ` AND expense.paid_by LIKE '%${paidBy}%'`;
+            }
+            // Add invoice ID condition
+            if (invoiceId && invoiceId !== '') {
+                sql += ` AND expense.voucher_id LIKE '%${invoiceId}%'`;
+            }
+
+            if (itemName) {
+
+                sql += ` AND LOWER(expense_item.item_name) LIKE '%${itemName}%'`;
+            }
+            if (multiSearch && multiSearch.length > 0) {
+                sql += ` ORDER BY ${multiSearch}`; // Append convertedData to the ORDER BY clause
+            }
+
+            // Add expense name (item_name) search condition
+
+
+
+            console.log("SQL Query:", sql);
+
+            // Execute the constructed SQL query
+            connection.query(sql, (error, results, fields) => {
+                if (error) {
+                    console.error("Error occurred during search:", error);
+                    res.status(500).json({ error: "An error occurred during search." });
+                } else {
+                    console.log("Search results:", results);
+                    res.status(200).json({ results });
+                }
+            });
+        } catch (error) {
+            console.error("An error occurred:", error);
+            res.status(500).json({ error: "An error occurred." });
+        }
+    },
+
+
+    expense_search_account_reports: async (req, res) => {
         try {
             const {
                 fromDate, toDate, searchQuery, invoiceId, itemName,
