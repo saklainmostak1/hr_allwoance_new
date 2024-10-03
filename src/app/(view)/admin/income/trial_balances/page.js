@@ -904,7 +904,7 @@ const TrialBalance = () => {
                             <div className="border-primary shadow-sm border-0">
                                 <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
                                     <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">
-                                        General Ledger From {fromDate ? formatDate(fromDate) : ''} to {toDate ? formatDate(toDate) : ''}
+                                        Trial Balance From {fromDate ? formatDate(fromDate) : ''} to {toDate ? formatDate(toDate) : ''}
                                     </h5>
                                 </div>
                                 <div class="card-body">
