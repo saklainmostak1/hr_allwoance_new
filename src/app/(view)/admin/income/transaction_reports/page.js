@@ -163,6 +163,221 @@ const TransactionReports = () => {
     }
 
 
+
+
+    const accounts_report_print = async () => {
+
+
+        try {
+            const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+                fromDate, toDate, invoiceId, paidBy
+            });
+
+            // Make the second request for income search
+            const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+                invoiceId, paidBy, fromDate, toDate
+            });
+
+            const salaryResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_salary`, {
+                paidBy, fromDate, toDate
+            });
+
+            // Combine results from both searches
+            const combinedResults = expenseResponse.data.results;
+            const combinedResultsIncome = incomeResponse.data.results;
+            const combinedResultsSalary = salaryResponse.data.results;
+
+            const searchResults = combinedResults; // Sort if necessary
+            const salarySearch = combinedResultsSalary; // Sort if necessary
+            const incomeSearch = combinedResultsIncome; // Sort if necessary
+
+            const subTotal = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+            const subTotalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+            const subTotalSalary = combinedResultsSalary.reduce((sum, result) => sum + result.paid_amount, 0);
+
+
+
+            const selectedLayout = document.getElementById('print_layout').value;
+            const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+
+            const selectedPrintSize = document.getElementById('print_size').value;
+            const selectedZoom = document.querySelector('.zoom_size').value;
+
+            // Convert zoom value to a numeric multiplier
+            let zoomMultiplier = 100; // Default zoom multiplier
+            if (selectedZoom !== '') {
+                zoomMultiplier = parseFloat(selectedZoom) / 100;
+            }
+            // Set the page dimensions based on the selected print size
+            let pageWidth, pageHeight;
+            switch (selectedPrintSize) {
+                case 'A4':
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+                case 'A3':
+                    pageWidth = 297 * zoomMultiplier;
+                    pageHeight = 420 * zoomMultiplier;
+                    break;
+                case 'legal':
+                    pageWidth = 216 * zoomMultiplier; // Width for Legal size
+                    pageHeight = 356 * zoomMultiplier; // Height for Legal size
+                    break;
+                default:
+                    // Default to A4 size
+                    pageWidth = 210 * zoomMultiplier;
+                    pageHeight = 297 * zoomMultiplier;
+                    break;
+            }
+
+
+
+            // Get the selected font size value
+            const selectedFontSize = document.querySelector('.font_size').value;
+
+            // Get the numeric part of the selected font size value
+            const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+
+            // Get the value of the extra column input field
+            // const extraColumnValue = parseInt(document.getElementById('extra_column').value);
+
+
+            console.log(searchResults);
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.open();
+
+            const html = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/trail_balance_print`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orientation, selectedPrintSize, fontSize,
+                    searchResults, salarySearch, incomeSearch, subTotal, subTotalIncome, subTotalSalary, activeTab
+                }),
+            });
+
+            const htmlText = await html.text();
+
+            printWindow.document.write(htmlText);
+            printWindow.document.close(); // Ensure the document is completely loaded before printing
+            printWindow.focus();
+        } catch (error) {
+            console.error('Error generating print view:', error.message);
+            setError('Error generating print view:', error.message)
+        }
+    };
+
+    console.log(error)
+
+    const accounts_report_pdf = async () => {
+
+
+
+        const expenseResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_expense`, {
+            fromDate, toDate, invoiceId, paidBy
+        });
+
+        // Make the second request for income search
+        const incomeResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_income`, {
+            invoiceId, paidBy, fromDate, toDate
+        });
+
+        const salaryResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/account_report_salary`, {
+            paidBy, fromDate, toDate
+        });
+
+        // Combine results from both searches
+        const combinedResults = expenseResponse.data.results;
+        const combinedResultsIncome = incomeResponse.data.results;
+        const combinedResultsSalary = salaryResponse.data.results;
+
+        const searchResults = combinedResults; // Sort if necessary
+        const salarySearch = combinedResultsSalary; // Sort if necessary
+        const incomeSearch = combinedResultsIncome; // Sort if necessary
+
+        const subTotal = combinedResults.reduce((sum, result) => sum + result.sub_total, 0);
+        const subTotalIncome = combinedResultsIncome.reduce((sum, result) => sum + result.sub_total, 0);
+        const subTotalSalary = combinedResultsSalary.reduce((sum, result) => sum + result.paid_amount, 0);
+
+
+        const selectedLayout = document.getElementById('print_layout').value;
+        const orientation = selectedLayout === 'landscape' ? 'landscape' : 'portrait';
+
+        const selectedPrintSize = document.getElementById('print_size').value;
+        const selectedZoom = document.querySelector('.zoom_size').value;
+
+        // Convert zoom value to a numeric multiplier
+        let zoomMultiplier = 100; // Default zoom multiplier
+        if (selectedZoom !== '') {
+            zoomMultiplier = parseFloat(selectedZoom) / 100;
+        }
+        // Set the page dimensions based on the selected print size
+        let pageWidth, pageHeight;
+        switch (selectedPrintSize) {
+            case 'A4':
+                pageWidth = 210 * zoomMultiplier;
+                pageHeight = 297 * zoomMultiplier;
+                break;
+            case 'A3':
+                pageWidth = 297 * zoomMultiplier;
+                pageHeight = 420 * zoomMultiplier;
+                break;
+            case 'legal':
+                pageWidth = 216 * zoomMultiplier; // Width for Legal size
+                pageHeight = 356 * zoomMultiplier; // Height for Legal size
+                break;
+            default:
+                // Default to A4 size
+                pageWidth = 210 * zoomMultiplier;
+                pageHeight = 297 * zoomMultiplier;
+                break;
+        }
+        const selectedFontSize = document.querySelector('.font_size').value;
+
+        // Get the numeric part of the selected font size value
+        const fontSize = parseInt(selectedFontSize.split('-')[1]) * zoomMultiplier;
+        console.log(searchResults)
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_report/trail_balance_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orientation, selectedPrintSize, fontSize,
+                    searchResults, salarySearch, incomeSearch, subTotal, subTotalIncome, subTotalSalary, activeTab
+                }),
+
+                // If you need to send any data with the request, you can include it here
+                // body: JSON.stringify({ /* your data */ }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error generating PDF In Period');
+            }
+
+
+            // If you want to download the PDF automatically
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendance_pdf.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            // setLoading(false);
+        }
+    };
+
+
+
     return (
         <div className="container-fluid">
             <div className="row">
@@ -217,12 +432,7 @@ const TransactionReports = () => {
                                                 </div>
 
                                             </div>
-                                            <div class="form-group row student">
 
-
-
-
-                                            </div>
                                             <div class="form-group row student">
                                                 <label class="col-form-label col-md-2"><strong>Voucher Id:</strong></label>
                                                 <div className="col-md-4">
@@ -255,6 +465,55 @@ const TransactionReports = () => {
                                                 </div>
 
                                             </div>
+                                            <div class="form-group row student">
+
+                                                <label class="col-form-label font-weight-bold col-md-2">Print/PDF Properties:</label>
+                                                <div class="col-md-10">
+                                                    <div class="input-group ">
+                                                        <select name="print_size" class="form-control form-control-sm  trim integer_no_zero print_size" id="print_size">
+                                                            <option value="legal">legal </option>
+                                                            <option value="A4">A4 </option>
+                                                            <option value="A3">A3 </option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select name="print_layout" class="form-control form-control-sm  trim integer_no_zero print_layout" id="print_layout">
+
+                                                            <option value="landscape">Landscape</option>
+                                                            <option value="portrait">Portrait</option>
+                                                            <option value="">Browser/Portrait(PDF) </option>
+                                                        </select>
+                                                        <select class=" form-control form-control-sm   integer_no_zero student_type font_size">
+                                                            <option value="font-12">Font Standard</option>
+                                                            <option value="font-10">Font Small</option>
+
+                                                        </select>
+                                                        <select name="zoom_size" class="form-control form-control-sm  trim integer_no_zero zoom_size" id="zoom_size">
+                                                            <option value="120%">Browser Zoom</option>
+                                                            <option value="5%">5% Zoom</option>
+                                                            <option value="10%">10% Zoom</option>
+                                                            <option value="15%">15% Zoom</option>
+                                                            <option value="20%">20% Zoom</option>
+                                                            <option value="25%">25% Zoom</option>
+                                                            <option value="30%">30% Zoom</option>
+                                                            <option value="35%">35% Zoom</option>
+                                                            <option value="40%">40% Zoom</option>
+                                                            <option value="45%">45% Zoom</option>
+                                                            <option value="50%">50% Zoom</option>
+                                                            <option value="55%">55% Zoom</option>
+                                                            <option value="60%">60% Zoom</option>
+                                                            <option value="65%">65% Zoom</option>
+                                                            <option value="70%">70% Zoom</option>
+                                                            <option value="75%">75% Zoom</option>
+                                                            <option value="80%">80% Zoom</option>
+                                                            <option value="85%">85% Zoom</option>
+                                                            <option value="90%">90% Zoom</option>
+                                                            <option value="95%">95% Zoom</option>
+                                                            <option value="100%" selected="">100% Zoom</option>
+
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div className="form-group row">
                                                 <div className="offset-md-2 col-md-10 float-left">
                                                     <input
@@ -269,12 +528,13 @@ const TransactionReports = () => {
                                                         name="search"
                                                         class="btn btn-sm btn-success print_btn mr-2"
                                                         value="Print"
+                                                        onClick={accounts_report_print}
 
                                                     />
                                                     <input
 
                                                         type="button"
-
+                                                        onClick={accounts_report_pdf}
                                                         name="search"
                                                         className="btn btn-sm btn-secondary excel_btn mr-2"
                                                         value="Download PDF"

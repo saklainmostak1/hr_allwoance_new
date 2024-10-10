@@ -59,12 +59,14 @@ const AccountReports = () => {
     };
 
 
+
+    console.log(yearName)
     // const formatTableRows = (expenses, incomes, type) => {
     //     const combinedData = {};
 
     //     // Initialize combinedData with zero values for daily
-    //     const year = new Date().getFullYear();
-
+    //     const year = yearName;
+    //     console.log(year)
     //     if (type === 'daily') {
     //         for (let day = 1; day <= 365; day++) {
     //             const date = new Date(year, 0); // Start from January 1st
@@ -142,7 +144,9 @@ const AccountReports = () => {
     //         combinedData[dateKey].income += sub_total_income;
     //     });
 
-    //     // Create formatted rows, ensuring correct order
+    //     // Create formatted rows with opening balance calculation
+    //     let previousBalance = 0; // Track the previous balance (starting with 0)
+
     //     const tableRows = Object.keys(combinedData).sort((a, b) => {
     //         if (type === 'daily') {
     //             const [dayA, monthA, yearA] = a.split('-').map(Number);
@@ -158,51 +162,72 @@ const AccountReports = () => {
     //     }).map((date, index) => {
     //         const data = combinedData[date];
     //         const total = data.income - (data.totalExpense + data.salaryExpense);
+    //         const openingBalance = previousBalance; // Set opening balance as previous closing balance
+    //         const closingBalance = openingBalance + total; // Calculate the new closing balance
 
+    //         // Update previous balance to current closing balance for the next iteration
+    //         previousBalance = closingBalance;
 
     //         return (
     //             <tr key={date}>
     //                 <td>{index + 1}</td>
     //                 <td>{date}</td> {/* Display formatted date or month */}
-    //                 <td>{0}</td> {/* Opening balance, set to 0 */}
+    //                 <td>{openingBalance.toFixed(2)}</td> {/* Opening balance */}
     //                 <td>{data.income.toFixed(2)}</td>
     //                 <td>{data.totalExpense.toFixed(2)}</td>
     //                 <td>{data.salaryExpense.toFixed(2)}</td>
-    //                 <td>{total.toFixed(2)}</td>
+    //                 <td>{total.toFixed(2)}</td> {/* Total income - total expenses */}
     //             </tr>
     //         );
     //     });
 
     //     setFormattedRows(tableRows); // Update formatted rows state
     // };
-    console.log(yearName)
+
     const formatTableRows = (expenses, incomes, type) => {
         const combinedData = {};
+        const year = parseFloat(yearName); // Assuming yearName is defined somewhere in your code
+        const currentYear = new Date().getFullYear(); // Get the current year
+        const currentDate = new Date(); // Get the current date
+        const startDate = new Date(year, 0, 1); // January 1st of the specified year
+        const endDate = new Date(year, 11, 31); // December 31st of the specified year
 
-        // Initialize combinedData with zero values for daily
-        const year = yearName;
-        console.log(year)
         if (type === 'daily') {
-            for (let day = 1; day <= 365; day++) {
-                const date = new Date(year, 0); // Start from January 1st
-                date.setDate(day); // Set to the respective day of the year
-                const dateKey = `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
-                combinedData[dateKey] = {
-                    income: 0,
-                    totalExpense: 0,
-                    salaryExpense: 0,
-                };
+            // Check if the specified year is the current year
+            if (year === currentYear) {
+                // Initialize daily data from January 1st to the current date
+                for (let day = new Date(year, 0, 1); day <= currentDate; day.setDate(day.getDate() + 1)) {
+                    const dateKey = `${day.getDate().toString().padStart(2, '0')}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+                    combinedData[dateKey] = {
+                        income: 0,
+                        totalExpense: 0,
+                        salaryExpense: 0,
+                    };
+                }
+            } else {
+                // If the specified year is not the current year, load all days of that year
+                for (let day = startDate; day <= endDate; day.setDate(day.getDate() + 1)) {
+                    const dateKey = `${day.getDate().toString().padStart(2, '0')}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+                    combinedData[dateKey] = {
+                        income: 0,
+                        totalExpense: 0,
+                        salaryExpense: 0,
+                    };
+                }
             }
         } else if (type === 'monthly') {
-            // List of all months in the year
             const allMonths = [
                 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
             ];
 
             // Initialize combinedData with all months and zeros for monthly
-            allMonths.forEach((month) => {
+            allMonths.forEach((month, index) => {
                 const monthKey = `${month}-${year}`; // Format Mon-YYYY
+                if (year === currentYear && index > currentDate.getMonth()) {
+                    // If the year is the current year, skip months after the current month
+                    return;
+                }
                 combinedData[monthKey] = {
                     income: 0,
                     totalExpense: 0,
@@ -299,6 +324,149 @@ const AccountReports = () => {
         setFormattedRows(tableRows); // Update formatted rows state
     };
 
+
+
+
+    // const formatTableRows = (expenses, incomes, type) => {
+
+    //     const combinedData = {};
+    //     const year = parseFloat(yearName); // Assuming yearName is defined somewhere in your code
+    //     const currentYear = new Date().getFullYear(); // Get the current year
+    //     const currentDate = new Date(); // Get the current date
+    //     const startDate = new Date(year, 0, 1); // January 1st of the specified year
+    //     const endDate = new Date(year, 11, 31); // December 31st of the specified year
+
+    //     if (year === currentYear) {
+    //         // Loop from January 1st to the current date for the current year
+    //         for (let day = startDate; day <= currentDate; day.setDate(day.getDate() + 1)) {
+    //             const dateKey = `${day.getDate().toString().padStart(2, '0')}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+    //             combinedData[dateKey] = {
+    //                 income: 0,
+    //                 totalExpense: 0,
+    //                 salaryExpense: 0,
+    //             };
+    //         }
+    //     }
+
+    //     else {
+    //         // Loop from January 1st to December 31st for the specified year
+    //         for (let day = startDate; day <= endDate; day.setDate(day.getDate() + 1)) {
+    //             const dateKey = `${day.getDate().toString().padStart(2, '0')}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${year}`; // DD-MM-YYYY
+    //             combinedData[dateKey] = {
+    //                 income: 0,
+    //                 totalExpense: 0,
+    //                 salaryExpense: 0,
+    //             };
+    //         }
+
+
+    //     }
+
+    //     // else if (type === 'monthly') {
+    //     //     // List of all months in the year
+    //     //     const allMonths = [
+    //     //         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    //     //         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    //     //     ];
+
+    //     //     // Initialize combinedData with all months and zeros for monthly
+    //     //     allMonths.forEach((month) => {
+    //     //         const monthKey = `${month}-${year}`; // Format Mon-YYYY
+    //     //         combinedData[monthKey] = {
+    //     //             income: 0,
+    //     //             totalExpense: 0,
+    //     //             salaryExpense: 0,
+    //     //         };
+    //     //     });
+    //     // }
+
+    //     // Process expenses
+    //     expenses.forEach(expense => {
+    //         const { created_date, sub_total_expense, expense_category } = expense;
+    //         const expenseDate = new Date(created_date);
+
+    //         let dateKey;
+    //         if (type === 'daily') {
+    //             dateKey = `${expenseDate.getDate().toString().padStart(2, '0')}-${(expenseDate.getMonth() + 1).toString().padStart(2, '0')}-${expenseDate.getFullYear()}`; // DD-MM-YYYY
+    //         } else {
+    //             dateKey = `${expenseDate.toLocaleString('default', { month: 'short' })}-${expenseDate.getFullYear()}`; // Mon-YYYY
+    //         }
+
+    //         if (!combinedData[dateKey]) {
+    //             combinedData[dateKey] = {
+    //                 income: 0,
+    //                 totalExpense: 0,
+    //                 salaryExpense: 0,
+    //             };
+    //         }
+    //         if (expense_category === "Salary") {
+    //             combinedData[dateKey].salaryExpense += sub_total_expense;
+    //         } else {
+    //             combinedData[dateKey].totalExpense += sub_total_expense;
+    //         }
+    //     });
+
+    //     // Process incomes
+    //     incomes.forEach(income => {
+    //         const { created_date, sub_total_income } = income;
+    //         const incomeDate = new Date(created_date);
+
+    //         let dateKey;
+    //         if (type === 'daily') {
+    //             dateKey = `${incomeDate.getDate().toString().padStart(2, '0')}-${(incomeDate.getMonth() + 1).toString().padStart(2, '0')}-${incomeDate.getFullYear()}`; // DD-MM-YYYY
+    //         } else {
+    //             dateKey = `${incomeDate.toLocaleString('default', { month: 'short' })}-${incomeDate.getFullYear()}`; // Mon-YYYY
+    //         }
+
+    //         if (!combinedData[dateKey]) {
+    //             combinedData[dateKey] = {
+    //                 income: 0,
+    //                 totalExpense: 0,
+    //                 salaryExpense: 0,
+    //             };
+    //         }
+    //         combinedData[dateKey].income += sub_total_income;
+    //     });
+
+    //     // Create formatted rows with opening balance calculation
+    //     let previousBalance = 0; // Track the previous balance (starting with 0)
+
+    //     const tableRows = Object.keys(combinedData).sort((a, b) => {
+    //         if (type === 'daily') {
+    //             const [dayA, monthA, yearA] = a.split('-').map(Number);
+    //             const [dayB, monthB, yearB] = b.split('-').map(Number);
+    //             return yearA - yearB || monthA - monthB || dayA - dayB; // Sort by year, month, then day
+    //         } else { // Monthly
+    //             const [monthA, yearA] = a.split('-');
+    //             const [monthB, yearB] = b.split('-');
+    //             const monthIndexA = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthA);
+    //             const monthIndexB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthB);
+    //             return yearA - yearB || monthIndexA - monthIndexB; // Sort by year and month index
+    //         }
+    //     }).map((date, index) => {
+    //         const data = combinedData[date];
+    //         const total = data.income - (data.totalExpense + data.salaryExpense);
+    //         const openingBalance = previousBalance; // Set opening balance as previous closing balance
+    //         const closingBalance = openingBalance + total; // Calculate the new closing balance
+
+    //         // Update previous balance to current closing balance for the next iteration
+    //         previousBalance = closingBalance;
+
+    //         return (
+    //             <tr key={date}>
+    //                 <td>{index + 1}</td>
+    //                 <td>{date}</td> {/* Display formatted date or month */}
+    //                 <td>{openingBalance.toFixed(2)}</td> {/* Opening balance */}
+    //                 <td>{data.income.toFixed(2)}</td>
+    //                 <td>{data.totalExpense.toFixed(2)}</td>
+    //                 <td>{data.salaryExpense.toFixed(2)}</td>
+    //                 <td>{total.toFixed(2)}</td> {/* Total income - total expenses */}
+    //             </tr>
+    //         );
+    //     });
+
+    //     setFormattedRows(tableRows); // Update formatted rows state
+    // };
 
 
     const accounts_report_print = async () => {

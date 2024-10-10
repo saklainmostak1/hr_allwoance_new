@@ -871,6 +871,10 @@ app.post("/Admin/account_report/accounts_report_print", AccountReportModel.accou
 );
 app.post("/Admin/account_report/accounts_report_pdf", AccountReportModel.accounts_report_pdf
 );
+app.post("/Admin/account_report/trail_balance_print", AccountReportModel.trail_balance_print
+);
+app.post("/Admin/account_report/trail_balance_pdf", AccountReportModel.trail_balance_pdf
+);
 
 
 
