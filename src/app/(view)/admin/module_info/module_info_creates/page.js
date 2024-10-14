@@ -299,6 +299,8 @@ export default function AdminPageListC() {
 
                                                                                                 <option defaultValue="academic_setup">academic_setup</option>
                                                                                                 <option defaultValue="account_management">account_management</option>
+                                                                                                <option defaultValue="asset_management">asset_management</option>
+                                                                                                <option defaultValue="loan_management">loan_management</option>
                                                                                                 <option defaultValue="certificate">certificate</option>
                                                                                                 <option defaultValue="dev">dev</option>
                                                                                                 <option defaultValue="dynamic_website">dynamic_website</option>

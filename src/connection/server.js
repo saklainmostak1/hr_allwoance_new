@@ -877,6 +877,61 @@ app.post("/Admin/account_report/trail_balance_pdf", AccountReportModel.trail_bal
 );
 
 
+const AssetTypeModel = require('../app/model/Admin/asset_type_model/asset_type_model')
+app.post("/Admin/asset_type/asset_type_create", AssetTypeModel.asset_type_create
+);
+app.post("/Admin/asset_type/asset_type_edit/:id", AssetTypeModel.asset_type_update
+);
+app.get("/Admin/asset_type/asset_type_all", AssetTypeModel.asset_type_list
+);
+app.get("/Admin/asset_type/asset_type_all/:id", AssetTypeModel.asset_type_single
+);
+app.post("/Admin/asset_type/asset_type_delete/:id", AssetTypeModel.asset_type_delete
+);
+app.get("/Admin/asset_type/asset_type_list_paigination/:pageNo/:perPage", AssetTypeModel.asset_type_list_paigination
+);
+
+const AssetInfoModel = require('../app/model/Admin/asset_info_model/asset_info_model')
+app.post("/Admin/asset_info/asset_info_create", AssetInfoModel.asset_info_create
+);
+app.get("/Admin/asset_info/asset_info_all", AssetInfoModel.asset_info_list
+);
+app.get("/Admin/asset_info/asset_info_all/:id", AssetInfoModel.asset_info_single
+);
+app.post("/Admin/asset_info/asset_info_delete/:id", AssetInfoModel.asset_info_delete
+);
+app.post("/Admin/asset_info/asset_info_edit/:id", AssetInfoModel.asset_info_update
+);
+app.get("/Admin/asset_info/asset_info_list_paigination/:pageNo/:perPage", AssetInfoModel.asset_info_list_paigination
+);
+
+const employeeAssetModel = require('../app/model/Admin/employee_asset_model/employee_asset_model')
+app.post("/Admin/asset_employee/asset_employee_create", employeeAssetModel.asset_employee_create
+);
+app.get("/Admin/asset_employee/asset_employee_all", employeeAssetModel.asset_employee_list
+);
+app.get("/Admin/asset_employee/asset_employee_all/:id", employeeAssetModel.asset_employee_single
+);
+app.post("/Admin/asset_employee/asset_employee_edit/:id", employeeAssetModel.asset_employee_update
+);
+app.post("/Admin/asset_employee/asset_employee_delete/:id", employeeAssetModel.asset_employee_delete
+);
+app.get("/Admin/asset_employee/asset_employee_all_paigination/:pageNo/:perPage", employeeAssetModel.asset_employee_list_paigination
+);
+
+const LoanOthorityModel = require('../app/model/Admin/loan_othority_model/loan_othority_model')
+app.post("/Admin/loan_authority/loan_authority_create", LoanOthorityModel.loan_authority_create
+);
+app.get("/Admin/loan_authority/loan_authority_all", LoanOthorityModel.loan_authority_list
+);
+app.get("/Admin/loan_authority/loan_authority_all/:id", LoanOthorityModel.loan_authority_single
+);
+app.post("/Admin/loan_authority/loan_authority_edit/:id", LoanOthorityModel.loan_authority_update
+);
+app.post("/Admin/loan_authority/loan_authority_delete/:id", LoanOthorityModel.loan_authority_delete
+);
+app.get("/Admin/loan_authority/loan_authority_all_paigination/:pageNo/:perPage", LoanOthorityModel.loan_authority_list_paigination
+);
 
 app.get('/account_report_combined', async (req, res) => {
   const today = new Date();
