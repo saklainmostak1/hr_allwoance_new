@@ -160,9 +160,9 @@ const AssetTypeCreates = () => {
                     <div className='card'>
                         <div class=" border-primary shadow-sm border-0">
                             <div class="card-header py-1  custom-card-header clearfix bg-gradient-primary text-white">
-                                <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Update Brand</h5>
+                                <h5 class="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Create Asset Type</h5>
                                 <div class="card-title font-weight-bold mb-0 card-header-color float-right">
-                                    <Link href={`/Admin/brand/brand_all?page_group=${page_group}`} class="btn btn-sm btn-info">Back Brand List</Link></div>
+                                    <Link href={`/Admin/asset_type/asset_type_all?page_group=${page_group}`} class="btn btn-sm btn-info">Back Asset Type List</Link></div>
                             </div>
                             <form action="" onSubmit={asset_type_create}>
 

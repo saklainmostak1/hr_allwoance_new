@@ -2,6 +2,9 @@
 
 const connection = require('../../../../connection/config/database')
 
+var wkhtmltopdf = require('wkhtmltopdf');
+
+wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
 
 const AssetInfoModel = {
 
@@ -180,6 +183,313 @@ const AssetInfoModel = {
             console.log(error)
         }
     },
+
+
+    asset_info_search: async (req, res) => {
+        try {
+            console.log("Search button clicked.");
+
+            // Extract necessary data from request
+            let { assenTypeName, status, assetType, toDate, fromDate } = req.body;
+
+            // Construct the base SQL query
+            let sql = `
+             SELECT asset_info.*, 
+             users_created.full_name AS created_by,
+             users_modified.full_name AS modified_by,
+             asset_type.asset_type_name AS asset_type_name 
+            FROM asset_info 
+            LEFT JOIN users AS users_created ON asset_info.created_by = users_created.id 
+            LEFT JOIN users AS users_modified ON asset_info.modified_by = users_modified.id 
+            LEFT JOIN asset_type ON asset_info.asset_type_id = asset_type.id
+            WHERE 1`;
+
+
+
+            if (assenTypeName) {
+                sql += ` AND LOWER(asset_info.asset_name) LIKE '%${assenTypeName}%'`;
+            }
+
+            if (assetType) {
+                sql += ` AND LOWER(asset_info.asset_type_id) LIKE '%${assetType}%'`;
+            }
+
+            if (status) {
+
+                sql += ` AND asset_info.status LIKE '%${status}%'`;
+            }
+
+            if (fromDate && toDate) {
+                sql += ` AND asset_info.date BETWEEN '${fromDate}' AND '${toDate}'`;
+            }
+
+
+
+            sql += ` ORDER BY asset_info.id DESC`
+            // Add expense name (item_name) search condition
+
+
+
+            console.log("SQL Query:", sql);
+
+            // Execute the constructed SQL query
+            connection.query(sql, (error, results, fields) => {
+                if (error) {
+                    console.error("Error occurred during search:", error);
+                    res.status(500).json({ error: "An error occurred during search." });
+                } else {
+                    console.log("Search results:", results);
+                    res.status(200).json({ results });
+                }
+            });
+        } catch (error) {
+            console.error("An error occurred:", error);
+            res.status(500).json({ error: "An error occurred." });
+        }
+    },
+
+
+
+
+    asset_info_pdf: async (req, res) => {
+        try {
+            const { searchResults, selectedPrintSize, orientation, fontSize } = req.body;
+
+
+
+
+
+            console.log(searchResults, 'here all the searchResults');
+
+            let tableRows = '';
+            searchResults?.forEach((result, index) => {
+                let row = '<tr>';
+
+                // Static column setup
+                row += `<td>${index + 1}</td>`; // Serial column
+                row += `<td>${result.asset_name}</td>`; // Person Name
+                row += `<td>${result.asset_type_name}</td>`; // Person Name
+                row += `<td>${result.date.slice(0, 10)}</td>`; // Person Name
+                row += `<td>${result.status === 1 ? "Active"
+                    : result.status === 2 ? "Inactive"
+                        : result.status === 3 ? "Pending"
+                            : "Unknown"}</td>`; // Person Mobile
+                row += `<td><td><img src="http://192.168.0.185:5003/${result.img}" alt="image" style="max-width: 100px; max-height: 100px;"></td></td>`; // Person Email
+                row += `<td>${result.note}</td>`; // Person Email
+
+
+                row += '</tr>';
+                tableRows += row;
+            });
+
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+
+            const html = `<html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Document</title>
+                <style>
+                     @page {
+                        size: ${pageSize} ${pageOrientation}; /* This sets the page size to A4 and orientation to Portrait */
+                        margin: 20mm; /* Adjust the margin as needed */
+                    }
+                    * { 
+                        font-size: ${fontSize || '12px'};
+                        font-family: 'Nikosh', sans-serif !important;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 8px;
+                        text-align: left;
+                        border: 1px solid #ddd;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    img {
+                        max-width: 100px;
+                        max-height: 100px;
+                    }
+                    .container {
+                        text-align: center;
+                    }
+                    .container2 {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <h2 style="margin: 0; padding: 0;">Pathshala School & College Expense List</h2>
+                    <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+                    <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+                    <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+                    <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">Expense List</h3>
+                </div>
+                <div class="container2">
+                    <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+                    <p style="margin: 0; padding: 0;">Collected By:</p>
+                    <p style="margin: 0; padding: 0;">Date: </p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SL No.</th>
+                            <th>Asset Name</th>
+                            <th>Asset Type Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Img</th>
+                            <th>Note</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </body>
+            </html>`;
+
+            wkhtmltopdf(html, { pageSize: pageSize, orientation: pageOrientation }, (err, stream) => {
+                if (err) {
+                    console.error('Error generating PDF:', err);
+                    res.status(500).send('Error generating PDF');
+                    return;
+                }
+                stream.pipe(res);
+            });
+        } catch (error) {
+            console.error('Error in expense_pdf:', error);
+            res.status(500).send('Error generating PDF');
+        }
+    },
+
+
+
+    asset_info_print: async (req, res) => {
+        try {
+            const { searchResults, selectedPrintSize, orientation, fontSize, extraColumnValue } = req.body;
+
+
+
+
+            console.log(searchResults, 'here all the searchResults');
+
+            let tableRows = '';
+            searchResults?.forEach((result, index) => {
+                let row = '<tr>';
+
+                // Static column setup
+                row += `<td>${index + 1}</td>`; // Serial column
+                row += `<td>${result.asset_name}</td>`; // Person Name
+                row += `<td>${result.asset_type_name}</td>`; // Person Name
+                row += `<td>${result.date.slice(0, 10)}</td>`; // Person Name
+                row += `<td>${result.status === 1 ? "Active"
+                    : result.status === 2 ? "Inactive"
+                        : result.status === 3 ? "Pending"
+                            : "Unknown"}</td>`; // Person Mobile
+                row += `<td><img src="http://192.168.0.185:5003/${result.img}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`; // Person Email
+                row += `<td>${result.note}</td>`; // Person Email
+                for (let i = 1; i <= extraColumnValue; i++) {
+                    row += `<td contenteditable="true">Extra Column ${i}</td>`; // Editable extra column
+                }
+
+                row += '</tr>';
+                tableRows += row;
+            });
+
+            const pageSize = selectedPrintSize || 'A4';
+            const pageOrientation = orientation || 'portrait';
+
+            const html = `<html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Document</title>
+                <style>
+                    @page {
+                        size: ${pageSize} ${pageOrientation}; /* This sets the page size and orientation */
+                        margin: 20mm; /* Adjust the margin as needed */
+                    }
+                    * { 
+                        font-size: ${fontSize || '12px'};
+                        font-family: 'Nikosh', sans-serif !important;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 8px;
+                        text-align: left;
+                        border: 1px solid #ddd;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    img {
+                        max-width: 100px;
+                        max-height: 100px;
+                    }
+                    .container {
+                        text-align: center;
+                    }
+                    .container2 {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <h2 style="margin: 0; padding: 0;">Pathshala School & College Visit List</h2>
+                    <h3 style="margin: 0; padding: 0;">GA-75/A, Middle Badda, Dhaka-1212</h3>
+                    <p style="margin: 0; padding: 0;">Phone: 01977379479, Mobile: 01977379479</p>
+                    <p style="margin: 0; padding: 0; margin-bottom: 10px">Email: pathshala@urbanitsolution.com</p>
+                    <h3 style="margin-bottom: 10px; padding: 0; text-decoration: underline;">Visit List</h3>
+                </div>
+                <div class="container2">
+                    <p style="margin: 0; padding: 0;">Receipt No: 829</p>
+                    <p style="margin: 0; padding: 0;">Collected By:</p>
+                    <p style="margin: 0; padding: 0;">Date: </p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SL No.</th>
+                            <th>Asset Name</th>
+                            <th>Asset Type Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Img</th>
+                            <th>Note</th>
+                            ${[...Array(extraColumnValue)].map((_, i) => `<th contenteditable="true">Extra Column ${i + 1}</th>`).join('')} <!-- Dynamically add headers -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </body>
+            <script>
+                window.print();
+            </script>
+            </html>`;
+
+            res.send(html); // Send the HTML directly to the client
+        } catch (error) {
+            console.error('Error in office_visit_person_print:', error);
+            res.status(500).send('Error generating print view');
+        }
+    },
+
 
 
 }

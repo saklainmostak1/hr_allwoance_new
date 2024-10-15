@@ -888,6 +888,12 @@ app.get("/Admin/asset_type/asset_type_all/:id", AssetTypeModel.asset_type_single
 );
 app.post("/Admin/asset_type/asset_type_delete/:id", AssetTypeModel.asset_type_delete
 );
+app.post("/Admin/asset_type/asset_type_search", AssetTypeModel.asset_type_search
+);
+app.post("/Admin/asset_type/asset_type_pdf", AssetTypeModel.asset_type_pdf
+);
+app.post("/Admin/asset_type/asset_type_print", AssetTypeModel.asset_type_print
+);
 app.get("/Admin/asset_type/asset_type_list_paigination/:pageNo/:perPage", AssetTypeModel.asset_type_list_paigination
 );
 
@@ -902,6 +908,12 @@ app.post("/Admin/asset_info/asset_info_delete/:id", AssetInfoModel.asset_info_de
 );
 app.post("/Admin/asset_info/asset_info_edit/:id", AssetInfoModel.asset_info_update
 );
+app.post("/Admin/asset_info/asset_info_search", AssetInfoModel.asset_info_search
+);
+app.post("/Admin/asset_info/asset_info_pdf", AssetInfoModel.asset_info_pdf
+);
+app.post("/Admin/asset_info/asset_info_print", AssetInfoModel.asset_info_print
+);
 app.get("/Admin/asset_info/asset_info_list_paigination/:pageNo/:perPage", AssetInfoModel.asset_info_list_paigination
 );
 
@@ -915,6 +927,12 @@ app.get("/Admin/asset_employee/asset_employee_all/:id", employeeAssetModel.asset
 app.post("/Admin/asset_employee/asset_employee_edit/:id", employeeAssetModel.asset_employee_update
 );
 app.post("/Admin/asset_employee/asset_employee_delete/:id", employeeAssetModel.asset_employee_delete
+);
+app.post("/Admin/asset_employee/asset_employee_search", employeeAssetModel.asset_employee_search
+);
+app.post("/Admin/asset_employee/asset_employee_pdf", employeeAssetModel.asset_employee_pdf
+);
+app.post("/Admin/asset_employee/asset_employee_print", employeeAssetModel.asset_employee_print
 );
 app.get("/Admin/asset_employee/asset_employee_all_paigination/:pageNo/:perPage", employeeAssetModel.asset_employee_list_paigination
 );
@@ -932,6 +950,22 @@ app.post("/Admin/loan_authority/loan_authority_delete/:id", LoanOthorityModel.lo
 );
 app.get("/Admin/loan_authority/loan_authority_all_paigination/:pageNo/:perPage", LoanOthorityModel.loan_authority_list_paigination
 );
+
+
+const LoanModel = require('../app/model/Admin/laon_model/loan_model')
+app.post("/Admin/loan/loan_create", LoanModel.loan_create
+);
+app.get("/Admin/loan/loan_all", LoanModel.loan_list
+);
+app.get("/Admin/loan/loan_all/:id", LoanModel.loan_single
+);
+app.post("/Admin/loan/loan_delete/:id", LoanModel.loan_delete
+);
+app.post("/Admin/loan/loan_edit/:id", LoanModel.loan_update
+);
+app.get("/Admin/loan/loan_all_paigination/:pageNo/:perPage", LoanModel.loan_list_paigination
+);
+
 
 app.get('/account_report_combined', async (req, res) => {
   const today = new Date();

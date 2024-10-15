@@ -8,7 +8,7 @@ import { FaTimes, FaUpload } from 'react-icons/fa';
 
 
 
-const LaonCreates = () => {
+const LoanUpdate = ({ id }) => {
 
     const [page_group, setPageGroup] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -43,12 +43,53 @@ const LaonCreates = () => {
 
 
     const [assetInfo, setAssetInfo] = useState({
-        loan_authority: '', account: '', loan_reason: '', reference: '', loan_type: '', amount: '', interest: '', payment_type: '', duration: '', per_month: '', payable_amount: '', loan_date: '', note: '', status: '', created_by: created, img: ''
+        loan_authority: '', account: '', loan_reason: '', reference: '', loan_type: '', amount: '', interest: '', payment_type: '', duration: '', per_month: '', payable_amount: '', loan_date: '', note: '', status: '', modified_by: created, img: ''
     });
+
+    const { data: loan = [], } = useQuery({
+        queryKey: ['loan'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_all/${id}`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return data;
+        }
+    });
+
+
+
+    useEffect(() => {
+        setAssetInfo({
+
+            loan_authority: loan[0]?.loan_authority || '',
+            account: loan[0]?.account || '',
+            loan_reason: loan[0]?.loan_reason || '',
+            reference: loan[0]?.reference || '',
+            loan_type: loan[0]?.loan_type || '',
+            amount: loan[0]?.amount || '',
+            interest: loan[0]?.interest || '',
+            payment_type: loan[0]?.payment_type || '',
+            payment_type: loan[0]?.payment_type || '',
+            duration: loan[0]?.duration || '',
+            per_month: loan[0]?.per_month || '',
+            payable_amount: loan[0]?.payable_amount || '',
+            note: loan[0]?.note || '',
+            status: loan[0]?.status || '',
+            img: loan[0]?.img || '',
+            loan_date: loan[0]?.loan_date || '',
+            modified_by: created,
+
+        });
+
+    }, [loan, created]);
+
 
     const [selectedEntryType, setSelectedEntryType] = useState('');
 
-  
+    // useEffect(() => {
+    //     setSelectedEntryType(assetInfo.payment_type)
+    // }, [assetInfo])
 
     const handleEntryTypeChange = (event) => {
         setSelectedEntryType(event.target.value);
@@ -236,7 +277,7 @@ const LaonCreates = () => {
 
 
         // Make the fetch request
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_create`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_edit/${id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -429,8 +470,7 @@ const LaonCreates = () => {
                                     </div>
 
 
-                                    {selectedEntryType == 'cash' ?
-
+                                    {selectedEntryType === 'cash' ?
 
                                         <>
 
@@ -584,7 +624,7 @@ const LaonCreates = () => {
                                     </div>
 
 
-                                    <div class="form-group row">
+                                    {/* <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong> Image:</strong></label>
                                         <div class="col-md-6">
 
@@ -608,6 +648,60 @@ const LaonCreates = () => {
                                                 </>
 
 
+                                            }
+                                            {
+                                                file_size_error && (
+                                                    <p className='text-danger'>{file_size_error}</p>
+                                                )
+                                            }
+
+                                        </div>
+                                    </div> */}
+                                       <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Image:</strong></label>
+                                        <div class="col-md-6">
+
+                                            <div>
+                                                <span class="btn btn-success btn-sm " >
+                                                    <label for="fileInput" className='mb-0' ><FaUpload></FaUpload><span className='ml-1'>Select Image</span></label>
+                                                    <input
+                                                        // multiple
+                                                        // name="img"
+                                                        onChange={brand_combined_change}
+                                                        type="file" id="fileInput" style={{ display: "none" }} />
+                                                </span>
+                                            </div>
+
+                                            {selectedFile[0] ?
+                                                <>
+                                                    <img className="w-100 mb-2 img-thumbnail" onChange={(e) => brand_file_change(e)} src={URL.createObjectURL(selectedFile[0])} alt="Uploaded File" />
+
+                                                    <input type="hidden" name="file_path" value={selectedFile[0].path} />
+                                                    <button onClick={brand_image_remove} type="button" className="btn btn-danger btn-sm position-absolute float-right ml-n4" ><FaTimes></FaTimes></button>
+                                                </>
+                                                :
+                                                <>
+                                                    {
+                                                        assetInfo.img ?
+                                                            <>
+
+                                                                <img
+                                                                    className="w-100"
+                                                                    src={`${process.env.NEXT_PUBLIC_API_URL}:5003/${assetInfo.img}`}
+                                                                    alt="Uploaded File"
+                                                                />
+                                                                <button
+                                                                    onClick={brand_image_remove}
+                                                                    type="button"
+                                                                    className="btn btn-danger btn-sm position-absolute float-right ml-n4"
+                                                                >
+                                                                    <FaTimes />
+                                                                </button>
+                                                            </>
+                                                            :
+                                                            ''
+                                                    }
+                                                </>
                                             }
                                             {
                                                 file_size_error && (
@@ -658,4 +752,4 @@ const LaonCreates = () => {
     );
 };
 
-export default LaonCreates;
+export default LoanUpdate;
