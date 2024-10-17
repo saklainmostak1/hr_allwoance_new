@@ -948,6 +948,12 @@ app.post("/Admin/loan_authority/loan_authority_edit/:id", LoanOthorityModel.loan
 );
 app.post("/Admin/loan_authority/loan_authority_delete/:id", LoanOthorityModel.loan_authority_delete
 );
+app.post("/Admin/loan_authority/loan_authority_search", LoanOthorityModel.loan_authority_search
+);
+app.post("/Admin/loan_authority/loan_authority_pdf", LoanOthorityModel.loan_authority_pdf
+);
+app.post("/Admin/loan_authority/loan_authority_print", LoanOthorityModel.loan_authority_print
+);
 app.get("/Admin/loan_authority/loan_authority_all_paigination/:pageNo/:perPage", LoanOthorityModel.loan_authority_list_paigination
 );
 
@@ -963,9 +969,81 @@ app.post("/Admin/loan/loan_delete/:id", LoanModel.loan_delete
 );
 app.post("/Admin/loan/loan_edit/:id", LoanModel.loan_update
 );
+app.post("/Admin/loan/loan_search", LoanModel.loan_search
+);
+app.post("/Admin/loan/loan_pdf", LoanModel.loan_pdf
+);
+app.post("/Admin/loan/loan_print", LoanModel.loan_print
+);
 app.get("/Admin/loan/loan_all_paigination/:pageNo/:perPage", LoanModel.loan_list_paigination
 );
 
+const LoanPaymentModel = require('../app/model/Admin/loan_payment_model/loan_payment_model')
+app.post("/Admin/loan_payment/loan_payment_create", LoanPaymentModel.loan_payment_create
+);
+
+app.get("/Admin/loan_payment/loan_payment_all", LoanPaymentModel.loan_payment_list
+);
+app.get("/Admin/loan_payment/loan_payment_all/:id", LoanPaymentModel.loan_payment_single
+);
+app.post("/Admin/loan_payment/loan_payment_update/:id", LoanPaymentModel.loan_payment_update
+);
+app.post("/Admin/loan_payment/loan_payment_delete/:id", LoanPaymentModel.loan_payment_delete
+);
+app.post("/Admin/loan_payment/loan_payment_search", LoanPaymentModel.loan_payment_search
+);
+app.post("/Admin/loan_payment/loan_payment_pdf", LoanPaymentModel.loan_payment_pdf
+);
+app.post("/Admin/loan_payment/loan_payment_print", LoanPaymentModel.loan_payment_print
+);
+app.get("/Admin/loan_payment/loan_payment_type_list", LoanPaymentModel.loan_payment_type_list
+);
+app.get("/Admin/loan_payment/loan_payment_list_paigination/:pageNo/:perPage", LoanPaymentModel.loan_payment_list_paigination
+);
+
+const EmployeeLoan = require('../app/model/Admin/employe_loan_model/employe_loan_model')
+app.post("/Admin/employe_loan/employe_loan_create", EmployeeLoan.employe_loan_create
+);
+app.get("/Admin/employe_loan/employe_loan_all", EmployeeLoan.employe_loan_list
+);
+app.get("/Admin/employe_loan/employe_loan_all/:id", EmployeeLoan.employe_loan_single
+);
+app.post("/Admin/employe_loan/employe_loan_update/:id", EmployeeLoan.employe_loan_update
+);
+app.post("/Admin/employe_loan/employe_loan_delete/:id", EmployeeLoan.employe_loan_delete
+);
+app.get("/Admin/employe_loan/employe_loan_list_paigination/:pageNo/:perPage", EmployeeLoan.employe_loan_list_paigination
+);
+app.post("/Admin/employe_loan/employe_loan_search", EmployeeLoan.employe_loan_search
+);
+app.post("/Admin/employe_loan/employe_loan_pdf", EmployeeLoan.employe_loan_pdf
+);
+app.post("/Admin/employe_loan/employe_loan_print", EmployeeLoan.employe_loan_print
+);
+
+
+const LoanPaymentModelEmployee = require('../app/model/Admin/employe_loan_payment_model/employe_loan_payment_model')
+app.post("/Admin/employe_loan_payment/employe_loan_payment_create", LoanPaymentModelEmployee.employe_loan_payment_create
+);
+
+app.get("/Admin/employe_loan_payment/employe_loan_payment_all", LoanPaymentModelEmployee.employe_loan_payment_list
+);
+app.get("/Admin/employe_loan_payment/employe_loan_payment_all/:id", LoanPaymentModelEmployee.employe_loan_payment_single
+);
+app.post("/Admin/employe_loan_payment/employe_loan_payment_update/:id", LoanPaymentModelEmployee.employe_loan_payment_update
+);
+app.post("/Admin/employe_loan_payment/employe_loan_payment_delete/:id", LoanPaymentModelEmployee.employe_loan_payment_delete
+);
+app.post("/Admin/employe_loan_payment/employe_loan_payment_search", LoanPaymentModelEmployee.employe_loan_payment_search
+);
+app.post("/Admin/employe_loan_payment/employe_loan_payment_pdf", LoanPaymentModelEmployee.employe_loan_payment_pdf
+);
+app.post("/Admin/employe_loan_payment/employe_loan_payment_print", LoanPaymentModelEmployee.employe_loan_payment_print
+);
+app.get("/Admin/employe_loan_payment/employe_loan_payment_type_list", LoanPaymentModelEmployee.employe_loan_payment_type_list
+);
+app.get("/Admin/employe_loan_payment/employe_loan_payment_list_paigination/:pageNo/:perPage", LoanPaymentModelEmployee.employe_loan_payment_list_paigination
+);
 
 app.get('/account_report_combined', async (req, res) => {
   const today = new Date();

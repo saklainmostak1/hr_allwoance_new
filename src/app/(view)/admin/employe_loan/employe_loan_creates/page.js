@@ -8,7 +8,7 @@ import { FaTimes, FaUpload } from 'react-icons/fa';
 
 
 
-const LaonCreates = () => {
+const EmployeeLoanCreates = () => {
 
     const [page_group, setPageGroup] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -43,53 +43,15 @@ const LaonCreates = () => {
 
 
     const [assetInfo, setAssetInfo] = useState({
-        loan_authority: '', account: '', loan_reason: '', reference: '', loan_type: '', amount: '', interest: '', payment_type: '', duration: '', per_month: '', payable_amount: '', loan_date: '', note: '', status: '', created_by: created, img: ''
+        account: '', employee_id: '', reference: '', amount: '', interest: '', payable_amount: '', payment_type: '', loan_date: '', duration: '', per_month: '', note: '', status: '', created_by: created, img: '', loan_reason: '', loan_type: '',
     });
 
-    const [selectedEntryType, setSelectedEntryType] = useState('');
-
-  
-
-    const handleEntryTypeChange = (event) => {
-        setSelectedEntryType(event.target.value);
-    };
-
-    const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
-
-    const handleDateSelection = (event) => {
-        const inputDate = event.target.value; // Directly get the value from the input
-
-        const day = String(inputDate.split('-')[2]).padStart(2, '0'); // Extract day, month, and year from the date string
-        const month = String(inputDate.split('-')[1]).padStart(2, '0');
-        const year = String(inputDate.split('-')[0]);
-        const formattedDate = `${day}-${month}-${year}`;
-        const formattedDatabaseDate = `${year}-${month}-${day}`;
-        setFromDate(formattedDate);
-        setAssetInfo(prevData => ({
-            ...prevData,
-            loan_date: formattedDatabaseDate // Update the dob field in the state
-        }));
-    };
-
-    useEffect(() => {
-        const dob = assetInfo.loan_date;
-        const formattedDate = dob?.split('T')[0];
-
-        if (formattedDate?.includes('-')) {
-            const [year, month, day] = formattedDate.split('-');
-            setFormattedDisplayDate(`${day}-${month}-${year}`);
-        } else {
-            console.log("Date format is incorrect:", formattedDate);
-        }
-    }, [assetInfo]);
 
 
-
-
-    const { data: loan_authority = [], isLoading, refetch } = useQuery({
-        queryKey: ['loan_authority'],
+    const { data: employeeList = [], } = useQuery({
+        queryKey: ['employeeList'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_authority/loan_authority_all`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_all_list`);
             const data = await res.json();
             // Filter out the brand with id 
             // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
@@ -97,10 +59,37 @@ const LaonCreates = () => {
         }
     });
 
+
+
+
+
+
+    const { data: loanAll = [], isLoading, refetch
+    } = useQuery({
+        queryKey: ['loanAll'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
     const { data: account_head = [], } = useQuery({
         queryKey: ['account_head'],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return data;
+        }
+    });
+
+    const { data: payment_type = [], } = useQuery({
+        queryKey: ['payment_type'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_type_list`);
             const data = await res.json();
             // Filter out the brand with id 
             // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
@@ -218,43 +207,6 @@ const LaonCreates = () => {
 
     const router = useRouter()
 
-    const brand_update = (e) => {
-        e.preventDefault();
-        const form = e.target; // Access the form
-
-        // if (!assetInfo.asset_name) {
-        //     setBrandName('Please enter a brand name.');
-        //     return; // Prevent further execution
-        // }
-
-        // if (!assetInfo.status) {
-        //     setError('Please select a status.');
-        //     return; // Prevent further execution
-        // }
-
-        // Retrieve the form's image value
-
-
-        // Make the fetch request
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(assetInfo)
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data) {
-                    sessionStorage.setItem("message", "Data Update successfully!");
-                    router.push(`/Admin/loan/loan_all?page_group=${page_group}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating brand:', error);
-            });
-    };
 
 
     const brand_combined_change = (e) => {
@@ -299,7 +251,78 @@ const LaonCreates = () => {
     }, [])
 
 
-    console.log(selectedEntryType)
+    const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
+
+
+    const handleDateSelection = (event) => {
+        const inputDate = event.target.value; // Directly get the value from the input
+
+        const day = String(inputDate.split('-')[2]).padStart(2, '0'); // Extract day, month, and year from the date string
+        const month = String(inputDate.split('-')[1]).padStart(2, '0');
+        const year = String(inputDate.split('-')[0]);
+        const formattedDate = `${day}-${month}-${year}`;
+        const formattedDatabaseDate = `${year}-${month}-${day}`;
+        setFromDate(formattedDate);
+        setAssetInfo(prevData => ({
+            ...prevData,
+            loan_date: formattedDatabaseDate // Update the dob field in the state
+        }));
+    };
+
+    useEffect(() => {
+        const dob = assetInfo.loan_date;
+        const formattedDate = dob?.split('T')[0];
+
+        if (formattedDate?.includes('-')) {
+            const [year, month, day] = formattedDate.split('-');
+            setFormattedDisplayDate(`${day}-${month}-${year}`);
+        } else {
+            console.log("Date format is incorrect:", formattedDate);
+        }
+    }, [assetInfo]);
+
+
+
+    const loan_payment_create = (e) => {
+        e.preventDefault();
+        const form = e.target; // Access the form
+
+        // if (!assetInfo.asset_name) {
+        //     setBrandName('Please enter a brand name.');
+        //     return; // Prevent further execution
+        // }
+
+        // if (!assetInfo.status) {
+        //     setError('Please select a status.');
+        //     return; // Prevent further execution
+        // }
+
+        // Retrieve the form's image value
+
+        // ${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_create
+        // Make the fetch request
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(assetInfo)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data) {
+                    sessionStorage.setItem("message", "Data Update successfully!");
+                    router.push(`/Admin/employe_loan_all/employe_loan_all_all?page_group=${page_group}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating brand:', error);
+            });
+    };
+
+
+    console.log(assetInfo)
 
     return (
         // col-md-12
@@ -315,27 +338,46 @@ const LaonCreates = () => {
                                 <div class="card-title font-weight-bold mb-0 card-header-color float-right">
                                     <Link href={`/Admin/loan/loan_all?page_group=${page_group}`} class="btn btn-sm btn-info">Back Loan List</Link></div>
                             </div>
-                            <form action="" onSubmit={brand_update}>
+                            <form action="" onSubmit={loan_payment_create}>
                                 <div class="card-body">
-
-
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Authority Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <label class="col-form-label col-md-3"><strong>Employee Name<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
                                             <select
-                                                value={assetInfo.loan_authority}
-                                                onChange={
-                                                    brand_input_change
-                                                }
-                                                name='loan_authority'
+                                                value={assetInfo.employee_id} onChange={brand_input_change}
+                                                name='employee_id'
 
                                                 class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select Loan Authority Name</option>
+                                                <option value=''>Select Employee Name</option>
                                                 {
-                                                    loan_authority.map(sta =>
+                                                    employeeList.map(sta =>
                                                         <>
 
-                                                            <option value={sta.id}>{sta.name}</option>
+                                                            <option value={sta.user_id}>{sta.full_name}</option>
+                                                        </>
+
+                                                    )
+                                                }
+                                            </select>
+                                            {
+                                                error && <p className='text-danger'>{error}</p>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Payment Type Name<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <select
+                                                value={assetInfo.payment_type} onChange={brand_input_change}
+                                                name='payment_type'
+
+                                                class="form-control form-control-sm " placeholder="Enter Role Name">
+                                                <option value=''>Select Payment Type Name</option>
+                                                {
+                                                    payment_type.map(sta =>
+                                                        <>
+
+                                                            <option value={sta.id}>{sta.payment_type_name}</option>
                                                         </>
 
                                                     )
@@ -348,6 +390,22 @@ const LaonCreates = () => {
                                     </div>
 
 
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Loan Type:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <select
+                                                value={assetInfo.loan_type} onChange={brand_input_change}
+                                                name='loan_type'
+
+                                                class="form-control form-control-sm " placeholder="Enter Loan Type Name">
+                                                <option value=''>Select Loan Type</option>
+                                                <option value='term'>Term</option>
+                                                <option value='cash'>Cash</option>
+
+                                            </select>
+
+                                        </div>
+                                    </div>
 
                                     <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Account:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
@@ -371,26 +429,21 @@ const LaonCreates = () => {
 
                                         </div>
                                     </div>
-
-
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Reason<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                        <div class="col-md-6">
+                                        <label class="col-form-label col-md-3"><strong>Loan Reasone:</strong></label>
+                                        <div className='form-group col-md-6'>
+
                                             <textarea
                                                 value={assetInfo.loan_reason} onChange={brand_input_change}
                                                 name="loan_reason"
                                                 className="form-control form-control-sm"
-                                                placeholder="Enter Loan Reason"
+                                                placeholder="Enter Loan Reasone"
                                                 rows={2}
-                                                cols={20}
+                                                cols={73}
                                                 // style={{ width: '550px', height: '100px' }}
                                                 maxLength={500}
                                             ></textarea>
-
-                                            {assetInfo.loan_reason.length > 255 && (
-                                                <p className='text-danger'>Brand name cannot more than 255 characters.</p>
-                                            )}
-
+                                            <small className="text-muted">{assetInfo.loan_reason.length} / 500</small>
                                         </div>
                                     </div>
 
@@ -407,163 +460,71 @@ const LaonCreates = () => {
                                         </div>
                                     </div>
 
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Duration<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="duration" value={assetInfo.duration} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Duration'
+                                                maxLength={256}
+                                            />
+
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Per Month<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="per_month" value={assetInfo.per_month} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Per Month'
+                                                maxLength={256}
+                                            />
+
+
+                                        </div>
+                                    </div>
 
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Type:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <label class="col-form-label col-md-3"><strong>Amount<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
-                                            <select
-                                                value={assetInfo.loan_type} onChange={(e) => {
-                                                    brand_input_change(e);
-                                                    handleEntryTypeChange(e);
-                                                }}
-                                                name='loan_type'
+                                            <input type="number" name="amount" value={assetInfo.amount} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Amount'
+                                                maxLength={256}
+                                            />
 
-                                                class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select Loan Type</option>
-                                                <option value='term'>Term</option>
-                                                <option value='cash'>Cash</option>
 
-                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Interest<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="interest" value={assetInfo.interest} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Interest'
+                                                maxLength={256}
+                                            />
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Payable Amount:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="payable_amount" value={assetInfo.payable_amount} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Payable Amount'
+                                                maxLength={256}
+                                            />
+
 
                                         </div>
                                     </div>
 
 
-                                    {selectedEntryType == 'cash' ?
-
-
-                                        <>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Amount<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="amount" value={assetInfo.amount} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Amount'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Interest<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="interest" value={assetInfo.interest} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Payment Type :<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <select
-                                                        value={assetInfo.payment_type} onChange={brand_input_change}
-                                                        name='payment_type'
-
-                                                        class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                        <option value=''>Select Payment Type</option>
-                                                        {
-                                                            account_head.map(sta =>
-                                                                <>
-
-                                                                    <option value={sta.id}>{sta.account_head_name}</option>
-                                                                </>
-
-                                                            )
-                                                        }
-                                                    </select>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Duration<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="duration" value={assetInfo.duration} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Per Month<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="per_month" value={assetInfo.per_month} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Payable Amount:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="payable_amount" value={assetInfo.payable_amount} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-                                        </>
-
-                                        :
-                                        <>
-
-                                        </>
-                                    }
-
-
-
-                                    {/* date  */}
-                                    <div className="form-group row student">
-                                        <label className="col-form-label col-md-3 font-weight-bold">Loan Date:</label>
-                                        <div className="col-md-6">
-
-                                            <input
-                                                type="text"
-                                                readOnly
-
-                                                defaultValue={formattedDisplayDate}
-                                                onClick={() => document.getElementById(`dateInput-nt`).showPicker()}
-                                                placeholder="dd-mm-yyyy"
-                                                className="form-control form-control-sm mb-2"
-                                                style={{ display: 'inline-block', }}
-                                            />
-                                            <input
-                                                name='loan_date'
-                                                type="date"
-                                                id={`dateInput-nt`}
-                                                onChange={(e) => handleDateSelection(e)}
-                                                style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
-
-                                            />
-
-
-                                        </div>
-
-
-                                    </div>
 
                                     <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Description:</strong></label>
@@ -618,6 +579,35 @@ const LaonCreates = () => {
                                         </div>
                                     </div>
 
+                                    <div className="form-group row student">
+                                        <label className="col-form-label col-md-3 font-weight-bold">Payment Date:</label>
+                                        <div className="col-md-6">
+
+                                            <input
+                                                type="text"
+                                                readOnly
+
+                                                defaultValue={formattedDisplayDate}
+                                                onClick={() => document.getElementById(`dateInput-nt`).showPicker()}
+                                                placeholder="dd-mm-yyyy"
+                                                className="form-control form-control-sm mb-2"
+                                                style={{ display: 'inline-block', }}
+                                            />
+                                            <input
+                                                name='loan_date'
+                                                type="date"
+                                                id={`dateInput-nt`}
+                                                onChange={(e) => handleDateSelection(e)}
+                                                style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
+
+                                            />
+
+
+                                        </div>
+
+
+                                    </div>
+
                                     <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Status<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
@@ -626,7 +616,7 @@ const LaonCreates = () => {
                                                 name='status'
 
                                                 class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select</option>
+                                                <option value=''>Select Status</option>
                                                 {
                                                     status.map(sta =>
                                                         <>
@@ -658,4 +648,4 @@ const LaonCreates = () => {
     );
 };
 
-export default LaonCreates;
+export default EmployeeLoanCreates;

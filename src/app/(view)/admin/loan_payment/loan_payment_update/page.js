@@ -8,7 +8,7 @@ import { FaTimes, FaUpload } from 'react-icons/fa';
 
 
 
-const LaonCreates = () => {
+const LoanPaymentUpdate = ({ id }) => {
 
     const [page_group, setPageGroup] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -43,59 +43,67 @@ const LaonCreates = () => {
 
 
     const [assetInfo, setAssetInfo] = useState({
-        loan_authority: '', account: '', loan_reason: '', reference: '', loan_type: '', amount: '', interest: '', payment_type: '', duration: '', per_month: '', payable_amount: '', loan_date: '', note: '', status: '', created_by: created, img: ''
+        loan: '', account: '', reference: '', amount: '', interest: '', aviable_balance: '', due: '', payable_amount: '', payment_date: '', note: '', status: '', modified_by: created, img: ''
     });
 
-    const [selectedEntryType, setSelectedEntryType] = useState('');
-
-  
-
-    const handleEntryTypeChange = (event) => {
-        setSelectedEntryType(event.target.value);
-    };
-
-    const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
-
-    const handleDateSelection = (event) => {
-        const inputDate = event.target.value; // Directly get the value from the input
-
-        const day = String(inputDate.split('-')[2]).padStart(2, '0'); // Extract day, month, and year from the date string
-        const month = String(inputDate.split('-')[1]).padStart(2, '0');
-        const year = String(inputDate.split('-')[0]);
-        const formattedDate = `${day}-${month}-${year}`;
-        const formattedDatabaseDate = `${year}-${month}-${day}`;
-        setFromDate(formattedDate);
-        setAssetInfo(prevData => ({
-            ...prevData,
-            loan_date: formattedDatabaseDate // Update the dob field in the state
-        }));
-    };
-
     useEffect(() => {
-        const dob = assetInfo.loan_date;
-        const formattedDate = dob?.split('T')[0];
+        const amount = parseFloat(assetInfo.amount) || 0;
+        const payable_amount = parseFloat(assetInfo.payable_amount) || 0;
 
-        if (formattedDate?.includes('-')) {
-            const [year, month, day] = formattedDate.split('-');
-            setFormattedDisplayDate(`${day}-${month}-${year}`);
-        } else {
-            console.log("Date format is incorrect:", formattedDate);
-        }
-    }, [assetInfo]);
+        setAssetInfo(prevState => ({
+            ...prevState,
+            due: amount - payable_amount
+        }));
+    }, [assetInfo.amount, assetInfo.payable_amount]);
 
 
 
-
-    const { data: loan_authority = [], isLoading, refetch } = useQuery({
-        queryKey: ['loan_authority'],
+    const { data: loanPayment = [], } = useQuery({
+        queryKey: ['loanPayment'],
         queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_authority/loan_authority_all`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_all/${id}`);
             const data = await res.json();
             // Filter out the brand with id 
             // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
             return data;
         }
     });
+
+
+
+    useEffect(() => {
+        setAssetInfo({
+
+            loan: loanPayment[0]?.loan_id || '',
+            account: loanPayment[0]?.account || '',
+            reference: loanPayment[0]?.reference || '',
+            amount: loanPayment[0]?.amount || '',
+            interest: loanPayment[0]?.interest || '',
+            aviable_balance: loanPayment[0]?.aviable_balance || '',
+            due: loanPayment[0]?.due || '',
+            payable_amount: loanPayment[0]?.payable_amount || '',
+            payment_date: loanPayment[0]?.payment_date || '',
+            note: loanPayment[0]?.note || '',
+            status: loanPayment[0]?.status || '',
+            img: loanPayment[0]?.img || '',
+
+            modified_by: created,
+
+        });
+
+    }, [loanPayment, created]);
+
+
+    const { data: loanAll = [], isLoading, refetch
+    } = useQuery({
+        queryKey: ['loanAll'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
 
     const { data: account_head = [], } = useQuery({
         queryKey: ['account_head'],
@@ -218,43 +226,6 @@ const LaonCreates = () => {
 
     const router = useRouter()
 
-    const brand_update = (e) => {
-        e.preventDefault();
-        const form = e.target; // Access the form
-
-        // if (!assetInfo.asset_name) {
-        //     setBrandName('Please enter a brand name.');
-        //     return; // Prevent further execution
-        // }
-
-        // if (!assetInfo.status) {
-        //     setError('Please select a status.');
-        //     return; // Prevent further execution
-        // }
-
-        // Retrieve the form's image value
-
-
-        // Make the fetch request
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(assetInfo)
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data) {
-                    sessionStorage.setItem("message", "Data Update successfully!");
-                    router.push(`/Admin/loan/loan_all?page_group=${page_group}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating brand:', error);
-            });
-    };
 
 
     const brand_combined_change = (e) => {
@@ -299,7 +270,76 @@ const LaonCreates = () => {
     }, [])
 
 
-    console.log(selectedEntryType)
+    const [formattedDisplayDate, setFormattedDisplayDate] = useState('');
+
+
+    const handleDateSelection = (event) => {
+        const inputDate = event.target.value; // Directly get the value from the input
+
+        const day = String(inputDate.split('-')[2]).padStart(2, '0'); // Extract day, month, and year from the date string
+        const month = String(inputDate.split('-')[1]).padStart(2, '0');
+        const year = String(inputDate.split('-')[0]);
+        const formattedDate = `${day}-${month}-${year}`;
+        const formattedDatabaseDate = `${year}-${month}-${day}`;
+        setFromDate(formattedDate);
+        setAssetInfo(prevData => ({
+            ...prevData,
+            payment_date: formattedDatabaseDate // Update the dob field in the state
+        }));
+    };
+
+    useEffect(() => {
+        const dob = assetInfo.payment_date;
+        const formattedDate = dob?.split('T')[0];
+
+        if (formattedDate?.includes('-')) {
+            const [year, month, day] = formattedDate.split('-');
+            setFormattedDisplayDate(`${day}-${month}-${year}`);
+        } else {
+            console.log("Date format is incorrect:", formattedDate);
+        }
+    }, [assetInfo]);
+
+
+
+    const loan_payment_create = (e) => {
+        e.preventDefault();
+        const form = e.target; // Access the form
+
+        // if (!assetInfo.asset_name) {
+        //     setBrandName('Please enter a brand name.');
+        //     return; // Prevent further execution
+        // }
+
+        // if (!assetInfo.status) {
+        //     setError('Please select a status.');
+        //     return; // Prevent further execution
+        // }
+
+        // Retrieve the form's image value
+
+        // ${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_create
+        // Make the fetch request
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_update/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(assetInfo)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data) {
+                    sessionStorage.setItem("message", "Data Update successfully!");
+                    // router.push(`/Admin/loan/loan_all?page_group=${page_group}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating brand:', error);
+            });
+    };
+
 
     return (
         // col-md-12
@@ -315,27 +355,27 @@ const LaonCreates = () => {
                                 <div class="card-title font-weight-bold mb-0 card-header-color float-right">
                                     <Link href={`/Admin/loan/loan_all?page_group=${page_group}`} class="btn btn-sm btn-info">Back Loan List</Link></div>
                             </div>
-                            <form action="" onSubmit={brand_update}>
+                            <form action="" onSubmit={loan_payment_create}>
                                 <div class="card-body">
 
 
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Authority Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <label class="col-form-label col-md-3"><strong>Loan Name:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
                                             <select
-                                                value={assetInfo.loan_authority}
+                                                value={assetInfo.loan}
                                                 onChange={
                                                     brand_input_change
                                                 }
-                                                name='loan_authority'
+                                                name='loan'
 
                                                 class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select Loan Authority Name</option>
+                                                <option value=''>Select Loan</option>
                                                 {
-                                                    loan_authority.map(sta =>
+                                                    loanAll.map(sta =>
                                                         <>
 
-                                                            <option value={sta.id}>{sta.name}</option>
+                                                            <option value={sta.id}>{sta.loan_reason}</option>
                                                         </>
 
                                                     )
@@ -346,8 +386,6 @@ const LaonCreates = () => {
                                             }
                                         </div>
                                     </div>
-
-
 
                                     <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Account:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
@@ -374,27 +412,6 @@ const LaonCreates = () => {
 
 
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Reason<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                        <div class="col-md-6">
-                                            <textarea
-                                                value={assetInfo.loan_reason} onChange={brand_input_change}
-                                                name="loan_reason"
-                                                className="form-control form-control-sm"
-                                                placeholder="Enter Loan Reason"
-                                                rows={2}
-                                                cols={20}
-                                                // style={{ width: '550px', height: '100px' }}
-                                                maxLength={500}
-                                            ></textarea>
-
-                                            {assetInfo.loan_reason.length > 255 && (
-                                                <p className='text-danger'>Brand name cannot more than 255 characters.</p>
-                                            )}
-
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Reference<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
                                             <input type="text" name="reference" value={assetInfo.reference} onChange={brand_input_change}
@@ -406,164 +423,81 @@ const LaonCreates = () => {
 
                                         </div>
                                     </div>
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Aviable Balance<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="aviable_balance" value={assetInfo.aviable_balance} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Aviable Balance'
+                                                maxLength={256}
+                                            />
 
+
+                                        </div>
+                                    </div>
 
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong>Loan Type:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <label class="col-form-label col-md-3"><strong>Amount<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
                                         <div class="col-md-6">
-                                            <select
-                                                value={assetInfo.loan_type} onChange={(e) => {
-                                                    brand_input_change(e);
-                                                    handleEntryTypeChange(e);
-                                                }}
-                                                name='loan_type'
+                                            <input type="number" name="amount" value={assetInfo.amount} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Amount'
+                                                maxLength={256}
+                                            />
 
-                                                class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                <option value=''>Select Loan Type</option>
-                                                <option value='term'>Term</option>
-                                                <option value='cash'>Cash</option>
 
-                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Interest<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="interest" value={assetInfo.interest} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Interest'
+                                                maxLength={256}
+                                            />
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Payable Amount:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input type="number" name="payable_amount" value={assetInfo.payable_amount} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Payable Amount'
+                                                maxLength={256}
+                                            />
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3"><strong>Due:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                        <div class="col-md-6">
+                                            <input readOnly type="number" name="due" value={assetInfo.due} onChange={brand_input_change}
+                                                class="form-control form-control-sm  required "
+                                                placeholder='Enter  Interest'
+                                                maxLength={256}
+                                            />
+
 
                                         </div>
                                     </div>
 
 
-                                    {selectedEntryType == 'cash' ?
-
-
-                                        <>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Amount<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="amount" value={assetInfo.amount} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Amount'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Interest<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="interest" value={assetInfo.interest} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Payment Type :<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <select
-                                                        value={assetInfo.payment_type} onChange={brand_input_change}
-                                                        name='payment_type'
-
-                                                        class="form-control form-control-sm " placeholder="Enter Role Name">
-                                                        <option value=''>Select Payment Type</option>
-                                                        {
-                                                            account_head.map(sta =>
-                                                                <>
-
-                                                                    <option value={sta.id}>{sta.account_head_name}</option>
-                                                                </>
-
-                                                            )
-                                                        }
-                                                    </select>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Duration<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="duration" value={assetInfo.duration} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
-
-
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Per Month<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="per_month" value={assetInfo.per_month} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
-
-
-                                                </div>
-                                            </div>
 
 
 
-                                            <div class="form-group row">
-                                                <label class="col-form-label col-md-3"><strong>Payable Amount:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
-                                                <div class="col-md-6">
-                                                    <input type="number" name="payable_amount" value={assetInfo.payable_amount} onChange={brand_input_change}
-                                                        class="form-control form-control-sm  required "
-                                                        placeholder='Enter  Interest'
-                                                        maxLength={256}
-                                                    />
 
-
-                                                </div>
-                                            </div>
-                                        </>
-
-                                        :
-                                        <>
-
-                                        </>
-                                    }
 
 
 
                                     {/* date  */}
-                                    <div className="form-group row student">
-                                        <label className="col-form-label col-md-3 font-weight-bold">Loan Date:</label>
-                                        <div className="col-md-6">
 
-                                            <input
-                                                type="text"
-                                                readOnly
-
-                                                defaultValue={formattedDisplayDate}
-                                                onClick={() => document.getElementById(`dateInput-nt`).showPicker()}
-                                                placeholder="dd-mm-yyyy"
-                                                className="form-control form-control-sm mb-2"
-                                                style={{ display: 'inline-block', }}
-                                            />
-                                            <input
-                                                name='loan_date'
-                                                type="date"
-                                                id={`dateInput-nt`}
-                                                onChange={(e) => handleDateSelection(e)}
-                                                style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
-
-                                            />
-
-
-                                        </div>
-
-
-                                    </div>
 
                                     <div class="form-group row">
                                         <label class="col-form-label col-md-3"><strong>Description:</strong></label>
@@ -585,7 +519,7 @@ const LaonCreates = () => {
 
 
                                     <div class="form-group row">
-                                        <label class="col-form-label col-md-3"><strong> Image:</strong></label>
+                                        <label class="col-form-label col-md-3"><strong>Image:</strong></label>
                                         <div class="col-md-6">
 
                                             <div>
@@ -599,15 +533,36 @@ const LaonCreates = () => {
                                                 </span>
                                             </div>
 
-                                            {selectedFile[0] &&
+                                            {selectedFile[0] ?
                                                 <>
-                                                    <img className="w-100 mb-2 img-thumbnail" onChange={(e) => brand_file_change(e)} src={`${process.env.NEXT_PUBLIC_API_URL}:5003/${selectedFile[0].path}`} alt="Uploaded File" />
+                                                    <img className="w-100 mb-2 img-thumbnail" onChange={(e) => brand_file_change(e)} src={URL.createObjectURL(selectedFile[0])} alt="Uploaded File" />
 
-                                                    <input type="hidden" name="img" value={selectedFile[0].path} />
+                                                    <input type="hidden" name="file_path" value={selectedFile[0].path} />
                                                     <button onClick={brand_image_remove} type="button" className="btn btn-danger btn-sm position-absolute float-right ml-n4" ><FaTimes></FaTimes></button>
                                                 </>
+                                                :
+                                                <>
+                                                    {
+                                                        assetInfo.img ?
+                                                            <>
 
-
+                                                                <img
+                                                                    className="w-100"
+                                                                    src={`${process.env.NEXT_PUBLIC_API_URL}:5003/${assetInfo.img}`}
+                                                                    alt="Uploaded File"
+                                                                />
+                                                                <button
+                                                                    onClick={brand_image_remove}
+                                                                    type="button"
+                                                                    className="btn btn-danger btn-sm position-absolute float-right ml-n4"
+                                                                >
+                                                                    <FaTimes />
+                                                                </button>
+                                                            </>
+                                                            :
+                                                            ''
+                                                    }
+                                                </>
                                             }
                                             {
                                                 file_size_error && (
@@ -616,6 +571,35 @@ const LaonCreates = () => {
                                             }
 
                                         </div>
+                                    </div>
+
+                                    <div className="form-group row student">
+                                        <label className="col-form-label col-md-3 font-weight-bold">Payment Date:</label>
+                                        <div className="col-md-6">
+
+                                            <input
+                                                type="text"
+                                                readOnly
+
+                                                defaultValue={formattedDisplayDate}
+                                                onClick={() => document.getElementById(`dateInput-nt`).showPicker()}
+                                                placeholder="dd-mm-yyyy"
+                                                className="form-control form-control-sm mb-2"
+                                                style={{ display: 'inline-block', }}
+                                            />
+                                            <input
+                                                name='payment_date'
+                                                type="date"
+                                                id={`dateInput-nt`}
+                                                onChange={(e) => handleDateSelection(e)}
+                                                style={{ position: 'absolute', bottom: '40px', left: '10px', visibility: 'hidden' }}
+
+                                            />
+
+
+                                        </div>
+
+
                                     </div>
 
                                     <div class="form-group row">
@@ -658,4 +642,4 @@ const LaonCreates = () => {
     );
 };
 
-export default LaonCreates;
+export default LoanPaymentUpdate;

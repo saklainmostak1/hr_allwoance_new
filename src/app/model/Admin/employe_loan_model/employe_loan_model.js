@@ -5,37 +5,25 @@ var wkhtmltopdf = require('wkhtmltopdf');
 
 wkhtmltopdf.command = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe";
 
-const LoanOthorityModel = {
+const EmployeeLoan = {
 
-    loan_authority_create: async (req, res) => {
+    employe_loan_create: async (req, res) => {
+
+
+
         try {
-            const { name, status, email, contact_number, amount, address, note, created_by } = req.body;
-            if (!name || !status) {
-                return res.status(400).json({ message: 'brand name and status ID are required' });
-            }
+            const { account, employee_id, reference, amount, interest, payable_amount, payment_type, loan_date, duration, per_month, note, status, created_by, img, loan_reason, loan_type
+            } = req.body;
 
-            const processedbrandName = name.replace(/\s+/g, ' ').trim();
+            const insertQuery = 'INSERT INTO employe_loan (account, employee_id, reference, amount, interest, payable_amount, payment_type, loan_date, duration, per_month, note, status, created_by, img, loan_reason, loan_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const result = await connection.query(insertQuery, [account, employee_id, reference, amount, interest, payable_amount, payment_type, loan_date, duration, per_month, note, status, created_by, img, loan_reason, loan_type]);
 
-            const selectQuery = 'SELECT * FROM loan_authority WHERE TRIM(name) = ?';
-            const existingBrands = await new Promise((resolve, reject) => {
-                connection.query(selectQuery, [processedbrandName], (error, results) => {
-                    if (error) {
-                        console.log(error);
-                        reject(error);
-                    }
-                    resolve(results);
-                });
-            });
-            if (existingBrands.length === 0) {
-                const insertQuery = 'INSERT INTO loan_authority (name, status, email, contact_number, amount, address, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-                const result = await connection.query(insertQuery, [processedbrandName, status, email, contact_number, amount, address, note, created_by]);
+            // Sending only the necessary data from the result object
+            const { insertId, affectedRows } = result;
 
-                // Sending only the necessary data from the result object
-                const { insertId, affectedRows } = result;
+            // Sending response with relevant data
+            res.status(200).json({ insertId, affectedRows });
 
-                // Sending response with relevant data
-                res.status(200).json({ insertId, affectedRows });
-            }
             // Using parameterized query to prevent SQL injection
 
         } catch (error) {
@@ -45,9 +33,9 @@ const LoanOthorityModel = {
     },
 
 
-    loan_authority_list: async (req, res) => {
+    employe_loan_list: async (req, res) => {
         try {
-            const data = "select * from  loan_authority";
+            const data = "select * from  employe_loan";
 
             connection.query(data, function (error, result) {
                 console.log(result)
@@ -66,9 +54,30 @@ const LoanOthorityModel = {
         }
     },
 
-    loan_authority_single: async (req, res) => {
+    employe_loan_type_list: async (req, res) => {
         try {
-            const query = 'SELECT * FROM loan_authority WHERE id = ?';
+            const data = "select * from  payment_type";
+
+            connection.query(data, function (error, result) {
+                console.log(result)
+                if (!error) {
+                    res.send(result)
+                }
+
+                else {
+                    console.log(error)
+                }
+
+            })
+        }
+        catch (error) {
+            console.log(error)
+        }
+    },
+
+    employe_loan_single: async (req, res) => {
+        try {
+            const query = 'SELECT * FROM employe_loan WHERE id = ?';
             connection.query(query, [req.params.id], (error, result) => {
                 if (!error && result.length > 0) {
                     console.log(result);
@@ -85,14 +94,14 @@ const LoanOthorityModel = {
     },
 
 
-    loan_authority_update: async (req, res) => {
+    employe_loan_update: async (req, res) => {
         try {
 
-            const { name, status, email, contact_number, amount, address, note, modified_by } = req.body;
+            const { account, employee_id, reference, amount, interest, payable_amount, payment_type, loan_date, duration, per_month, note, status, img, loan_reason, loan_type, modified_by
+            } = req.body;
 
-
-            const query = `UPDATE loan_authority SET   name = ?, status = ?, email = ?, contact_number = ?, amount = ?, address = ?,  note = ?, modified_by = ? WHERE id = ?`;
-            connection.query(query, [name, status, email, contact_number, amount, address, note, modified_by, req.params.id], (error, result) => {
+            const query = `UPDATE employe_loan SET   account = ?, employee_id = ?, reference = ?, amount = ?, interest = ?, payable_amount = ?, payment_type = ?, loan_date = ?, duration = ?, per_month = ?,  note = ?, status = ?, img = ?, loan_reason = ?, loan_type = ?,  modified_by = ? WHERE id = ?`;
+            connection.query(query, [account, employee_id, reference, amount, interest, payable_amount, payment_type, loan_date, duration, per_month, note, status, img, loan_reason, loan_type, modified_by, req.params.id], (error, result) => {
                 if (!error && result.affectedRows > 0) {
                     console.log(result);
                     return res.send(result);
@@ -108,100 +117,46 @@ const LoanOthorityModel = {
     },
 
 
-    loan_authority_delete: async (req, res) => {
+    employe_loan_delete: async (req, res) => {
         try {
-            const shiftId = req.params.id;
-
-            console.log(shiftId);
-
-            // First, check if the shift_id is referenced in employee_joining
-            const checkQuery =
-                "SELECT COUNT(*) AS count FROM loan WHERE loan_authority = ?";
-            connection.query(checkQuery, [shiftId], (error, results) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(500).json({ message: "Database error" });
+            const query = 'DELETE FROM employe_loan WHERE id = ?';
+            connection.query(query, [req.params.id], (error, result) => {
+                if (!error && result.affectedRows > 0) {
+                    console.log(result);
+                    return res.send(result);
+                } else {
+                    console.log(error || 'Product not found');
+                    return res.status(404).json({ message: 'Product not found.' });
                 }
-
-                const isReferenced = results[0].count > 0;
-
-                if (isReferenced) {
-                    // If referenced, prevent deletion
-                    return res
-                        .status(400)
-                        .json({ message: "Cannot delete: blood group in  use." });
-                }
-
-                // Proceed with deletion if not referenced
-                const deleteQuery = "DELETE FROM loan_authority WHERE id = ?";
-                connection.query(
-                    deleteQuery,
-                    [shiftId],
-                    (deleteError, deleteResult) => {
-                        if (!deleteError && deleteResult.affectedRows > 0) {
-                            console.log(deleteResult);
-                            return res.send(deleteResult);
-                        } else {
-                            console.log(deleteError || "School shift not found");
-                            return res
-                                .status(404)
-                                .json({ message: "School shift not found." });
-                        }
-                    }
-                );
             });
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({ message: "Server error" });
+        }
+        catch (error) {
+            console.log(error)
         }
     },
 
 
-    // sub_category_list_paigination: async (req, res) => {
-    //     const pageNo = Number(req.params.pageNo);
-    //     const perPage = Number(req.params.perPage);
-    //     try {
-    //         const skipRows = (pageNo - 1) * perPage;
-    //         let query = `
-    //   SELECT sub_category.*, 
-    //          users_created.full_name AS created_by,
-    //          users_modified.full_name AS modified_by 
-    //   FROM sub_category 
-    //   LEFT JOIN users AS users_created ON sub_category.created_by = users_created.id 
-    //   LEFT JOIN users AS users_modified ON sub_category.modified_by = users_modified.id 
-    //   ORDER BY sub_category.id DESC
-    //   LIMIT ?, ?
-    // `;
 
-    //         connection.query(query, [skipRows, perPage], (error, result) => {
-    //             console.log(result)
-    //             if (!error) {
-    //                 res.send(result)
-    //             }
-
-    //             else {
-    //                 console.log(error)
-    //             }
-
-    //         })
-    //     }
-    //     catch (error) {
-    //         console.log(error)
-    //     }
-    // },
-    loan_authority_list_paigination: async (req, res) => {
+    employe_loan_list_paigination: async (req, res) => {
         const pageNo = Number(req.params.pageNo);
         const perPage = Number(req.params.perPage);
         try {
             const skipRows = (pageNo - 1) * perPage;
             let query = `
-      SELECT loan_authority.*, 
+      SELECT employe_loan.*, 
              users_created.full_name AS created_by,
-             users_modified.full_name AS modified_by 
-      FROM loan_authority 
-      LEFT JOIN users AS users_created ON loan_authority.created_by = users_created.id 
-      LEFT JOIN users AS users_modified ON loan_authority.modified_by = users_modified.id 
-      ORDER BY loan_authority.id DESC
+             users_modified.full_name AS modified_by,
+             account_head.account_head_name AS account_head_name, 
+             payment_type.payment_type_name AS payment_type_name, 
+             users.full_name AS full_name 
+            FROM employe_loan 
+            LEFT JOIN users AS users_created ON employe_loan.created_by = users_created.id 
+            LEFT JOIN users AS users_modified ON employe_loan.modified_by = users_modified.id 
+            LEFT JOIN account_head ON employe_loan.account = account_head.id
+            LEFT JOIN payment_type ON employe_loan.payment_type = payment_type.id
+            LEFT JOIN users ON employe_loan.employee_id = users.id
+
+      ORDER BY employe_loan.id DESC
       LIMIT ?, ?
     `;
 
@@ -222,48 +177,67 @@ const LoanOthorityModel = {
         }
     },
 
-    loan_authority_search: async (req, res) => {
+
+    employe_loan_search: async (req, res) => {
         try {
             console.log("Search button clicked.");
 
             // Extract necessary data from request
-            let { toDate, fromDate, name, email, contact_number, status, address } = req.body;
+            let {   toDate, fromDate, account_heads, loan_type, status, employee, payment_types , loan_reason
+            } = req.body;
 
             // Construct the base SQL query
             let sql = `
-              SELECT loan_authority.*, 
+                SELECT employe_loan.*, 
              users_created.full_name AS created_by,
-             users_modified.full_name AS modified_by 
-            FROM loan_authority 
-            LEFT JOIN users AS users_created ON loan_authority.created_by = users_created.id 
-            LEFT JOIN users AS users_modified ON loan_authority.modified_by = users_modified.id 
+             users_modified.full_name AS modified_by,
+             account_head.account_head_name AS account_head_name, 
+             payment_type.payment_type_name AS payment_type_name, 
+             users.full_name AS full_name 
+            FROM employe_loan 
+            LEFT JOIN users AS users_created ON employe_loan.created_by = users_created.id 
+            LEFT JOIN users AS users_modified ON employe_loan.modified_by = users_modified.id 
+            LEFT JOIN account_head ON employe_loan.account = account_head.id
+            LEFT JOIN payment_type ON employe_loan.payment_type = payment_type.id
+            LEFT JOIN users ON employe_loan.employee_id = users.id
             WHERE 1`;
 
 
+            if (account_heads) {
 
-            if (name) {
-                sql += ` AND LOWER(loan_authority.name) LIKE '%${name}%'`;
+                sql += ` AND employe_loan.account LIKE '%${account_heads}%'`;
             }
-            if (email) {
-                sql += ` AND LOWER(loan_authority.email) LIKE '%${email}%'`;
+
+            if (employee) {
+
+                sql += ` AND employe_loan.employe_id LIKE '%${employee}%'`;
             }
-            if (contact_number) {
-                sql += ` AND LOWER(loan_authority.contact_number) LIKE '%${contact_number}%'`;
+            if (payment_types) {
+
+                sql += ` AND employe_loan.payment_type LIKE '%${payment_types}%'`;
             }
-            if (address) {
-                sql += ` AND LOWER(loan_authority.address) LIKE '%${address}%'`;
+            if (loan_type) {
+
+                sql += ` AND employe_loan.loan_type LIKE '%${loan_type}%'`;
+            }
+
+
+            if (loan_reason) {
+                sql += ` AND LOWER(employe_loan.loan_reason) LIKE '%${loan_reason}%'`;
             }
 
             if (status) {
-                sql += ` AND loan_authority.status LIKE '%${status}%'`;
+
+                sql += ` AND employe_loan.status LIKE '%${status}%'`;
             }
+
 
             if (fromDate && toDate) {
-                sql += ` AND loan_authority.created_date BETWEEN '${fromDate}' AND '${toDate}'`;
+                sql += ` AND employe_loan.loan_date BETWEEN '${fromDate}' AND '${toDate}'`;
             }
 
 
-            sql += ` ORDER BY loan_authority.id DESC`
+            sql += ` ORDER BY employe_loan.id DESC`
             // Add expense name (item_name) search condition
 
 
@@ -286,9 +260,7 @@ const LoanOthorityModel = {
         }
     },
 
-
-
-    loan_authority_pdf: async (req, res) => {
+    employe_loan_pdf: async (req, res) => {
         try {
             const { searchResults, selectedPrintSize, orientation, fontSize } = req.body;
 
@@ -296,17 +268,21 @@ const LoanOthorityModel = {
 
             console.log(searchResults, 'here all the searchResults');
 
+
             let tableRows = '';
             searchResults?.forEach((result, index) => {
                 let row = '<tr>';
 
                 // Static column setup
                 row += `<td>${index + 1}</td>`; // Serial column
-                row += `<td>${result.name}</td>`; // Person Name
-                row += `<td>${result.email}</td>`; // Person Name
-                row += `<td>${result.contact_number}</td>`; // Person Name
+                row += `<td>${result.full_name}</td>`; // Person Name
+                row += `<td>${result.account_head_name}</td>`; // Person Name
+                row += `<td>${result.loan_reason}</td>`; // Person Name
                 row += `<td>${result.amount}</td>`; // Person Name
-                row += `<td>${result.address}</td>`; // Person Name
+                row += `<td>${result.payment_type_name}</td>`; // Person Name
+                row += `<td>${result.payable_amount}</td>`; // Person Name
+                row += `<td>${result.loan_date.slice(0, 10)}</td>`; // Person Name
+                row += `<td><img src="http://192.168.0.185:5003/${result.img}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`; // Person Name
                 row += `<td>${result.status === 1 ? "Active"
                     : result.status === 2 ? "Inactive"
                         : result.status === 3 ? "Pending"
@@ -374,25 +350,34 @@ const LoanOthorityModel = {
                     <thead>
                         <tr>
                             <th>SL No.</th>
-                           <th>
-                                                                        Name
+                            <th>
+                                                                        Employee Name
                                                                     </th>
                                                                     <th>
-                                                                        Email
+                                                                        Account
                                                                     </th>
                                                                     <th>
-                                                                        Contact Number
+                                                                        Loan Reason
                                                                     </th>
+
                                                                     <th>
                                                                         Amount
                                                                     </th>
                                                                     <th>
-                                                                        Address
+                                                                        Payment Type
+                                                                    </th>
+                                                                    <th>
+                                                                        Payable Amount
+                                                                    </th>
+                                                                    <th>
+                                                                        Loan Date
+                                                                    </th>
+                                                                    <th>
+                                                                        Image
                                                                     </th>
                                                                     <th>
                                                                         Status
                                                                     </th>
-                            
                         </tr>
                     </thead>
                     <tbody>
@@ -418,7 +403,9 @@ const LoanOthorityModel = {
 
 
 
-    loan_authority_print: async (req, res) => {
+
+
+    employe_loan_print: async (req, res) => {
         try {
             const { searchResults, selectedPrintSize, orientation, fontSize, extraColumnValue } = req.body;
 
@@ -429,16 +416,18 @@ const LoanOthorityModel = {
                 let row = '<tr>';
 
                 row += `<td>${index + 1}</td>`; // Serial column
-                row += `<td>${result.name}</td>`; // Person Name
-                row += `<td>${result.email}</td>`; // Person Name
-                row += `<td>${result.contact_number}</td>`; // Person Name
-                row += `<td>${result.amount}</td>`; // Person Name
-                row += `<td>${result.address}</td>`; // Person Name
+                row += `<td>${result?.full_name}</td>`; // Person Name
+                row += `<td>${result?.account_head_name}</td>`; // Person Name
+                row += `<td>${result?.loan_reason}</td>`; // Person Name
+                row += `<td>${result?.amount}</td>`; // Person Name
+                row += `<td>${result?.payment_type_name}</td>`; // Person Name
+                row += `<td>${result?.payable_amount}</td>`; // Person Name
+                row += `<td>${result?.loan_date?.slice(0, 10)}</td>`; // Person Name
+                row += `<td><img src="http://192.168.0.185:5003/${result.img}" alt="image" style="max-width: 100px; max-height: 100px;"></td>`; // Person Name
                 row += `<td>${result.status === 1 ? "Active"
                     : result.status === 2 ? "Inactive"
                         : result.status === 3 ? "Pending"
                             : "Unknown"}</td>`; // Person Mobile
-
                 // Add extra columns based on extraColumnValue
                 for (let i = 1; i <= extraColumnValue; i++) {
                     row += `<td contenteditable="true">Extra Column ${i}</td>`; // Editable extra column
@@ -508,20 +497,30 @@ const LoanOthorityModel = {
                     
                             <tr>
                             <th>SL No.</th>
-                           <th>
-                                                                        Name
+                          <th>
+                                                                        Employee Name
                                                                     </th>
                                                                     <th>
-                                                                        Email
+                                                                        Account
                                                                     </th>
                                                                     <th>
-                                                                        Contact Number
+                                                                        Loan Reason
                                                                     </th>
+
                                                                     <th>
                                                                         Amount
                                                                     </th>
                                                                     <th>
-                                                                        Address
+                                                                        Payment Type
+                                                                    </th>
+                                                                    <th>
+                                                                        Payable Amount
+                                                                    </th>
+                                                                    <th>
+                                                                        Loan Date
+                                                                    </th>
+                                                                    <th>
+                                                                        Image
                                                                     </th>
                                                                     <th>
                                                                         Status
@@ -549,7 +548,6 @@ const LoanOthorityModel = {
     },
 
 
-
 }
 
-module.exports = LoanOthorityModel
+module.exports = EmployeeLoan

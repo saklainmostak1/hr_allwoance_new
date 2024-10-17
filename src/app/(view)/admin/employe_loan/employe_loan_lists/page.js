@@ -10,7 +10,7 @@ import { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun, Image
 
 
 
-const LoanLists = ({ searchParams }) => {
+const EmployeeLoanLists = ({ searchParams }) => {
 
 
     const [toDate, setToDate] = useState('');
@@ -21,15 +21,28 @@ const LoanLists = ({ searchParams }) => {
     const [errorr, setErrorr] = useState(null)
     const [status, setStatus] = useState('')
     const [account_heads, setAccount_heads] = useState('')
-    const [loanAuthority, setLoanAuthority] = useState('')
+    const [payment_types, setPayment_types] = useState('')
     const [loan_type, setLoan_type] = useState('')
+    const [loan_reason, setLoan_reason] = useState('')
 
+    const [employee, setEmployee] = useState('')
 
     const { data: loanAll = [], isLoading, refetch
     } = useQuery({
         queryKey: ['loanAll'],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_all`)
+
+            const data = await res.json()
+            return data
+        }
+    })
+
+    const { data: loanPaymentList = [],
+    } = useQuery({
+        queryKey: ['loanPaymentList'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_all`)
 
             const data = await res.json()
             return data
@@ -76,7 +89,7 @@ const LoanLists = ({ searchParams }) => {
     })
 
     // console.log(moduleInfo.filter(moduleI => moduleI.controller_name === 'brand'))
-    const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'loan')
+    const brandList = moduleInfo.filter(moduleI => moduleI.controller_name === 'employe_loan')
 
     //   console.log(filteredModuleInfo);
 
@@ -98,7 +111,7 @@ const LoanLists = ({ searchParams }) => {
     );
 
     // Paigination start
-    const parentUsers = loanAll
+    const parentUsers = loanPaymentList
 
     const totalData = parentUsers?.length
     const dataPerPage = 20
@@ -125,7 +138,7 @@ const LoanLists = ({ searchParams }) => {
     }
     const [pageUsers, setPageUsers] = useState([]);
     const caregory_list = async () => {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_all_paigination/${currentPage}/${dataPerPage}`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_list_paigination/${currentPage}/${dataPerPage}`;
         const response = await fetch(url);
         const data = await response.json();
         setPageUsers(data);
@@ -144,7 +157,7 @@ const LoanLists = ({ searchParams }) => {
 
 
         // const proceed = window.confirm(`Are You Sure delete${id}`)
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_delete/${id}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_delete/${id}`, {
             method: "POST",
         })
             .then(response => {
@@ -220,21 +233,35 @@ const LoanLists = ({ searchParams }) => {
     };
 
 
-    const { data: loan_authorityAll = [],
-    } = useQuery({
-        queryKey: ['loan_authorityAll'],
-        queryFn: async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_authority/loan_authority_all`)
 
-            const data = await res.json()
-            return data
-        }
-    })
 
     const { data: account_head = [], } = useQuery({
         queryKey: ['account_head'],
         queryFn: async () => {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/account_head/account_head_list`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return data;
+        }
+    });
+
+
+    const { data: employeeList = [], } = useQuery({
+        queryKey: ['employeeList'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employee/employee_all_list`);
+            const data = await res.json();
+            // Filter out the brand with id 
+            // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
+            return data;
+        }
+    });
+
+    const { data: payment_type = [], } = useQuery({
+        queryKey: ['payment_type'],
+        queryFn: async () => {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan_payment/loan_payment_type_list`);
             const data = await res.json();
             // Filter out the brand with id 
             // const filteredBrands = data.filter(brand => brand.id !== parseInt(id));
@@ -255,8 +282,8 @@ const LoanLists = ({ searchParams }) => {
     const loan_search = () => {
 
         setLoading(true);
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_search`, {
-            toDate, fromDate, account_heads, loanAuthority, loan_type, status
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_search`, {
+            toDate, fromDate, account_heads, loan_type, status, employee, payment_types, loan_reason
 
         })
             .then(response => {
@@ -277,12 +304,11 @@ const LoanLists = ({ searchParams }) => {
 
 
 
-
-    const loan_pdf_download = async () => {
+    const loan_payment_pdf = async () => {
 
         // const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_person_list_visit/${id}`);
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_search`, {
-            toDate, fromDate, account_heads, loanAuthority, loan_type, status
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_search`, {
+            toDate, fromDate, account_heads, loan_type, status, employee, payment_types, loan_reason
         });
 
         const searchResults = response.data.results
@@ -332,7 +358,7 @@ const LoanLists = ({ searchParams }) => {
         console.log(searchResults)
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_pdf`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_pdf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -367,16 +393,13 @@ const LoanLists = ({ searchParams }) => {
         }
     };
 
-    console.log(error)
-    console.log(errorr)
 
-    const loan_print = async () => {
+    const loan_payment_print = async () => {
         try {
             // const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/office_visit/office_visit_person_list_visit/${id}`);
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_search`, {
-                toDate, fromDate, account_heads, loanAuthority, loan_type, status
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_search`, {
+                toDate, fromDate, account_heads, loan_type, status, employee, payment_types, loan_reason
             });
-
             const searchResults = response.data.results;
 
             console.log(searchResults);
@@ -426,7 +449,7 @@ const LoanLists = ({ searchParams }) => {
             const printWindow = window.open('', '_blank');
             printWindow.document.open();
 
-            const html = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_print`, {
+            const html = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_print`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -449,8 +472,8 @@ const LoanLists = ({ searchParams }) => {
 
     const loan_excel_download = async () => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_search`, {
-                toDate, fromDate, account_heads, loanAuthority, loan_type, status
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_search`, {
+                toDate, fromDate, account_heads, loan_type, status, employee, payment_types, loan_reason
             });
 
             const searchResults = response.data.results;
@@ -458,25 +481,30 @@ const LoanLists = ({ searchParams }) => {
             // Define the columns
             const columns = [
                 'SL No.',
-                'Loan Authority Name',
-                'Loan Type',
+                'Employee Name',
+                'Account',
+                'Loan Reason',
                 'Amount',
+                'Payment Type',
+                'Payable Amount',
                 'Loan Date',
-                'Image',
                 'Status',
 
             ];
+
 
 
             // Filter the data
             const filteredColumns = searchResults.map((category, index) => {
                 const filteredData = {
                     'SL No.': index + 1,
-                    'Name': category.loan_authority,
-                    'Email': category.loan_type,
-                    'Contact Number': category.amount,
-                    'Amount': category.loan_date,
-                    'Img': category.img ? `=${process.env.NEXT_PUBLIC_API_URL}:5003/${category.img}` : '',
+                    'Employee Name': category.full_name,
+                    'Account': category.account_head_name,
+                    'Loan Reason': category.loan_reason,
+                    'Amount': category.amount,
+                    'Payment Type': category.payment_type_name,
+                    'Payable Amount': category.payable_amount,
+                    'Loan Date': category.loan_date.slice(0, 10),
                     'Status': category.status === 1 ? "Active"
                         : category.status === 2 ? "Inactive"
                             : category.status === 3 ? "Pending"
@@ -511,8 +539,8 @@ const LoanLists = ({ searchParams }) => {
 
     const loan_word_download = async () => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/loan/loan_search`, {
-                toDate, fromDate, account_heads, loanAuthority, loan_type, status
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/employe_loan/employe_loan_search`, {
+                toDate, fromDate, account_heads, loan_type, status, employee, payment_types, loan_reason
             });
 
             const searchResults = response.data.results;
@@ -520,15 +548,17 @@ const LoanLists = ({ searchParams }) => {
             // Define columns and headers
             const columns = [
                 'SL No.',
-                'Loan Authority Name',
-                'Loan Type',
+                'Employee Name',
+                'Account',
+                'Loan Reason',
                 'Amount',
+                'Payment Type',
+                'Payable Amount',
                 'Loan Date',
                 'Image',
                 'Status',
 
             ];
-
             // Create header row
             const headerRow = new TableRow({
                 children: columns.map(column => new TableCell({
@@ -551,6 +581,8 @@ const LoanLists = ({ searchParams }) => {
                 });
                 // Check and handle missing or undefined amount
                 const amountText = category.amount != null ? `${category.amount}` : ''; // Ensures amount is treated as text and avoids null/undefined
+                const payableAmountText = category.payable_amount != null ? `${category.payable_amount}` : ''; // Ensures amount is treated as text and avoids null/undefined
+              ''; // Ensures amount is treated as text and avoids null/undefined
 
                 return new TableRow({
                     children: [
@@ -559,19 +591,32 @@ const LoanLists = ({ searchParams }) => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.loan_authority ? `${category.loan_authority}` : '' })], // Name
+                            children: [new Paragraph({ text: category.full_name ? `${category.full_name}` : '' })], // Name
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.loan_type || '' })], // Email
+                            children: [new Paragraph({ text: category.account_head_name || '' })], // Email
                             borders: {},
                         }),
+                        new TableCell({
+                            children: [new Paragraph({ text: category.loan_reason || '' })], // Email
+                            borders: {},
+                        }),
+                       
                         new TableCell({
                             children: [new Paragraph({ text: amountText })], // Contact Number
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.loan_date.slice(0,10) || '' })], // Contact Number
+                            children: [new Paragraph({ text: category.payment_type || '' })], // Email
+                            borders: {},
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: payableAmountText })], // Email
+                            borders: {},
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: category.loan_date.slice(0, 10) || '' })], // Contact Number
                             borders: {},
                         }),
                         new TableCell({
@@ -649,7 +694,7 @@ const LoanLists = ({ searchParams }) => {
                         <div className="body-content bg-light">
                             <div className="border-primary shadow-sm border-0">
                                 <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Loan Authority Search</h5>
+                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">Loan Payment Search</h5>
                                 </div>
                                 <div className="card-body">
                                     <form >
@@ -726,23 +771,44 @@ const LoanLists = ({ searchParams }) => {
 
 
                                                 </div>
-                                                <label className="col-form-label col-md-2"><strong>Loan Type:</strong></label>
-                                                <div className="col-md-4">
+                                                <label class="col-form-label col-md-2"><strong>Loan Type:<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                                <div class="col-md-4">
                                                     <select
                                                         value={loan_type} onChange={(e) => setLoan_type(e.target.value)}
-                                                        name="statusFilter"
-                                                        className="form-control form-control-sm integer_no_zero"
-                                                    >
-                                                        <option value="">Select Loan Type</option>
-                                                        <option value="term">Term</option>
-                                                        <option value="cash">Cash</option>
+                                                        name='loan_type'
+
+                                                        class="form-control form-control-sm " placeholder="Enter Loan Type Name">
+                                                        <option value=''>Select Loan Type</option>
+                                                        <option value='term'>Term</option>
+                                                        <option value='cash'>Cash</option>
 
                                                     </select>
 
                                                 </div>
+
                                             </div>
 
+
                                             <div className="form-group row">
+                                                <label className="col-form-label col-md-2"><strong>Employee:</strong></label>
+                                                <div className="col-md-4">
+                                                    <select
+                                                        value={employee} onChange={(e) => setEmployee(e.target.value)}
+                                                        name="statusFilter"
+                                                        className="form-control form-control-sm integer_no_zero"
+                                                    >
+                                                        <option value="">Select Employee</option>
+                                                        {
+                                                            employeeList.map(sta =>
+                                                                <>
+
+                                                                    <option value={sta.user_id}>{sta.full_name}</option>
+                                                                </>
+
+                                                            )
+                                                        }
+                                                    </select>
+                                                </div>
                                                 <label className="col-form-label col-md-2"><strong>Status:</strong></label>
                                                 <div className="col-md-4">
                                                     <select
@@ -762,28 +828,43 @@ const LoanLists = ({ searchParams }) => {
                                                         }
                                                     </select>
                                                 </div>
-                                                <label className="col-form-label col-md-2"><strong>Loan Authority:</strong></label>
-                                                <div className="col-md-4">
+                                            </div>
+                                            <div className="form-group row">
+
+
+                                                <label class="col-form-label col-md-2"><strong>Payment Type Name<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                                <div class="col-md-4">
                                                     <select
-                                                        value={loanAuthority} onChange={(e) => setLoanAuthority(e.target.value)}
-                                                        name="statusFilter"
-                                                        className="form-control form-control-sm integer_no_zero"
-                                                    >
-                                                        <option value="">Select Loan Authority</option>
+                                                        value={payment_types} onChange={(e) => setPayment_types(e.target.value)}
+                                                        name='payment_type'
+
+                                                        class="form-control form-control-sm " placeholder="Enter Role Name">
+                                                        <option value=''>Select Payment Type Name</option>
                                                         {
-                                                            loan_authorityAll.map(sta =>
+                                                            payment_type.map(sta =>
                                                                 <>
 
-                                                                    <option value={sta.id}>{sta.name}</option>
+                                                                    <option value={sta.id}>{sta.payment_type_name}</option>
                                                                 </>
 
                                                             )
                                                         }
                                                     </select>
+
                                                 </div>
+
+                                                <label class="col-form-label col-md-2"><strong>Loan Reason<small><sup><small><i class="text-danger fas fa-star"></i></small></sup></small>:</strong></label>
+                                                <div class="col-md-4">
+                                                    <input type="text" name="loan_reason" value={loan_reason} onChange={(e) => setLoan_reason(e.target.value)}
+                                                        class="form-control form-control-sm  required "
+                                                        placeholder='Enter  Loan Reason'
+
+                                                    />
+
+                                                </div>
+
+
                                             </div>
-
-
                                             <div class="form-group row student">
                                                 <label class="col-form-label col-md-2"><strong>Extra Column:</strong></label>
                                                 <div className="col-md-10">
@@ -857,7 +938,7 @@ const LoanLists = ({ searchParams }) => {
                                                     onClick={loan_search}
                                                 />
                                                 <input
-                                                    onClick={loan_pdf_download}
+                                                    onClick={loan_payment_pdf}
                                                     type="button" name="summary" class="btn btn-sm btn-secondary print_summary ml-2" value="Download PDF" />
                                                 <input
                                                     onClick={loan_excel_download}
@@ -867,7 +948,7 @@ const LoanLists = ({ searchParams }) => {
 
                                                     type="button" name="summary" class="btn btn-sm btn-danger print_summary ml-2" value="Download Word" />
                                                 <input
-                                                    onClick={loan_print}
+                                                    onClick={loan_payment_print}
                                                     type="button" name="print" class="btn btn-sm btn-success print_btn ml-2" value="Print" />
                                             </div>
                                         </div>
@@ -880,9 +961,9 @@ const LoanLists = ({ searchParams }) => {
                         <div className="body-content bg-light">
                             <div className="border-primary shadow-sm border-0">
                                 <div className="card-header py-1 custom-card-header clearfix bg-gradient-primary text-white">
-                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">List Loan</h5>
+                                    <h5 className="card-title font-weight-bold mb-0 card-header-color float-left mt-1">List Loan Payment</h5>
                                     <div className="card-title font-weight-bold mb-0 card-header-color float-right">
-                                        <Link href={`/Admin/loan/loan_create?page_group`} className="btn btn-sm btn-info">Loan Create</Link>
+                                        <Link href={`/Admin/loan/loan_create?page_group`} className="btn btn-sm btn-info">Loan Payment Create</Link>
                                     </div>
                                 </div>
 
@@ -907,18 +988,26 @@ const LoanLists = ({ searchParams }) => {
 
                                                                 <tr>
                                                                     <th>
-
                                                                         SL No.
                                                                     </th>
                                                                     <th>
-                                                                        Loan Authority Name
+                                                                        Employee Name
                                                                     </th>
                                                                     <th>
-                                                                        Loan Type
+                                                                        Account
+                                                                    </th>
+                                                                    <th>
+                                                                        Loan Reason
                                                                     </th>
 
                                                                     <th>
                                                                         Amount
+                                                                    </th>
+                                                                    <th>
+                                                                        Payment Type
+                                                                    </th>
+                                                                    <th>
+                                                                        Payable Amount
                                                                     </th>
                                                                     <th>
                                                                         Loan Date
@@ -953,15 +1042,25 @@ const LoanLists = ({ searchParams }) => {
                                                                             <td>    {i + 1}</td>
 
                                                                             <td>
-                                                                                {loan?.loan_authority_name}
+                                                                                {loan?.full_name}
                                                                             </td>
 
                                                                             <td>
-                                                                                {loan.loan_type}
+                                                                                {loan.account_head_name}
+                                                                            </td>
+                                                                            <td>
+                                                                                {loan.loan_reason}
                                                                             </td>
                                                                             <td>
                                                                                 {loan.amount}
                                                                             </td>
+                                                                            <td>
+                                                                                {loan.payment_type_name}
+                                                                            </td>
+                                                                            <td>
+                                                                                {loan.payable_amount}
+                                                                            </td>
+
 
                                                                             <td>
                                                                                 {loan.loan_date.slice(0, 10)}
@@ -988,7 +1087,7 @@ const LoanLists = ({ searchParams }) => {
                                                                             <td>
 
                                                                                 <div className="flex items-center ">
-                                                                                    <Link href={`/Admin/loan/loan_edit/${loan.id}?page_group=${page_group}`}>
+                                                                                    <Link href={`/Admin/employe_loan/employe_loan_edit/${loan.id}?page_group=${page_group}`}>
                                                                                         {filteredBtnIconEdit?.map((filteredBtnIconEdit => (
                                                                                             <button
                                                                                                 key={filteredBtnIconEdit.id}
@@ -1058,19 +1157,19 @@ const LoanLists = ({ searchParams }) => {
                                                     <div class="pagination float-right pagination-sm border">
                                                         {
                                                             currentPage - 3 >= 1 && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${1}`}>‹ First</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${1}`}>‹ First</Link>
                                                             )
                                                         }
                                                         {
                                                             currentPage > 1 && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${activePage - 1}`}>&lt;</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${activePage - 1}`}>&lt;</Link>
                                                             )
                                                         }
                                                         {
                                                             pageNumber.map((page) =>
                                                                 <Link
                                                                     key={page}
-                                                                    href={`/Admin/loan/loan_all?page=${page}`}
+                                                                    href={`/Admin/employe_loan/employe_loan_all?page=${page}`}
                                                                     className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
                                                                 > {page}
                                                                 </Link>
@@ -1078,12 +1177,12 @@ const LoanLists = ({ searchParams }) => {
                                                         }
                                                         {
                                                             currentPage < totalPages && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${activePage + 1}`}>&gt;</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${activePage + 1}`}>&gt;</Link>
                                                             )
                                                         }
                                                         {
                                                             currentPage + 3 <= totalPages && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${totalPages}`}>Last ›</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${totalPages}`}>Last ›</Link>
                                                             )
                                                         }
                                                     </div>
@@ -1094,18 +1193,26 @@ const LoanLists = ({ searchParams }) => {
 
                                                         <tr>
                                                             <th>
-
                                                                 SL No.
                                                             </th>
                                                             <th>
-                                                                Loan Authority Name
+                                                                Employee Name
                                                             </th>
                                                             <th>
-                                                                Loan Type
+                                                                Account
+                                                            </th>
+                                                            <th>
+                                                                Loan Reason
                                                             </th>
 
                                                             <th>
                                                                 Amount
+                                                            </th>
+                                                            <th>
+                                                                Payment Type
+                                                            </th>
+                                                            <th>
+                                                                Payable Amount
                                                             </th>
                                                             <th>
                                                                 Loan Date
@@ -1140,15 +1247,25 @@ const LoanLists = ({ searchParams }) => {
                                                                     <td>    {i + 1}</td>
 
                                                                     <td>
-                                                                        {loan?.loan_authority_name}
+                                                                        {loan?.full_name}
                                                                     </td>
 
                                                                     <td>
-                                                                        {loan.loan_type}
+                                                                        {loan.account_head_name}
+                                                                    </td>
+                                                                    <td>
+                                                                        {loan.loan_reason}
                                                                     </td>
                                                                     <td>
                                                                         {loan.amount}
                                                                     </td>
+                                                                    <td>
+                                                                        {loan.payment_type_name}
+                                                                    </td>
+                                                                    <td>
+                                                                        {loan.payable_amount}
+                                                                    </td>
+
 
                                                                     <td>
                                                                         {loan.loan_date.slice(0, 10)}
@@ -1175,7 +1292,7 @@ const LoanLists = ({ searchParams }) => {
                                                                     <td>
 
                                                                         <div className="flex items-center ">
-                                                                            <Link href={`/Admin/loan/loan_edit/${loan.id}?page_group=${page_group}`}>
+                                                                            <Link href={`/Admin/employe_loan/employe_loan_edit/${loan.id}?page_group=${page_group}`}>
                                                                                 {filteredBtnIconEdit?.map((filteredBtnIconEdit => (
                                                                                     <button
                                                                                         key={filteredBtnIconEdit.id}
@@ -1235,19 +1352,19 @@ const LoanLists = ({ searchParams }) => {
                                                     <div class="pagination float-right pagination-sm border">
                                                         {
                                                             currentPage - 3 >= 1 && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${1}`}>‹ First</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${1}`}>‹ First</Link>
                                                             )
                                                         }
                                                         {
                                                             currentPage > 1 && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${activePage - 1}`}>&lt;</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${activePage - 1}`}>&lt;</Link>
                                                             )
                                                         }
                                                         {
                                                             pageNumber.map((page) =>
                                                                 <Link
                                                                     key={page}
-                                                                    href={`/Admin/loan/loan_all?page=${page}`}
+                                                                    href={`/Admin/employe_loan/employe_loan_all?page=${page}`}
                                                                     className={` ${page === activePage ? "font-bold bg-primary px-2 border-left py-1 text-white" : "text-primary px-2 border-left py-1"}`}
                                                                 > {page}
                                                                 </Link>
@@ -1255,12 +1372,12 @@ const LoanLists = ({ searchParams }) => {
                                                         }
                                                         {
                                                             currentPage < totalPages && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${activePage + 1}`}>&gt;</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${activePage + 1}`}>&gt;</Link>
                                                             )
                                                         }
                                                         {
                                                             currentPage + 3 <= totalPages && (
-                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/loan/loan_all?page=${totalPages}`}>Last ›</Link>
+                                                                <Link className=" text-primary px-2 border-left py-1" href={`/Admin/employe_loan/employe_loan_all?page=${totalPages}`}>Last ›</Link>
                                                             )
                                                         }
                                                     </div>
@@ -1280,4 +1397,4 @@ const LoanLists = ({ searchParams }) => {
     );
 };
 
-export default LoanLists;
+export default EmployeeLoanLists;

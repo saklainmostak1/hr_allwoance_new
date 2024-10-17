@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun, ImageRun, WidthType } from 'docx';
 
 const AssetInfoLists = ({ searchParams }) => {
 
@@ -426,39 +428,37 @@ const AssetInfoLists = ({ searchParams }) => {
     };
 
 
-    const asset_type_excel_download = async () => {
+    const asset_info_excel_download = async () => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/asset_type/asset_type_search`, {
-                assenTypeName, status
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/asset_info/asset_info_search`, {
+                assenTypeName, status, assetType, toDate, fromDate
             });
             const searchResults = response.data.results;
 
             // Define the columns
             const columns = [
                 'SL No.',
+                'Asset Name',
                 'Asset Type Name',
                 'Status',
+                'Img',
                 'Description',
-               
+
             ];
 
-         
             // Filter the data
             const filteredColumns = searchResults.map((category, index) => {
                 const filteredData = {
                     'SL No.': index + 1,
+                    'Asset Name': category.asset_name,
                     'Asset Type Name': category.asset_type_name,
-                    'status':  category.status === 1 ? "Active"
+                    'status': category.status === 1 ? "Active"
                         : category.status === 2 ? "Inactive"
                             : category.status === 3 ? "Pending"
                                 : "Unknown",
-                    'Photo': category.photo ? `=${process.env.NEXT_PUBLIC_API_URL}:5003/${category.photo}` : '',
+                    'Img': category.photo ? `=${process.env.NEXT_PUBLIC_API_URL}:5003/${category.img}` : '',
                     'Description': category.note,
-                    'Month': monthName, // Assumes monthName is available
-                    'Date': showFromDate && showToDate ? `${showFromDate} to ${showToDate}` : '',
-                    'Day': '', // Assuming no data provided for 'Day'
-                    'Entry Time': category.entry_checktime,
-                    'Exit Time': category.exit_checktime
+
                 };
                 return filteredData;
             });
@@ -486,22 +486,22 @@ const AssetInfoLists = ({ searchParams }) => {
     };
 
 
-
-
-
-
-
-
-    const attendance_word_download = async () => {
+    const asset_info_word_download = async () => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/attendance/attendance_list_search`, {
-                searchQuery, itemName, employee, month, fromDate, toDate
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/asset_info/asset_info_search`, {
+                assenTypeName, status, assetType, toDate, fromDate
             });
             const searchResults = response.data.results;
 
             // Define columns and headers
             const columns = [
-                'SL No.', 'Employee ID', 'Name', 'Photo', 'Designation', 'Month', 'Date', 'Day', 'Entry Time', 'Exit Time'
+                'SL No.',
+                'Asset Name',
+                'Asset Type Name',
+                'Img',
+                'Status',
+                'Description',
+
             ];
 
             // Create header row
@@ -515,8 +515,8 @@ const AssetInfoLists = ({ searchParams }) => {
             // Create data rows
             const dataRows = await Promise.all(searchResults.map(async (category, index) => {
                 // Fetch image data
-                const imageResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5003/${category.photo}`);
-                const imageData = await imageResponse.blob();
+                const imageResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}:5003/${category.img ? category.img : 'No Image Found'}`);
+                const imageData = await imageResponse?.blob();
                 const imageRun = new ImageRun({
                     data: imageData,
                     transformation: {
@@ -532,11 +532,11 @@ const AssetInfoLists = ({ searchParams }) => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.unique_id ? `${category.unique_id}` : '' })], // Ensure Employee ID is treated as text
+                            children: [new Paragraph({ text: category.asset_name ? `${category.asset_name}` : '' })], // Ensure Employee ID is treated as text
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.full_name })],
+                            children: [new Paragraph({ text: category.asset_type_name })],
                             borders: {},
                         }),
                         new TableCell({
@@ -544,29 +544,17 @@ const AssetInfoLists = ({ searchParams }) => {
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: category.designation_name })],
+                            children: [new Paragraph({ text: category.status === 1 ? "Active"
+                                : category.status === 2 ? "Inactive"
+                                    : category.status === 3 ? "Pending"
+                                        : "Unknown", })],
                             borders: {},
                         }),
                         new TableCell({
-                            children: [new Paragraph({ text: monthName })],
+                            children: [new Paragraph({ text: category.note })],
                             borders: {},
                         }),
-                        new TableCell({
-                            children: [new Paragraph({ text: showFromDate && showToDate ? `${showFromDate} to ${showToDate}` : '' })],
-                            borders: {},
-                        }),
-                        new TableCell({
-                            children: [new Paragraph({ text: '' })],
-                            borders: {},
-                        }),
-                        new TableCell({
-                            children: [new Paragraph({ text: category.entry_checktime })],
-                            borders: {},
-                        }),
-                        new TableCell({
-                            children: [new Paragraph({ text: category.exit_checktime })],
-                            borders: {},
-                        }),
+                       
                     ],
                 });
             }));
@@ -807,8 +795,13 @@ const AssetInfoLists = ({ searchParams }) => {
                                                 />
                                                 <input
                                                     onClick={asset_info_pdf_download}
-                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download PDF" />
-
+                                                    type="button" name="summary" class="btn btn-sm btn-secondary print_summary ml-2" value="Download PDF" />
+                                                <input
+                                                    onClick={asset_info_excel_download}
+                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download Excel" />
+                                                <input
+                                                    onClick={asset_info_word_download}
+                                                    type="button" name="summary" class="btn btn-sm btn-danger print_summary ml-2" value="Download Word" />
                                                 <input
                                                     onClick={asset_type_print}
 

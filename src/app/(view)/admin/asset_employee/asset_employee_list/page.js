@@ -5,6 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import * as XLSX from "xlsx";
+import { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun, ImageRun, WidthType } from 'docx';
+
 
 const AssetEmployeeList = ({ searchParams }) => {
 
@@ -436,6 +439,163 @@ const AssetEmployeeList = ({ searchParams }) => {
     };
 
 
+    const asset_employee_excel_download = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/asset_employee/asset_employee_search`, {
+                employee, assetType, toDate, fromDate
+            });
+            const searchResults = response.data.results;
+
+            // Define the columns
+            const columns = [
+                'SL No.',
+                'Employee',
+                'Asset',
+                'Handover Date',
+                'Return Date',
+                'Description',
+               
+            ];
+
+          
+            // Filter the data
+            const filteredColumns = searchResults.map((category, index) => {
+                const filteredData = {
+                    'SL No.': index + 1,
+                    'Employee': category.full_name,
+                    'Asset': category.asset_name,
+                    'Handover Date': category.handover_date.slice(0,10),
+                    'Return Date': category.return_date.slice(0,10),
+                    'Description': category.note,
+                    
+                };
+                return filteredData;
+            });
+
+            // Create worksheet with filtered data
+            const worksheet = XLSX.utils.json_to_sheet(filteredColumns);
+
+            // Calculate width for each column
+            const columnWidth = 100 / columns.length;
+
+            // Set width for each column
+            const columnWidths = columns.map(() => ({ wpx: columnWidth * columns.length }));
+
+            worksheet['!cols'] = columnWidths;
+            console.log(columnWidths);
+
+            // Create workbook and write to file
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+            XLSX.writeFile(workbook, 'attendance_results.xlsx');
+        } catch (error) {
+            console.error("An error occurred during printing.", error);
+            setError("An error occurred during printing.", error);
+        }
+    };
+
+
+    const asset_employee_word_download = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}:5002/Admin/asset_employee/asset_employee_search`, {
+                employee, assetType, toDate, fromDate
+            });
+            const searchResults = response.data.results;
+
+            // Define columns and headers
+            const columns = [
+                'SL No.',
+                'Employee',
+                'Asset',
+                'Handover Date',
+                'Return Date',
+                'Description',
+               
+            ];
+
+            // Create header row
+            const headerRow = new TableRow({
+                children: columns.map(column => new TableCell({
+                    children: [new Paragraph({ text: column, bold: true })],
+                    borders: {},
+                })),
+            });
+
+            // Create data rows
+            const dataRows = await Promise.all(searchResults.map(async (category, index) => {
+                // Fetch image data
+              
+
+                return new TableRow({
+                    children: [
+                        new TableCell({
+                            children: [new Paragraph({ text: `${index + 1}` })], // Ensure SL No. is treated as text
+                            borders: {},
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: category.full_name ? `${category.full_name}` : '' })], // Ensure Employee ID is treated as text
+                            borders: {},
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: category.asset_name })],
+                            borders: {},
+                        }),
+                       
+                        new TableCell({
+                            children: [new Paragraph({ text: category.handover_date.slice(0,10) })],
+                            borders: {},
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ text: category.return_date.slice(0,10) })],
+                            borders: {},
+                        }),
+                    
+                        new TableCell({
+                            children: [new Paragraph({ text: category.note })],
+                            borders: {},
+                        }),
+                       
+                    ],
+                });
+            }));
+
+            const table = new Table({
+                rows: [headerRow, ...dataRows],
+                width: {
+                    size: 100,
+                    type: WidthType.PERCENTAGE,
+                },
+                columnWidths: columns.map(() => 100 / columns.length),
+            });
+
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new Paragraph({
+                            children: [
+                                new TextRun("News List")
+                            ],
+                            alignment: 'center',
+                        }),
+                        table, // Add the table to the document
+                    ],
+                }],
+            });
+
+            const buffer = await Packer.toBuffer(doc);
+            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'attendance_results.docx';
+            link.click();
+        } catch (error) {
+            console.error("An error occurred during printing.", error);
+            setError("An error occurred during printing.", error);
+        }
+    };
+
+
 
     return (
         <div className="container-fluid">
@@ -623,8 +783,13 @@ const AssetEmployeeList = ({ searchParams }) => {
                                                 />
                                                 <input
                                                     onClick={asset_employee_pdf_download}
-                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download PDF" />
-
+                                                    type="button" name="summary" class="btn btn-sm btn-secondary print_summary ml-2" value="Download PDF" />
+  <input
+                                                    onClick={asset_employee_excel_download}
+                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download Excel" />
+                                                <input
+                                                    onClick={asset_employee_word_download}
+                                                    type="button" name="summary" class="btn btn-sm btn-danger print_summary ml-2" value="Download Word" />
                                                 <input
                                                     onClick={asset_employee_print}
 

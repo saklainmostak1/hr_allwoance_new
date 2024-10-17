@@ -667,10 +667,10 @@ const AssetTypeLists = ({ searchParams }) => {
                                                 />
                                                 <input
                                                     onClick={asset_type_pdf_download}
-                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download PDF" />
+                                                    type="button" name="summary" class="btn btn-sm btn-dark print_summary ml-2" value="Download PDF" />
                                                 <input
                                                     onClick={asset_type_excel_download}
-                                                    type="button" name="summary" class="btn btn-sm btn-info print_summary ml-2" value="Download Excel" />
+                                                    type="button" name="summary" class="btn btn-sm btn-primary print_summary ml-2" value="Download Excel" />
                                                 <input
                                                     onClick={attendance_word_download}
                                                     type="button" name="summary" class="btn btn-sm btn-danger print_summary ml-2" value="Download Word" />
